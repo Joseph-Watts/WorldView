@@ -11,6 +11,8 @@
 library(tidyverse)
 library(plyr)
 library(readxl)
+library(writexl)
+library(tm)
 
 #' Reading in individual level data
 d <- read_rds("WVS_Dataset/WVS7_Individual.rds")
@@ -83,29 +85,23 @@ sum_fun <- function(data, v, min_n = 10){
     #' Return proportion of each 
     d_levels <- levels(d_col)
 
-    #' If there are fewer than min_n observations return NA
+    d_tbl <- table(d_col) %>% 
+      as.matrix() / n_notNA
+    
+    d_sum <- d_tbl[ , 1]
+    
+    new_names <- removePunctuation(names(d_sum))
+    new_names <- gsub(" ", "_", new_names)
+  
+    names(d_sum) <- paste(v, new_names, sep = ".")
+    
     if(n_notNA < min_n){
       
-      #' Retain each level as a separate item in the output
-      #' This ensures outputs remains the same length across inputs
-      d_sum <- rep(NA, times = length(d_levels))
+      d_sum[1:length(d_sum)] <- NA
       
-      names(d_sum) <- paste(v, names(d_sum), sep = ": ")
-      
-      return(d_sum)
-      
-    }else{
-
-      d_tbl <- table(d_col) %>% 
-        as.matrix() / n_notNA
-      
-      d_sum <- d_tbl[ , 1]
-      
-      names(d_sum) <- paste(v, names(d_sum), sep = ": ")
-      
-      return(d_sum)
-    
     }
+    
+    return(d_sum)
     
   #' If the column is of a different format stop with an error  
   }else{
@@ -160,9 +156,8 @@ country_sum_output <- lapply(countries, country_sum, data = d)
 country_sum_output <- ldply(country_sum_output , data.frame)
 
 #' Saving out the country level summary data
-write_rds(country_sum_output, 
-          "WVS_Dataset/WVS7_Country.rds",
-          compress = "gz")
+write_xlsx(country_sum_output, "WVS_Dataset/WVS7_Country.xlsx")
+write_rds(country_sum_output, "WVS_Dataset/WVS7_Country.rds")
 
 
 

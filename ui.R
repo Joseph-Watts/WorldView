@@ -81,12 +81,18 @@ shinyUI(fluidPage(
         menuItem("Home", 
                  tabName = "home", 
                  icon = icon("home")),
-
+        menuItem("WVS7 Data", 
+                 tabName = "EDA", 
+                 icon = icon("stats", 
+                             lib = "glyphicon")),
         menuItem("Within Country", 
                  tabName = "within_country", 
                  icon = icon("stats", 
                              lib = "glyphicon")),
-        
+        menuItem("Between Countries", 
+                 tabName = "between_countries", 
+                 icon = icon("stats", 
+                             lib = "glyphicon")),
         menuItem("Global", 
                  tabName = "global", 
                  icon = icon("stats", 
@@ -107,9 +113,15 @@ shinyUI(fluidPage(
           
         ),
         
+        tabItem(tabName = "EDA",
+                fluidRow(column(6,uiOutput("DTchoice"))),
+                fluidRow(column(12,DT::dataTableOutput(outputId = "Table")))
+                  
+        ),
+        
         tabItem(tabName = "within_country",
                 includeMarkdown("www/within_country.md"),
-                fluidRow(column(3, uiOutput("Within_Country_Select"))),
+                fluidRow(column(6, uiOutput("Within_Country_Select"))),
                 fluidRow(
                   column(6, uiOutput("Within_Var_1_Select")),
                   column(6, uiOutput("Within_Var_2_Select"))
@@ -117,14 +129,31 @@ shinyUI(fluidPage(
                 fluidRow(
                   column(6, plotOutput("within_country_p_var_1")),
                   column(6, plotOutput("within_country_p_var_2"))
+                  ),
+                fluidRow(
+                  column(12,plotOutput("within_country_mosaic"))
+                  
                 )
                 #' Add in a plot and more details about the relationship
-                #' between the two variables here?
+                #' between the two variables here? - Added Mosaic plot - need to include explanation and nice-ify the labels
                 
                 
         ),
-        
-        #' To add in a between county page here?
+        #' To add in a between county page here?        
+        tabItem(tabName = "between_countries",
+                includeMarkdown("www/between_country.md"),
+                fluidRow(column(6, uiOutput("Between_Var_Select"))),
+                fluidRow(
+                  column(6, uiOutput("Between_Country_1_Select")),
+                  column(6, uiOutput("Between_Country_2_Select"))
+                  ),
+                fluidRow(
+                  column(6,plotOutput("between_country_p1")),
+                  column(6,plotOutput("between_country_p2"))
+                  )
+          
+        ),        
+
         
         tabItem(tabName = "global",
                 includeMarkdown("www/global.md"),

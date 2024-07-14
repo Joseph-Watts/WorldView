@@ -114,6 +114,7 @@ shinyUI(fluidPage(
         ),
         
         tabItem(tabName = "EDA",
+                includeMarkdown("www/DTable.md"),
                 fluidRow(column(6,uiOutput("DTchoice"))),
                 fluidRow(column(12,DT::dataTableOutput(outputId = "Table")))
                   
@@ -131,6 +132,7 @@ shinyUI(fluidPage(
                   column(6, plotOutput("within_country_p_var_2"))
                   ),
                 fluidRow(
+                  includeMarkdown("www/mosaic.md"),
                   column(12,plotOutput("within_country_mosaic"))
                   
                 )

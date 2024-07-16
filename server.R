@@ -17,8 +17,7 @@ library(DT)
 # SUPPORT FUNCTIONS #
 #####################
 
-#' Currently none
-
+source("Functions.R")
 
 # ##################
 # # DATA WRANGLING #
@@ -115,7 +114,6 @@ shinyServer(
    q1_lookup <- var_info[which(var_info$ColLab == input$Selected_Within_Var_1),]
    q1input <- q1_lookup$Col_ID
   
-   
  })
  
  q2var <- reactive({

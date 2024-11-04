@@ -19,7 +19,6 @@ library(DT)
 
 #' Currently none
 
-
 # ##################
 # # DATA WRANGLING # - move to global.R
 # ##################

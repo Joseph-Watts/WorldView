@@ -62,118 +62,123 @@ shinyUI(fluidPage(
              ".shiny-output-error:before { visibility: hidden; }"
   ),
   
-  # load page layout
   dashboardPage(
     
     skin = "green",
-      
-    dashboardHeader(title="World Values Survey", titleWidth = 300),
+    
+    dashboardHeader(title="**World Values Survey", titleWidth = 300),
     
     dashboardSidebar(width = 300,
       sidebarMenu(
         HTML(paste0(
-          "<br>",
-          "<a href='https://www.worldvaluessurvey.org' target='_blank'><img style = 'display: block; margin-left: auto; margin-right: auto;' src='logoWVS215crop.png' width = '186'></a>",
-          "<br>",
-          "<p style = 'text-align: center;'><small>Data visualisation tool for <br> PSYC382: Culture and Cognition</small></p>",
-          "<br>"
+                "<br>",
+                "<a href='https://www.worldvaluessurvey.org' target='_blank'><img style = 'display: block; margin-left: auto; margin-right: auto;' src='logoWVS215crop.png' width = '186'></a>",
+                "<br>",
+                "<p style = 'text-align: center;'><small>Data visualisation tool for <br> PSYC382: Culture and Cognition</small></p>",
+                "<br>"
         )),
-        menuItem("Home", 
-                 tabName = "home", 
+        menuItem("Home",
+                 tabName = "home",
                  icon = icon("home")),
-        menuItem("WVS7 Data", 
-                 tabName = "EDA", 
-                 icon = icon("stats", 
-                             lib = "glyphicon")),
-        menuItem("Within Country", 
-                 tabName = "within_country", 
-                 icon = icon("stats", 
-                             lib = "glyphicon")),
-        menuItem("Between Countries", 
-                 tabName = "between_countries", 
-                 icon = icon("stats", 
-                             lib = "glyphicon")),
-        menuItem("Global", 
-                 tabName = "global", 
-                 icon = icon("stats", 
-                             lib = "glyphicon")) 
-        
+        menuItem("Master Survery Questionnaire",
+                 tabName="pdfview",
+                 icon = icon("stats",lib = "glyphicon")),
+        menuItem("WVS7 Data",
+                  tabName = "EDA",
+                  icon = icon("stats",lib = "glyphicon")),
+        menuItem("Within Country",
+                 tabName = "withinCountry",
+                 icon = icon("stats",lib = "glyphicon")),
+        menuItem("Between Countries",
+                 tabName="betweenCountries",
+                 icon = icon("stats",lib = "glyphicon")),
+        menuItem("Global",
+                 tabName = "global",
+                 icon = icon("stats",lib = "glyphicon"))
+    
       )
-      
-    ), # end dashboardSidebar
+    ),
     
     dashboardBody(
       
       tabItems(
-        
         tabItem(tabName = "home",
-          
-          # home section
-          includeMarkdown("www/home.md")
-          
+                # home section
+                includeMarkdown("www/home.md")
         ),
-        
+        tabItem(tabName = "pdfview",
+                fluidRow(column(12, uiOutput("pdfview")))
+        ),
         tabItem(tabName = "EDA",
                 includeMarkdown("www/DTable.md"),
                 fluidRow(column(6,uiOutput("DTchoice"))),
                 fluidRow(column(12,DT::dataTableOutput(outputId = "Table")))
-                  
         ),
-        
-        tabItem(tabName = "within_country",
-                includeMarkdown("www/within_country.md"),
-                fluidRow(column(6, uiOutput("Within_Country_Select"))),
+        tabItem(tabName ="withinCountry",
+                fluidRow(column(6, uiOutput("wc_country_sel"))),
+                fluidRow(column(6, tableOutput("c_total_obs"))),
                 fluidRow(
-                  column(6, uiOutput("Within_Var_1_Select")),
-                  column(6, uiOutput("Within_Var_2_Select"))
-                  ),
+                  column(6, uiOutput("wc_qA")),
+                  column(6, uiOutput("wc_qB"))
+                ),
                 fluidRow(
-                  column(6, plotOutput("within_country_p_var_1")),
-                  column(6, plotOutput("within_country_p_var_2"))
-                  ),
+                  column(6, tableOutput("stats_wc_qA")),
+                  column(6, tableOutput("stats_wc_qB"))
+                ),
                 fluidRow(
-                  includeMarkdown("www/mosaic.md"),
-                  column(12,plotOutput("within_country_mosaic"))
-                  
+                  column(6,plotOutput("plot_wc_qA_levels")),
+                  column(6,plotOutput("plot_wc_qB_levels"))
+                ),
+                tags$br(),
+                fluidRow(
+                  column(6,plotOutput("plot_wc_qA_prop")),
+                  column(6,plotOutput("plot_wc_qB_prop"))
+                ),
+                tags$br(),
+                fluidRow(column(12,plotOutput("test_output_plot"))),
+                fluidRow(column(12,tableOutput("test_output_table"))),
+                fluidRow(column(12,textOutput("test_output_stats")))
+                
+        ),
+        tabItem(tabName = "betweenCountries",
+                fluidRow(column(6,uiOutput("bc_question"))),
+                fluidRow(
+                  column(6,uiOutput("bc_countryA")),
+                  column(6,uiOutput("bc_countryB"))
+                ),
+                fluidRow(
+                  column(6,tableOutput("cA_total_obs")),
+                  column(6,tableOutput("cB_total_obs"))
+                ),
+                fluidRow(
+                  column(6,tableOutput("stats_bc_cA")),
+                  column(6,tableOutput("stats_bc_cB"))
+                ),
+                fluidRow(
+                  column(6,plotOutput("plot_bc_qcA_levels")),
+                  column(6,plotOutput("plot_bc_qcB_levels"))
+                ),
+                tags$br(),
+                fluidRow(
+                  column(6,plotOutput("plot_bc_qA_prop")),
+                  column(6,plotOutput("plot_bc_qB_prop"))
                 )
-                #' Add in a plot and more details about the relationship
-                #' between the two variables here? - Added Mosaic plot - need to include explanation and nice-ify the labels
-                
                 
         ),
-        #' To add in a between county page here?        
-        tabItem(tabName = "between_countries",
-                includeMarkdown("www/between_country.md"),
-                fluidRow(column(6, uiOutput("Between_Var_Select"))),
-                fluidRow(
-                  column(6, uiOutput("Between_Country_1_Select")),
-                  column(6, uiOutput("Between_Country_2_Select"))
-                  ),
-                fluidRow(
-                  column(6,plotOutput("between_country_p1")),
-                  column(6,plotOutput("between_country_p2"))
-                  )
-          
-        ),        
-
-        
         tabItem(tabName = "global",
-                includeMarkdown("www/global.md"),
                 fluidRow(
-                  column(6, uiOutput("Global_Var_1_Select")),
-                  column(6, uiOutput("Global_Var_2_Select"))
-                  ),
+                  column(6,uiOutput("global_varA")),
+                  column(6,uiOutput("global_varB"))
+                ),
                 fluidRow(
-                  column(12, plotOutput("global_p1") %>% 
-                           withSpinner(color = "green"))
-                )
-                
+                  column(12,plotOutput("global_p1"))
+               )
         )
-              
-      )
-    
+        
+      ) #end tabItems
     ) # end dashboardBody
-  
-  )# end dashboardPage
+    
+  ) #end dashboardPage
 
-))
+) #end fluidPage
+) #end Server

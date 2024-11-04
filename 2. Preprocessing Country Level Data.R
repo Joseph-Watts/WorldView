@@ -19,6 +19,7 @@ d <- read_rds("WVS_Dataset/WVS7_Individual.rds")
 
 #' Reading in variable information
 d_vars_coded <- read_xlsx("WVS_Dataset/Codebook manual coded index.xlsx")
+#d_vars_coded <- read_xlsx("WVS_Dataset/WVS7_Codebook_updated_labels.xlsx")
 
 #' Converting character to logical
 d_vars_coded$Variable_Display_Logical <- as.logical(d_vars_coded$Variable_Display_Logical)
@@ -114,6 +115,7 @@ sum_fun <- function(data, v, min_n = 10){
 
 #' Columns that sum_fun should be applied to
 cols_to_sum_fun <- d_vars_coded$Col_ID[d_vars_coded$Variable_Display_Logical]
+#cols_to_sum_fun <- d_vars_coded$ColLab[d_vars_coded$Variable_Display_Logical]
 
 #' Function for applying sum_fun to each of the desired columns in a dataframe,
 #' subset by country
@@ -156,8 +158,8 @@ country_sum_output <- lapply(countries, country_sum, data = d)
 country_sum_output <- ldply(country_sum_output , data.frame)
 
 #' Saving out the country level summary data
-write_xlsx(country_sum_output, "WVS_Dataset/WVS7_Country.xlsx")
-write_rds(country_sum_output, "WVS_Dataset/WVS7_Country.rds")
+# write_xlsx(country_sum_output, "WVS_Dataset/WVS7_Country.xlsx")
+# write_rds(country_sum_output, "WVS_Dataset/WVS7_Country.rds")
 
 
 

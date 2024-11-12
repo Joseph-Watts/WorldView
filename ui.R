@@ -69,39 +69,48 @@ shinyUI(fluidPage(
     dashboardHeader(title="**World Values Survey", titleWidth = 300),
     
     dashboardSidebar(width = 300,
-      sidebarMenu(
-        HTML(paste0(
-                "<br>",
-                "<a href='https://www.worldvaluessurvey.org' target='_blank'><img style = 'display: block; margin-left: auto; margin-right: auto;' src='logoWVS215crop.png' width = '186'></a>",
-                "<br>",
-                "<p style = 'text-align: center;'><small>Data visualisation tool for <br> PSYC382: Culture and Cognition</small></p>",
-                "<br>"
-        )),
-        menuItem("Home",
-                 tabName = "home",
-                 icon = icon("home")),
-        menuItem("Master Survery Questionnaire",
-                 tabName="pdfview",
-                 icon = icon("stats",lib = "glyphicon")),
-        menuItem("WVS7 Data",
-                  tabName = "EDA",
-                  icon = icon("stats",lib = "glyphicon")),
-        menuItem("Within Country",
-                 tabName = "withinCountry",
-                 icon = icon("stats",lib = "glyphicon")),
-        menuItem("Between Countries",
-                 tabName="betweenCountries",
-                 icon = icon("stats",lib = "glyphicon")),
-        menuItem("Global",
-                 tabName = "global",
-                 icon = icon("stats",lib = "glyphicon"))
-    
-      )
+                     sidebarMenu(
+                       HTML(paste0(
+                         "<br>",
+                         "<a href='https://www.worldvaluessurvey.org' target='_blank'><img style = 'display: block; margin-left: auto; margin-right: auto;' src='logoWVS215crop.png' width = '186'></a>",
+                         "<br>",
+                         "<p style = 'text-align: center;'><small>Data visualisation tool for <br> PSYC382: Culture and Cognition</small></p>",
+                         "<br>"
+                       )),
+                       menuItem("Home",
+                                tabName = "home",
+                                icon = icon("home")),
+                       menuItem( "dropdown test", tabName = "dummy", icon = icon('list'), startExpanded = F,
+                                 menuSubItem("Exports", tabName = "dummy", icon = icon('export', lib = 'glyphicon')),
+                                 menuSubItem("Imports", tabName = "dummy", icon = icon('import', lib = 'glyphicon')),
+                                 menuSubItem("Intelligence by HS code", tabName = "dummy", icon = icon("bolt"))),
+                       menuItem("Master Survery Questionnaire",
+                                tabName="pdfview",
+                                icon = icon("stats",lib = "glyphicon")),
+                       menuItem("WVS7 Data",
+                                tabName = "EDA",
+                                icon = icon("stats",lib = "glyphicon")),
+                       menuItem("Within Country",
+                                tabName = "withinCountry",
+                                icon = icon("stats",lib = "glyphicon")),
+                       menuItem("Between Countries",
+                                tabName="betweenCountries",
+                                icon = icon("stats",lib = "glyphicon")),
+                       menuItem("Global",
+                                tabName = "global",
+                                icon = icon("stats",lib = "glyphicon")),
+                       menuItem("FAQ",
+                                tabName = "faq",
+                                icon = icon("question-sign",lib = "glyphicon"))
+                     )
     ),
     
     dashboardBody(
       
       tabItems(
+        tabItem(tabName = "dummy"
+                # INTENTIONALLY EMPTY
+        ),
         tabItem(tabName = "home",
                 # home section
                 includeMarkdown("www/home.md")
@@ -173,6 +182,9 @@ shinyUI(fluidPage(
                 fluidRow(
                   column(12,plotOutput("global_p1"))
                )
+        ),
+        tabItem(tabName = "faq",
+                includeMarkdown("www/faq.md")
         )
         
       ) #end tabItems

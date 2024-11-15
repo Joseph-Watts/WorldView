@@ -77,52 +77,74 @@ shinyUI(fluidPage(
                          "<p style = 'text-align: center;'><small>Data visualisation tool for <br> PSYC382: Culture and Cognition</small></p>",
                          "<br>"
                        )),
+                       
                        menuItem("Home",
                                 tabName = "home",
                                 icon = icon("home")),
+                       
+                       menuItem("Master Survery Questionnaire",
+                                tabName="pdfview",
+                                icon = icon("stats",lib = "glyphicon")),
+                       
                        menuItem( "dropdown test", tabName = "dummy", icon = icon('list'), startExpanded = F,
                                  menuSubItem("Exports", tabName = "dummy", icon = icon('export', lib = 'glyphicon')),
                                  menuSubItem("Imports", tabName = "dummy", icon = icon('import', lib = 'glyphicon')),
                                  menuSubItem("Intelligence by HS code", tabName = "dummy", icon = icon("bolt"))),
-                       menuItem("Master Survery Questionnaire",
-                                tabName="pdfview",
-                                icon = icon("stats",lib = "glyphicon")),
+                       
+                       menuItem("Choropleth",
+                                tabName="map",
+                                icon = icon("globe",lib = "glyphicon")),
+                       
                        menuItem("WVS7 Data",
                                 tabName = "EDA",
                                 icon = icon("stats",lib = "glyphicon")),
+                       
                        menuItem("Within Country",
                                 tabName = "withinCountry",
                                 icon = icon("stats",lib = "glyphicon")),
+                       
                        menuItem("Between Countries",
                                 tabName="betweenCountries",
                                 icon = icon("stats",lib = "glyphicon")),
+                       
                        menuItem("Global",
                                 tabName = "global",
                                 icon = icon("stats",lib = "glyphicon")),
+                       
                        menuItem("FAQ",
                                 tabName = "faq",
                                 icon = icon("question-sign",lib = "glyphicon"))
-                     )
-    ),
+                       
+                     ) # end sidebarMenu
+    ), # end dashboardSidebar
     
     dashboardBody(
       
       tabItems(
+        
         tabItem(tabName = "dummy"
                 # INTENTIONALLY EMPTY
         ),
+        
         tabItem(tabName = "home",
                 # home section
                 includeMarkdown("www/home.md")
         ),
+        
+        tabItem(tabName = "map",
+                fluidRow(column(12, leafletOutput("worldMap", height = "80vh")))
+        ),
+        
         tabItem(tabName = "pdfview",
                 fluidRow(column(12, uiOutput("pdfview")))
         ),
+        
         tabItem(tabName = "EDA",
                 includeMarkdown("www/DTable.md"),
                 fluidRow(column(6,uiOutput("DTchoice"))),
                 fluidRow(column(12,DT::dataTableOutput(outputId = "Table")))
         ),
+        
         tabItem(tabName ="withinCountry",
                 fluidRow(column(6, uiOutput("wc_country_sel"))),
                 fluidRow(column(6, tableOutput("c_total_obs"))),
@@ -149,6 +171,7 @@ shinyUI(fluidPage(
                 fluidRow(column(12,textOutput("test_output_stats")))
                 
         ),
+        
         tabItem(tabName = "betweenCountries",
                 fluidRow(column(6,uiOutput("bc_question"))),
                 fluidRow(
@@ -174,6 +197,7 @@ shinyUI(fluidPage(
                 )
                 
         ),
+        
         tabItem(tabName = "global",
                 fluidRow(
                   column(6,uiOutput("global_varA")),
@@ -183,9 +207,24 @@ shinyUI(fluidPage(
                   column(12,plotOutput("global_p1"))
                )
         ),
+        
         tabItem(tabName = "faq",
                 includeMarkdown("www/faq.md")
         )
+        
+        # tabItem(tabName = "choropleth",
+        #         
+        #         # choropleth species map section
+        #         fluidRow(
+        #           column(3, uiOutput("statesSelectCombo")),
+        #           column(3, uiOutput("categorySelectComboChoro"))
+        #         ),
+        #         fluidRow(
+        #           column(3,tableOutput('stateCategoryList') %>% withSpinner(color = "green")),
+        #           column(9,leafletOutput("choroplethCategoriesPerState") %>% withSpinner(color = "green"))
+        #         )
+        #         
+        # ),
         
       ) #end tabItems
     ) # end dashboardBody

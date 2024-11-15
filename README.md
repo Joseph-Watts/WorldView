@@ -12,7 +12,7 @@ Psychology students, primarily at the University of Canterbury, Christchurch, Ne
 
 ## Credits
 
-### Data source
+### Data source & Licence
 
 The source of data can be found [HERE](https://www.worldvaluessurvey.org/WVSDocumentationWV7.jsp) for wave 7, which is the focus of this app.
 
@@ -22,10 +22,6 @@ To access data from other waves, use [THIS](https://www.worldvaluessurvey.org/WV
 
 ### Development of this Shiny Application
 
--   (Professor Doctor?) Joseph Watts
--   (MSc?)Nicki Cartlidge
--   (MSc?)Andre Brescancini De Vito
-
-## Data Licence
-
-TBD
+-   Joseph Watts
+-   Nicki Cartlidge
+-   Andre Brescancini De Vito

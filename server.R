@@ -12,6 +12,9 @@ library(rvest)
 library(readxl)
 library(vcd)
 library(DT)
+library(leaflet)
+library(rnaturalearth)
+library(sf)
 
 #####################
 # SUPPORT FUNCTIONS #
@@ -22,6 +25,10 @@ library(DT)
 # ##################
 # # DATA WRANGLING # - move to global.R
 # ##################
+
+# WVS7_country <- readRDS("WVS_Dataset/WVS7_Country.rds")
+WVS7_country_xls <- read_excel("WVS_Dataset/WVS7_Country.xlsx")
+country_codes <- WVS7_country_xls[c(2)]
 
 # Currently done within Server Logic
 
@@ -99,7 +106,8 @@ shinyServer(
     # Master Survery Questionnaire PDF
     
     output$pdfview <- renderUI({
-      tags$iframe(style = "height:650px; width:100%; scrolling=yes",src="F00011012-WVS_WAVE_7_MASTER_QUESTIONNAIRE_2017-2021_ENGLISH.pdf")
+      tags$iframe(style = "height:100vh; width:100%; scrolling=yes", 
+                  src="F00011012-WVS_WAVE_7_MASTER_QUESTIONNAIRE_2017-2021_ENGLISH.pdf")
     })
     
     
@@ -560,5 +568,66 @@ shinyServer(
       
     })
     
-  })
+    
+    # base leaflet - show countries
+    
+    # Load world shapefile data from rnaturalearth
+    world <- ne_countries(scale = "medium", returnclass = "sf")
+    
+    highlighted_countries <- world %>%
+      filter(iso_a3 %in% country_codes$B_COUNTRY_ALPHA)
+    
+    # Render the leaflet map
+    output$worldMap <- renderLeaflet({
+      leaflet() %>%
+        addProviderTiles("CartoDB.PositronNoLabels") %>%
+        # setView(lng = 174.8, lat = 10, zoom = 2) %>%
+        setView(lng = 0, lat = 0, zoom = 2) %>%
+        addPolygons(
+          data = highlighted_countries,
+          color = "green",
+          weight = 1,
+          fillColor = "lightgreen",
+          fillOpacity = 0.75,
+          label = ~name
+        )
+        
+    })
+    
+    
+    
+    
+    
+    
+  }) # end server
+
+
+
+
+
+
+# output$choroplethCategoriesPerState <- renderLeaflet({
+#   
+#   leaflet(options = leafletOptions(zoomControl = FALSE)) %>% htmlwidgets::onRender("function(el, x) {L.control.zoom({ position: 'topright' }).addTo(this) }") %>%
+#     addProviderTiles("CartoDB.PositronNoLabels") %>%
+#     setView(-98.483330, 38.712046, zoom = 4) %>%
+#     addPolygons(data = selectedChoroCategoryJoinStates(),
+#                 fillColor = colorNumeric("Greens", domain=selectedChoroCategoryJoinStates()$n)(selectedChoroCategoryJoinStates()$n),
+#                 fillOpacity = 0.7,
+#                 weight = 0.2,
+#                 smoothFactor = 0.2,
+#                 highlight = highlightOptions(
+#                   weight = 5,
+#                   color = "#666",
+#                   fillOpacity = 0.7,
+#                   bringToFront = TRUE),
+#                 label = paste0("Total of ", as.character(selectedChoroCategoryJoinStates()$n)," species in ",as.character(selectedChoroCategoryJoinStates()$NAME)," (",as.character(selectedChoroCategoryJoinStates()$STUSPS),").")) %>%
+#     addLegend(pal = colorNumeric("Greens", domain=selectedChoroCategoryJoinStates()$n),
+#               values = selectedChoroCategoryJoinStates()$n,
+#               position = "bottomright",
+#               title = input$selectedCategoryChoro)
+#   
+# })
+
+
 

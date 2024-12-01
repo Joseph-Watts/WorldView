@@ -34,15 +34,17 @@
 #' - Perform more sophisticated statistical models
 #'      
 
-library(leaflet)
-library(shinydashboard)
-library(collapsibleTree)
-library(shinycssloaders)
-library(DT)
-library(tidyverse)
-library(tigris)
-library(gtsummary)
-library(gt)
+# library(leaflet)
+# library(shinydashboard)
+# library(collapsibleTree)
+# library(shinycssloaders)
+# library(DT)
+# library(tidyverse)
+# library(tigris)
+# library(gtsummary)
+# library(gt)
+# library(shinyWidgets)
+# library(shinyBS)
 
 ###########
 # LOAD UI #
@@ -57,63 +59,109 @@ shinyUI(fluidPage(
   tags$head(includeScript("www/google-analytics-bioNPS.js")),
   
   # remove shiny "red" warning messages on GUI
-  tags$style(type="text/css",
-             ".shiny-output-error { visibility: hidden; }",
-             ".shiny-output-error:before { visibility: hidden; }"
-  ),
-  
+  tags$style(
+    type = "text/css",
+    ".shiny-output-error { visibility: hidden; }",
+    ".shiny-output-error:before { visibility: hidden; }",
+    HTML(
+      ".blue-button {
+                    background-color: #33aaff !important;
+                    color: white !important;
+                    border-color: #33aaff !important;
+      }
+      
+      .green-button {
+                    background-color: #00a65a !important;
+                    color: black !important;
+                    border-color: #00a65a !important;
+      }"
+    )
+  ), 
   dashboardPage(
     
     skin = "green",
     
-    dashboardHeader(title="**World Values Survey", titleWidth = 300),
+    dashboardHeader(title = "World Values Survey", titleWidth = 300),
     
     dashboardSidebar(width = 300,
                      sidebarMenu(
-                       HTML(paste0(
-                         "<br>",
-                         "<a href='https://www.worldvaluessurvey.org' target='_blank'><img style = 'display: block; margin-left: auto; margin-right: auto;' src='logoWVS215crop.png' width = '186'></a>",
-                         "<br>",
-                         "<p style = 'text-align: center;'><small>Data visualisation tool for <br> PSYC382: Culture and Cognition</small></p>",
-                         "<br>"
-                       )),
+                       HTML(
+                         paste0(
+                           "<br>",
+                           "<a href='https://www.worldvaluessurvey.org' target='_blank'><img style = 'display: block; margin-left: auto; margin-right: auto;' src='logoWVS215crop.png' width = '186'></a>",
+                           "<br>",
+                           "<p style = 'text-align: center;'><small>Data visualisation tool for <br> PSYC382: Culture and Cognition</small></p>",
+                           "<br>"
+                         )
+                       ),
                        
-                       menuItem("Home",
-                                tabName = "home",
-                                icon = icon("home")),
+                       menuItem(
+                         "Home",
+                         tabName = "home",
+                         icon = icon("home")
+                       ),
                        
-                       menuItem("Master Survery Questionnaire",
-                                tabName="pdfview",
-                                icon = icon("stats",lib = "glyphicon")),
+                       menuItem(
+                         "Master Survery Questionnaire",
+                         tabName = "pdfview",
+                         icon = icon("stats", lib = "glyphicon")
+                       ),
                        
-                       menuItem( "dropdown test", tabName = "dummy", icon = icon('list'), startExpanded = F,
-                                 menuSubItem("Exports", tabName = "dummy", icon = icon('export', lib = 'glyphicon')),
-                                 menuSubItem("Imports", tabName = "dummy", icon = icon('import', lib = 'glyphicon')),
-                                 menuSubItem("Intelligence by HS code", tabName = "dummy", icon = icon("bolt"))),
+                       menuItem(
+                         "Data Tables",
+                         tabName = "dummy",
+                         icon = icon('list-alt', lib = "glyphicon"),
+                         startExpanded = F,
+                         
+                         menuSubItem(
+                           "WVS7 Data Table",
+                           tabName = "EDA",
+                           icon = icon("th", lib = "glyphicon")
+                         ),
+                         
+                         menuSubItem(
+                           "Missing Data Visualization",
+                           tabName = "vis_miss",
+                           icon = icon("warning-sign", lib = "glyphicon")
+                         ),
+                         
+                         menuSubItem(
+                           "Missing Data Visualization 2",
+                           tabName = "dummy",
+                           icon = icon("warning-sign", lib = "glyphicon")
+                         )
+                       ),
                        
-                       menuItem("Choropleth",
-                                tabName="map",
-                                icon = icon("globe",lib = "glyphicon")),
+                       menuItem(
+                         "Intelligence",
+                         tabName = "dummy",
+                         icon = icon('info-sign', lib = "glyphicon"),
+                         startExpanded = F,
+                         
+                         menuSubItem(
+                           "Choropleth",
+                           tabName = "map",
+                           icon = icon("globe", lib = "glyphicon")
+                         ),
+                         
+                         menuSubItem(
+                           "Within Country",
+                           tabName = "withinCountry",
+                           icon = icon("save", lib = "glyphicon")
+                         ),
+                         
+                         menuSubItem(
+                           "Between Countries",
+                           tabName = "betweenCountries",
+                           icon = icon("random", lib = "glyphicon")
+                         )
+                       ),
                        
-                       menuItem("WVS7 Data",
-                                tabName = "EDA",
-                                icon = icon("stats",lib = "glyphicon")),
-                       
-                       menuItem("Within Country",
-                                tabName = "withinCountry",
-                                icon = icon("stats",lib = "glyphicon")),
-                       
-                       menuItem("Between Countries",
-                                tabName="betweenCountries",
-                                icon = icon("stats",lib = "glyphicon")),
-                       
-                       menuItem("Global",
-                                tabName = "global",
-                                icon = icon("stats",lib = "glyphicon")),
-                       
-                       menuItem("FAQ",
-                                tabName = "faq",
-                                icon = icon("question-sign",lib = "glyphicon"))
+                       menuItem(
+                         "FAQ",
+                         tabName = "faq",
+                         icon = icon("question-sign", lib = "glyphicon")
+                       )
                        
                      ) # end sidebarMenu
     ), # end dashboardSidebar
@@ -132,7 +180,32 @@ shinyUI(fluidPage(
         ),
         
         tabItem(tabName = "map",
-                fluidRow(column(12, leafletOutput("worldMap", height = "80vh")))
+                includeMarkdown("www/choropleth.md"),
+                
+                # top row
+                fluidRow(
+                  column(6, uiOutput("pickRegion")),
+                  column(6, uiOutput("selectAspect")),
+                ),
+                
+                # bottom row
+                fluidRow(
+                  # left side
+                  column(6, leafletOutput("worldMap", height = "80vh", width = "100%")),
+                  
+                  # right side
+                  column(6, 
+                         # first row inside the right side
+                         fluidRow(
+                           column(6, uiOutput("global_varA")),
+                           column(6, uiOutput("global_varB"))
+                         ),
+                         # second row inside the right side
+                         fluidRow(
+                           column(12, plotOutput("global_p1", height = "600px"))
+                         )
+                  )
+                ),
         ),
         
         tabItem(tabName = "pdfview",
@@ -141,8 +214,37 @@ shinyUI(fluidPage(
         
         tabItem(tabName = "EDA",
                 includeMarkdown("www/DTable.md"),
+                tags$style(type = "text/css", "#q1 {vertical-align: top;}"),
+                bsButton(
+                  "q1",
+                  label = "",
+                  icon = icon("question"),
+                  style = "info",
+                  class = "green-button",
+                  size = "extra-small"
+                ),
                 fluidRow(column(6,uiOutput("DTchoice"))),
-                fluidRow(column(12,DT::dataTableOutput(outputId = "Table")))
+                fluidRow(column(12,DT::dataTableOutput(outputId = "Table"))),
+                bsPopover(
+                  id = "q1",
+                  title = "Tidy data",
+                  content = paste0(
+                    "You should read the ",
+                    a("tidy data paper", href = "http://vita.had.co.nz/papers/tidy-data.pdf", target =
+                        "_blank")
+                  ),
+                  placement = "top",
+                  trigger = "focus",
+                  options = list(container = "body")
+                )
+        ),
+        
+        tabItem(tabName = "vis_miss",
+                checkboxInput(inputId = "cluster",
+                              label = "Cluster missingness",
+                              value = FALSE),
+                fluidRow(column(12,plotOutput("Missing", height = "90vh")))
+                
         ),
         
         tabItem(tabName ="withinCountry",
@@ -195,41 +297,16 @@ shinyUI(fluidPage(
                   column(6,plotOutput("plot_bc_qA_prop")),
                   column(6,plotOutput("plot_bc_qB_prop"))
                 )
-                
-        ),
-        
-        tabItem(tabName = "global",
-                fluidRow(
-                  column(6,uiOutput("global_varA")),
-                  column(6,uiOutput("global_varB"))
-                ),
-                fluidRow(
-                  column(12,plotOutput("global_p1"))
-               )
         ),
         
         tabItem(tabName = "faq",
                 includeMarkdown("www/faq.md")
         )
         
-        # tabItem(tabName = "choropleth",
-        #         
-        #         # choropleth species map section
-        #         fluidRow(
-        #           column(3, uiOutput("statesSelectCombo")),
-        #           column(3, uiOutput("categorySelectComboChoro"))
-        #         ),
-        #         fluidRow(
-        #           column(3,tableOutput('stateCategoryList') %>% withSpinner(color = "green")),
-        #           column(9,leafletOutput("choroplethCategoriesPerState") %>% withSpinner(color = "green"))
-        #         )
-        #         
-        # ),
-        
       ) #end tabItems
     ) # end dashboardBody
     
   ) #end dashboardPage
-
+  
 ) #end fluidPage
 ) #end Server

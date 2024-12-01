@@ -3,18 +3,23 @@
 #' Code based on: https://shiny.posit.co/r/gallery/life-sciences/biodiversity-national-parks/
 #' WVS data source: https://www.worldvaluessurvey.org/WVSDocumentationWV7.jsp
 
-library(shiny)
-library(tidyverse)
-library(gtsummary)
-library(gt)
-library(leaflet.extras)
-library(rvest)
-library(readxl)
-library(vcd)
-library(DT)
-library(leaflet)
-library(rnaturalearth)
-library(sf)
+# library(shiny)
+# library(tidyverse)
+# library(gtsummary)
+# library(gt)
+# library(leaflet.extras)
+# library(rvest)
+# library(readxl)
+# library(vcd)
+# library(DT)
+# library(leaflet)
+# library(rnaturalearth)
+# library(sf)
+# library(ggplot2)
+# library(naniar)
+# library(shinyWidgets)
+# library(shinyBS)
+
 
 #####################
 # SUPPORT FUNCTIONS #
@@ -26,9 +31,14 @@ library(sf)
 # # DATA WRANGLING # - move to global.R
 # ##################
 
-# WVS7_country <- readRDS("WVS_Dataset/WVS7_Country.rds")
 WVS7_country_xls <- read_excel("WVS_Dataset/WVS7_Country.xlsx")
 country_codes <- WVS7_country_xls[c(2)]
+
+WVS7_country_rds <- readRDS("WVS_Dataset/WVS7_Country.rds")
+country_codes_rds <- WVS7_country_rds[c(2)]
+
+UNSD_country_region <- read_excel("WVS_Dataset/UNSD — Methodology.xlsx")
+country_region <- UNSD_country_region[c(3:12)]
 
 # Currently done within Server Logic
 
@@ -90,8 +100,16 @@ shinyServer(
       choices
     })
     
+    # Fetch sections
+    get_sectionsOrd <- reactive({
+      var_info <- get_var_info()
+      sections <- as.list(unique(var_info$Section))
+      sections_ord <- factor(var_info$Section, ordered = TRUE, levels = sections)
+      sections_ord
+    })
+    
+    
     #' #' Grouping Questions by section for input options
-
     get_groupedQs_I <- reactive({
       var_info <- get_var_info()
       sections <- as.list(unique(var_info$Section))
@@ -115,7 +133,7 @@ shinyServer(
     
     output$DTchoice <- renderUI ({
       radioButtons("DTdata", "Choose Dataset", choices = c("Country", "Individuals"), selected = "Country")
-    }) 
+    })
     
     output$Table <- DT::renderDataTable({
       if (input$DTdata == "Country"){
@@ -126,7 +144,7 @@ shinyServer(
         DTdata <- get_I_longID()
       }
       DT::datatable(data = DTdata, options = list(scrollX=TRUE))
-    })  
+    })
     
     
     ########################
@@ -155,7 +173,7 @@ shinyServer(
       selectInput(inputId = "wc_sel_qA",
                   label = "Select Question A",
                   choices = get_groupedQs_I(),
-                  selected =get_groupedQs_I()[[1]][1])
+                  selected = get_groupedQs_I()[[1]][1])
     })
     
     # Reactive control for selecting question B
@@ -172,22 +190,21 @@ shinyServer(
         filter(B_COUNTRY == input$wc_c_select) |>
         select(input$wc_sel_qA,input$wc_sel_qB) 
       d
-      
-    })  
+    })
     
     # Show count stats for Question A factor levels
     output$stats_wc_qA <- renderTable({
       get_country_data() |>
         group_by(.data[[input$wc_sel_qA]]) |>
         summarise(n=n())
-    }) 
+    })
     
     # Show count stats for Question B factor levels
     output$stats_wc_qB <- renderTable({
       get_country_data() |>
         group_by(.data[[input$wc_sel_qB]]) |>
         summarise(n=n())
-    }) 
+    })
     
     # Plot Question A factor level counts
     output$plot_wc_qA_levels <- renderPlot({
@@ -575,14 +592,52 @@ shinyServer(
     world <- ne_countries(scale = "medium", returnclass = "sf")
     
     highlighted_countries <- world %>%
-      filter(iso_a3 %in% country_codes$B_COUNTRY_ALPHA)
+      filter(iso_a3 %in% country_codes_rds$B_COUNTRY_ALPHA)
+    
+    
+    # render lists
+    output$pickRegion <- renderUI({
+      pickerInput("pickRegion","Select a region:", choices = country_region$`Region Name`, multiple = TRUE)
+    })
+    
+    output$selectAspect <- renderUI({
+      selectInput("selectAspect","Select aspect:", choices = get_sectionsOrd())
+    })
+    
+    
+    # highlighted_countries <- world %>%
+    #   filter(iso_a3 %in% country_codes_rds$B_COUNTRY_ALPHA) %>%
+    #   st_transform(crs = 2193)
+    # 
+    # # Render the leaflet map
+    # output$worldMap <- renderLeaflet({
+    #   leaflet(options = leafletOptions(crs = leafletCRS(
+    #     crsClass = "L.Proj.CRS",
+    #     code = "EPSG:2193",
+    #     proj4def = "+proj=tmerc +lat_0=0 +lon_0=173 +k=1 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs",
+    #     # proj4def = "+proj=merc +lat_0=0 +lon_0=23 +k=1 +x_0=0 +y_0=0 +axis=wsu +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+    #     resolutions = c(8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16)))) %>%
+    #     # addProviderTiles("CartoDB.PositronNoLabels") %>%
+    #     addPolygons(
+    #       data = highlighted_countries,
+    #       color = "green",
+    #       weight = 1,
+    #       fillColor = "lightgreen",
+    #       fillOpacity = 0.75,
+    #       label = ~name
+    #     ) %>%
+    #     setView(lng = 173, lat = -41, zoom = 5)
+    #   # setView(lng = 0, lat = 0, zoom = 2)
+    # })
+    
     
     # Render the leaflet map
     output$worldMap <- renderLeaflet({
       leaflet() %>%
         addProviderTiles("CartoDB.PositronNoLabels") %>%
-        # setView(lng = 174.8, lat = 10, zoom = 2) %>%
-        setView(lng = 0, lat = 0, zoom = 2) %>%
+        # addTiles() %>%
+        # setView(lng = 174.8, lat = -36, zoom = 2) %>%
+        setView(lng = 0, lat = 0, zoom = 1) %>%
         addPolygons(
           data = highlighted_countries,
           color = "green",
@@ -591,43 +646,77 @@ shinyServer(
           fillOpacity = 0.75,
           label = ~name
         )
-        
+
+    })
+    
+    output$dynamicUI <- renderUI({
+      req(input$pickRegion)
+      
+      selected_aspect <- color_data[color_data$Color == input$color, ]
+      
+      fluidRow(
+        box(
+          title = paste("Details for", selected_color$Color), 
+          status = "primary", 
+          solidHeader = TRUE, 
+          width = 12,
+          tableOutput("colorTable") # Display the data in a table
+        )
+      )
     })
     
     
+    output$teste1 <- renderUI({
+      selectInput("tstcolor", "Choose a color:", 
+                  choices = c("Red", "Green", "Blue"))
+    })
     
     
+    output$teste2 <- renderUI({
+      selectInput("tstnumber", "Choose a number:", 
+                  choices = c("one", "two", "three"))
+    })
+    
+    # test_vis_miss <- get_I_data()
+    test_vis_miss <- reactive({
+      d.I <- get_I_data()
+      d.I
+    })
+    
+    # get data of countries
+    vis_miss_countries <- reactive({
+      d.C <- get_C_data()
+      d.C
+    })
+    
+    # vis_miss
+    output$Missing <- renderPlot({
+      vis_miss(vis_miss_countries(),
+               cluster = input$cluster)
+      #+ coord_flip() # this function only works for axis LABELS
+    })
+    
+    
+     # # Reactive expression to transpose and format data for vis_miss
+    # transposed_vis_miss <- reactive({
+    #   t.vismiss <- vis_miss_countries()  # Original data
+    #   t.vismiss <- t(t.vismiss)          # Transpose the data
+    #   t.vismiss <- as.data.frame(t.vismiss) # Convert to a data frame
+    #   t.vismiss <- tibble::rownames_to_column(t.vismiss, var = "variable") # Add rownames as a column
+    #   t.vismiss
+    # })
+    
+    # # Render plot
+    # output$Missing <- renderPlot({
+    #   transposed_data <- transposed_vis_miss() # Get the transposed data
+    #   
+    #   # Ensure column names are suitable for vis_miss
+    #   colnames(transposed_data) <- make.names(colnames(transposed_data), unique = TRUE)
+    #   
+    #   # Visualize missingness in the transposed data
+    #   vis_miss(transposed_data, cluster = input$cluster) +
+    #     theme(axis.text.x = element_text(angle = 90, hjust = 1))
+    # })
     
     
   }) # end server
-
-
-
-
-
-
-# output$choroplethCategoriesPerState <- renderLeaflet({
-#   
-#   leaflet(options = leafletOptions(zoomControl = FALSE)) %>% htmlwidgets::onRender("function(el, x) {L.control.zoom({ position: 'topright' }).addTo(this) }") %>%
-#     addProviderTiles("CartoDB.PositronNoLabels") %>%
-#     setView(-98.483330, 38.712046, zoom = 4) %>%
-#     addPolygons(data = selectedChoroCategoryJoinStates(),
-#                 fillColor = colorNumeric("Greens", domain=selectedChoroCategoryJoinStates()$n)(selectedChoroCategoryJoinStates()$n),
-#                 fillOpacity = 0.7,
-#                 weight = 0.2,
-#                 smoothFactor = 0.2,
-#                 highlight = highlightOptions(
-#                   weight = 5,
-#                   color = "#666",
-#                   fillOpacity = 0.7,
-#                   bringToFront = TRUE),
-#                 label = paste0("Total of ", as.character(selectedChoroCategoryJoinStates()$n)," species in ",as.character(selectedChoroCategoryJoinStates()$NAME)," (",as.character(selectedChoroCategoryJoinStates()$STUSPS),").")) %>%
-#     addLegend(pal = colorNumeric("Greens", domain=selectedChoroCategoryJoinStates()$n),
-#               values = selectedChoroCategoryJoinStates()$n,
-#               position = "bottomright",
-#               title = input$selectedCategoryChoro)
-#   
-# })
-
-
-

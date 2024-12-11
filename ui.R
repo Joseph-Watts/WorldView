@@ -34,18 +34,6 @@
 #' - Perform more sophisticated statistical models
 #'      
 
-# library(leaflet)
-# library(shinydashboard)
-# library(collapsibleTree)
-# library(shinycssloaders)
-# library(DT)
-# library(tidyverse)
-# library(tigris)
-# library(gtsummary)
-# library(gt)
-# library(shinyWidgets)
-# library(shinyBS)
-
 ###########
 # LOAD UI #
 ###########
@@ -126,8 +114,8 @@ shinyUI(fluidPage(
                          ),
                          
                          menuSubItem(
-                           "Missing Data Visualization 2",
-                           tabName = "dummy",
+                           "Missing Data Visualization Sampled",
+                           tabName = "vis_miss_sampled",
                            icon = icon("warning-sign", lib = "glyphicon")
                          )
                        ),
@@ -181,20 +169,20 @@ shinyUI(fluidPage(
         
         tabItem(tabName = "map",
                 includeMarkdown("www/choropleth.md"),
-                
+
                 # top row
                 fluidRow(
                   column(6, uiOutput("pickRegion")),
-                  column(6, uiOutput("selectAspect")),
+                  column(6, uiOutput("pickTopic"))
                 ),
                 
                 # bottom row
                 fluidRow(
                   # left side
                   column(6, leafletOutput("worldMap", height = "80vh", width = "100%")),
-                  
+
                   # right side
-                  column(6, 
+                  column(6,
                          # first row inside the right side
                          fluidRow(
                            column(6, uiOutput("global_varA")),
@@ -205,7 +193,7 @@ shinyUI(fluidPage(
                            column(12, plotOutput("global_p1", height = "600px"))
                          )
                   )
-                ),
+                )
         ),
         
         tabItem(tabName = "pdfview",
@@ -240,11 +228,21 @@ shinyUI(fluidPage(
         ),
         
         tabItem(tabName = "vis_miss",
+                actionButton("countries_tbl", "Countries View"),
+                actionButton("indiv_tbl", "Individual answers View"),
                 checkboxInput(inputId = "cluster",
                               label = "Cluster missingness",
                               value = FALSE),
-                fluidRow(column(12,plotOutput("Missing", height = "90vh")))
-                
+                fluidRow(column(12, plotOutput("Missing", height = "90vh")))
+        ),
+        
+        tabItem(tabName = "vis_miss_sampled",
+                # actionButton("countries_tbl", "Countries View"),
+                # actionButton("indiv_tbl", "Individual answers View"),
+                checkboxInput(inputId = "sampled_cluster",
+                              label = "Cluster missingness",
+                              value = FALSE),
+                fluidRow(column(12, plotOutput("Missing_sampled", height = "90vh")))
         ),
         
         tabItem(tabName ="withinCountry",
@@ -259,18 +257,18 @@ shinyUI(fluidPage(
                   column(6, tableOutput("stats_wc_qB"))
                 ),
                 fluidRow(
-                  column(6,plotOutput("plot_wc_qA_levels")),
-                  column(6,plotOutput("plot_wc_qB_levels"))
+                  column(6, plotOutput("plot_wc_qA_levels")),
+                  column(6, plotOutput("plot_wc_qB_levels"))
                 ),
                 tags$br(),
                 fluidRow(
-                  column(6,plotOutput("plot_wc_qA_prop")),
-                  column(6,plotOutput("plot_wc_qB_prop"))
+                  column(6, plotOutput("plot_wc_qA_prop")),
+                  column(6, plotOutput("plot_wc_qB_prop"))
                 ),
                 tags$br(),
-                fluidRow(column(12,plotOutput("test_output_plot"))),
-                fluidRow(column(12,tableOutput("test_output_table"))),
-                fluidRow(column(12,textOutput("test_output_stats")))
+                fluidRow(column(12, plotOutput("test_output_plot"))),
+                fluidRow(column(12, tableOutput("test_output_table"))),
+                fluidRow(column(12, textOutput("test_output_stats")))
                 
         ),
         

@@ -3,24 +3,6 @@
 #' Code based on: https://shiny.posit.co/r/gallery/life-sciences/biodiversity-national-parks/
 #' WVS data source: https://www.worldvaluessurvey.org/WVSDocumentationWV7.jsp
 
-# library(shiny)
-# library(tidyverse)
-# library(gtsummary)
-# library(gt)
-# library(leaflet.extras)
-# library(rvest)
-# library(readxl)
-# library(vcd)
-# library(DT)
-# library(leaflet)
-# library(rnaturalearth)
-# library(sf)
-# library(ggplot2)
-# library(naniar)
-# library(shinyWidgets)
-# library(shinyBS)
-
-
 #####################
 # SUPPORT FUNCTIONS #
 #####################
@@ -30,15 +12,6 @@
 # ##################
 # # DATA WRANGLING # - move to global.R
 # ##################
-
-WVS7_country_xls <- read_excel("WVS_Dataset/WVS7_Country.xlsx")
-country_codes <- WVS7_country_xls[c(2)]
-
-WVS7_country_rds <- readRDS("WVS_Dataset/WVS7_Country.rds")
-country_codes_rds <- WVS7_country_rds[c(2)]
-
-UNSD_country_region <- read_excel("WVS_Dataset/UNSD — Methodology.xlsx")
-country_region <- UNSD_country_region[c(3:12)]
 
 # Currently done within Server Logic
 
@@ -59,18 +32,19 @@ shinyServer(
     
     # WVS7_Individual.rds
     get_I_data <- reactive({
-      d <- readRDS("WVS_Dataset/WVS7_Individual.rds")
+      d <- orig_indiv_data
       d
     })
     
     # WVS7_Country.rds
     get_C_data <- reactive({
-      d <- readRDS("WVS_Dataset/WVS7_Country.rds")
+      d <- orig_country_data
+      d
     })
     
     # Codebook - with updated ColLab (concatenating Col_Id with label)
     get_var_info <- reactive({
-      d <- read_xlsx("WVS_Dataset/WVS7_Codebook_updated_labels.xlsx")
+      d <- orig_codebook_data
       d$Variable_Display_Logical <- as.logical(d$Variable_Display_Logical)
       d
     })
@@ -80,7 +54,7 @@ shinyServer(
       d.I <- get_I_data()
       d.var_info <- get_var_info()
       
-      for (i in 4:293){
+      for (i in 4:293) {
         names(d.I)[i] <- d.var_info$ColLab[i]
       }
       d.I
@@ -89,62 +63,83 @@ shinyServer(
     # Extract Country names in Individual dataset 
     get_countries <- reactive({
       d.I <- get_I_data()
-      choices <- unique(d.I$B_COUNTRY)
-      choices
-    })  
-    
-    #Extract Questions in Individual dataset
-    get_questions_I <- reactive({
-      d <- get_var_info()
-      choices <- d$ColLab[d$Variable_Display_Logical]
-      choices
+      d.country_name <- unique(d.I$B_COUNTRY)
+      d.country_name
     })
     
-    # Fetch sections
+    # Extract Questions in Individual dataset
+    get_questions_I <- reactive({
+      d <- get_var_info()
+      d.Qs <- d$ColLab[d$Variable_Display_Logical]
+      d.Qs
+    })
+    
+    # Fetch just sections
     get_sectionsOrd <- reactive({
       var_info <- get_var_info()
       sections <- as.list(unique(var_info$Section))
-      sections_ord <- factor(var_info$Section, ordered = TRUE, levels = sections)
+      sections_ord <- unique(factor(var_info$Section, ordered = TRUE, levels = sections))
       sections_ord
     })
-    
     
     #' #' Grouping Questions by section for input options
     get_groupedQs_I <- reactive({
       var_info <- get_var_info()
       sections <- as.list(unique(var_info$Section))
-      sections_ord <- factor(var_info$Section, ordered=TRUE, levels = sections)
-      testDD <- data.frame(group=sections_ord,
-                           qvar=var_info$ColLab)
-      choicesgrpQ <- split(testDD$qvar,testDD$group, lex.order=FALSE)
+      sections_ord <- factor(var_info$Section, ordered = TRUE, levels = sections)
+      testDD <- data.frame(group = sections_ord,
+                           qvar = var_info$ColLab)
+      choicesgrpQ <- split(testDD$qvar, testDD$group, lex.order = FALSE)
       choicesgrpQ <- choicesgrpQ[-1]
       choicesgrpQ
-    })
+    }) # this function can be copied to get countries
+    
+    
+    
+    
+    
+    ########################
+    # PDF VIEW
+    ########################
     
     # Master Survery Questionnaire PDF
-    
     output$pdfview <- renderUI({
-      tags$iframe(style = "height:100vh; width:100%; scrolling=yes", 
-                  src="F00011012-WVS_WAVE_7_MASTER_QUESTIONNAIRE_2017-2021_ENGLISH.pdf")
+      tags$iframe(style = "height:100vh; width:100%; scrolling=yes",
+                  src = "F00011012-WVS_WAVE_7_MASTER_QUESTIONNAIRE_2017-2021_ENGLISH.pdf")
     })
     
     
+    
+    
+    
+    ########################
     # DataTable
+    ########################
     
     output$DTchoice <- renderUI ({
-      radioButtons("DTdata", "Choose Dataset", choices = c("Country", "Individuals"), selected = "Country")
+      radioButtons(
+        "DTdata",
+        "Choose Dataset",
+        choices = c("Country", "Individuals"),
+        selected = "Country"
+      )
     })
     
     output$Table <- DT::renderDataTable({
-      if (input$DTdata == "Country"){
-       #DTdata<-d_country
+      if (input$DTdata == "Country") {
+        #DTdata<-d_country
         DTdata <- get_C_data()
-      }else if (input$DTdata == "Individuals"){
+      } else if (input$DTdata == "Individuals") {
         #DTdata<-d_ind_longID
         DTdata <- get_I_longID()
       }
-      DT::datatable(data = DTdata, options = list(scrollX=TRUE))
+      DT::datatable(data = DTdata, options = list(scrollX = TRUE))
     })
+    
+
+    
+    
+    
     
     
     ########################
@@ -153,10 +148,12 @@ shinyServer(
     
     # Reactive control for selected required country
     output$wc_country_sel <- renderUI({
-      selectInput(inputId = "wc_c_select",
-                  label = "Select Country:",
-                  choices = get_countries(),
-                  selected = "New Zealand")
+      selectInput(
+        inputId = "wc_c_select",
+        label = "Select Country:",
+        choices = get_countries(),
+        selected = "New Zealand"
+      )
     })
     
     # Give total count of observations for selected country
@@ -165,30 +162,33 @@ shinyServer(
         filter(B_COUNTRY == input$wc_c_select) |>
         summarise(Observations = n())
       d
-      
     })
     
     # Reactive control for selecting question A
     output$wc_qA <- renderUI({
-      selectInput(inputId = "wc_sel_qA",
-                  label = "Select Question A",
-                  choices = get_groupedQs_I(),
-                  selected = get_groupedQs_I()[[1]][1])
+      selectInput(
+        inputId = "wc_sel_qA",
+        label = "Select Question A",
+        choices = get_groupedQs_I(),
+        selected = get_groupedQs_I()[[1]][1]
+      )
     })
     
     # Reactive control for selecting question B
     output$wc_qB <- renderUI({
-      selectInput(inputId = "wc_sel_qB",
-                  label = "Select Question B",
-                  choices = get_groupedQs_I(),
-                  selected = get_groupedQs_I()[[1]][2])
+      selectInput(
+        inputId = "wc_sel_qB",
+        label = "Select Question B",
+        choices = get_groupedQs_I(),
+        selected = get_groupedQs_I()[[1]][2]
+      )
     })
     
     # get the data for the chosen country and questions 
     get_country_data <- reactive({
       d <- get_I_longID() |>
         filter(B_COUNTRY == input$wc_c_select) |>
-        select(input$wc_sel_qA,input$wc_sel_qB) 
+        select(input$wc_sel_qA, input$wc_sel_qB)
       d
     })
     
@@ -196,64 +196,64 @@ shinyServer(
     output$stats_wc_qA <- renderTable({
       get_country_data() |>
         group_by(.data[[input$wc_sel_qA]]) |>
-        summarise(n=n())
+        summarise(n = n())
     })
     
     # Show count stats for Question B factor levels
     output$stats_wc_qB <- renderTable({
       get_country_data() |>
         group_by(.data[[input$wc_sel_qB]]) |>
-        summarise(n=n())
+        summarise(n = n())
     })
     
     # Plot Question A factor level counts
     output$plot_wc_qA_levels <- renderPlot({
       ggplot(get_country_data(),
-             aes(x=.data[[input$wc_sel_qA]], fill=.data[[input$wc_sel_qA]])) +
+             aes(x = .data[[input$wc_sel_qA]], fill = .data[[input$wc_sel_qA]])) +
         geom_bar() +
-        ggtitle("Factor levels by frequency")+
+        ggtitle("Factor levels by frequency") +
         theme_minimal()
     })
     
     # Plot Question A factor level proportions
     output$plot_wc_qA_prop <- renderPlot({
       ggplot(get_country_data(),
-             aes(x='',fill=.data[[input$wc_sel_qA]])) +
-        geom_bar(position="fill") +
-        ggtitle("Factor level proportions")+
-        labs(x=input$wc_sel_qA, y="proportion")
+             aes(x = '', fill = .data[[input$wc_sel_qA]])) +
+        geom_bar(position = "fill") +
+        ggtitle("Factor level proportions") +
+        labs(x = input$wc_sel_qA, y = "proportion")
     })
     
     # Plot Question B factor level counts
     output$plot_wc_qB_levels <- renderPlot({
       ggplot(get_country_data(),
-             aes(x=.data[[input$wc_sel_qB]], fill=.data[[input$wc_sel_qB]])) +
+             aes(x = .data[[input$wc_sel_qB]], fill = .data[[input$wc_sel_qB]])) +
         geom_bar() +
-        ggtitle("Factor levels by frequency")+
+        ggtitle("Factor levels by frequency") +
         theme_minimal()
     })
     
     # Plot Question B factor level proportions
     output$plot_wc_qB_prop <- renderPlot({
       ggplot(get_country_data(),
-             aes(x='',fill=.data[[input$wc_sel_qB]])) +
-        geom_bar(position="fill") + 
-        ggtitle("Factor level proportions")+
-        labs(x=input$wc_sel_qB, y="proportion")
+             aes(x = '', fill = .data[[input$wc_sel_qB]])) +
+        geom_bar(position = "fill") +
+        ggtitle("Factor level proportions") +
+        labs(x = input$wc_sel_qB, y = "proportion")
     })
     
     
     # Show comparison stats for each question grouped by the other
     output$stats_wc_qAqB <- renderTable({
       get_country_data() |>
-        group_by(.data[[input$wc_sel_qA]],.data[[input$wc_sel_qB]]) |>
-        summarise(n=n())
+        group_by(.data[[input$wc_sel_qA]], .data[[input$wc_sel_qB]]) |>
+        summarise(n = n())
     }) 
     
     output$stats_wc_qBqA <- renderTable({
       get_country_data() |>
-        group_by(.data[[input$wc_sel_qB]],.data[[input$wc_sel_qA]]) |>
-        summarise(n=n())
+        group_by(.data[[input$wc_sel_qB]], .data[[input$wc_sel_qA]]) |>
+        summarise(n = n())
     }) 
     
     within_country_compare <- reactive({
@@ -369,6 +369,8 @@ shinyServer(
       
     })
     
+    ############################ TEST SECTION #################################
+    
     output$test_output_plot <- renderPlot({
       test_output <- within_country_compare()
       test_output$plot
@@ -383,6 +385,8 @@ shinyServer(
       test_output <- within_country_compare()
       print(test_output$stats)
     })
+    
+    ###########################################################################
  
     ########################
     # Between Countries
@@ -390,36 +394,42 @@ shinyServer(
     
     # Reactive control for selecting BC question
     output$bc_question <- renderUI({
-      selectInput(inputId = "bc_sel_q",
-                  label = "Select Question",
-                  choices = get_groupedQs_I(),
-                  selected =get_groupedQs_I()[[1]][1])
+      selectInput(
+        inputId = "bc_sel_q",
+        label = "Select Question",
+        choices = get_groupedQs_I(),
+        selected = get_groupedQs_I()[[1]][1]
+      )
     })
     
     # Reactive control for selecting Country A
     output$bc_countryA <- renderUI({
-      selectInput(inputId = "bc_sel_cA",
-                  label = "Select Country:",
-                  choices = get_countries(),
-                  selected = "New Zealand")
+      selectInput(
+        inputId = "bc_sel_cA",
+        label = "Select Country:",
+        choices = get_countries(),
+        selected = "New Zealand"
+      )
     })
     
     
     # Reactive control for selecting Country B
     output$bc_countryB <- renderUI({
-      selectInput(inputId = "bc_sel_cB",
-                  label = "Select Country:",
-                  choices = get_countries(),
-                  selected = "Argentina")
+      selectInput(
+        inputId = "bc_sel_cB",
+        label = "Select Country:",
+        choices = get_countries(),
+        selected = "Argentina"
+      )
     })
     
     # Get question data for Country A 
     get_countryA_data <- reactive({
       # d <- get_I_longID() |>
       #   filter(B_COUNTRY == input$wc_c_select) |>
-      #   select(input$wc_sel_qA,input$wc_sel_qB) 
+      #   select(input$wc_sel_qA,input$wc_sel_qB)
       # d
-      d <- get_I_longID()|>
+      d <- get_I_longID() |>
         filter(B_COUNTRY == input$bc_sel_cA) |>
         select(input$bc_sel_q)
       d
@@ -430,80 +440,78 @@ shinyServer(
       d <- get_countryA_data() |>
         summarise(Observations = n())
       d
-      
     })
     
     # Get question data for Country A 
     get_countryB_data <- reactive({
       # d <- get_I_longID() |>
       #   filter(B_COUNTRY == input$wc_c_select) |>
-      #   select(input$wc_sel_qA,input$wc_sel_qB) 
+      #   select(input$wc_sel_qA,input$wc_sel_qB)
       # d
-      d <- get_I_longID()|>
+      d <- get_I_longID() |>
         filter(B_COUNTRY == input$bc_sel_cB) |>
         select(input$bc_sel_q)
       d
-    }) 
+    })
     
     # Give total count of observations for selected country
     output$cB_total_obs <- renderTable({
       d <- get_countryB_data() |>
         summarise(Observations = n())
       d
-      
     })
     
     # Show count stats for Question Country A factor levels
     output$stats_bc_cA <- renderTable({
       get_countryA_data() |>
         group_by(.data[[input$bc_sel_q]]) |>
-        summarise(n=n())
+        summarise(n = n())
     }) 
     
     # Show count stats for Question Country B factor levels
     output$stats_bc_cB <- renderTable({
       get_countryB_data() |>
         group_by(.data[[input$bc_sel_q]]) |>
-        summarise(n=n())
+        summarise(n = n())
     }) 
     
     #Plot Question factor level counts for Country A
     output$plot_bc_qcA_levels <- renderPlot({
       ggplot(get_countryA_data(),
-             aes(x=.data[[input$bc_sel_q]], fill=.data[[input$bc_sel_q]])) + #need to figure out this line
+             aes(x = .data[[input$bc_sel_q]], fill = .data[[input$bc_sel_q]])) + #need to figure out this line
         geom_bar() +
-        ggtitle("Country A: Question factor levels by frequency")+
+        ggtitle("Country A: Question factor levels by frequency") +
         theme_minimal()
     })
     
     # Plot Question factor level proportions Country A
     output$plot_bc_qA_prop <- renderPlot({
       ggplot(get_countryA_data(),
-             aes(x='',fill=.data[[input$bc_sel_q]])) +
-        geom_bar(position="fill") +
-        ggtitle("Factor level proportions")+
-        labs(x=input$bc_sel_q, y="proportion")
+             aes(x = '', fill = .data[[input$bc_sel_q]])) +
+        geom_bar(position = "fill") +
+        ggtitle("Factor level proportions") +
+        labs(x = input$bc_sel_q, y = "proportion")
     })
     
     #Plot Question factor level counts for Country B
     output$plot_bc_qcB_levels <- renderPlot({
       ggplot(get_countryB_data(),
-             aes(x=.data[[input$bc_sel_q]], fill=.data[[input$bc_sel_q]])) + #need to figure out this line
+             aes(x = .data[[input$bc_sel_q]], fill = .data[[input$bc_sel_q]])) + #need to figure out this line
         geom_bar() +
-        ggtitle("Country B: Question factor levels by frequency")+
+        ggtitle("Country B: Question factor levels by frequency") +
         theme_minimal()
     })
     
     # Plot Question factor level proportions Country B
     output$plot_bc_qB_prop <- renderPlot({
       ggplot(get_countryB_data(),
-             aes(x='',fill=.data[[input$bc_sel_q]])) +
-        geom_bar(position="fill") +
-        ggtitle("Factor level proportions")+
-        labs(x=input$bc_sel_q, y="proportion")
+             aes(x = '', fill = .data[[input$bc_sel_q]])) +
+        geom_bar(position = "fill") +
+        ggtitle("Factor level proportions") +
+        labs(x = input$bc_sel_q, y = "proportion")
     })
     
-        
+    
     
     #' ---
     #' Global
@@ -517,25 +525,50 @@ shinyServer(
     #' More sophistication could be added in later.
     #' 
 
-    # Reactive control for selecting first variable
-    output$global_varA <- renderUI({
-      selectInput(inputId = "gbl_sel_varA",
-                  label = "Select Question A",
-                  choices = get_groupedQs_I(),
-                  selected =get_groupedQs_I()[[1]][1])
+    # Reactive to get the filtered questions for varA
+    filtered_choices_A <- reactive({
+      # Get the list of all questions
+      all_questions <- get_groupedQs_I()
+      
+      # Exclude the question selected in varB
+      selected_B <- input$gbl_sel_varB
+      all_questions[!all_questions %in% selected_B]
     })
     
+    # Reactive to get the filtered questions for varB
+    filtered_choices_B <- reactive({
+      # Get the list of all questions
+      all_questions <- get_groupedQs_I()
+      
+      # Exclude the question selected in varA
+      selected_A <- input$gbl_sel_varA
+      all_questions[!all_questions %in% selected_A]
+    })
+    
+    
     # Reactive control for selecting first variable
+    output$global_varA <- renderUI({
+      selectInput(
+        inputId = "gbl_sel_varA",
+        label = "Select Question A",
+        choices = filtered_choices_A(),
+        selected = get_groupedQs_I()[[1]][1]
+      )
+    })
+    
+    # Reactive control for selecting second variable
     output$global_varB <- renderUI({
-      selectInput(inputId = "gbl_sel_varB",
-                  label = "Select Question B",
-                  choices = get_groupedQs_I(),
-                  selected =get_groupedQs_I()[[1]][2])
+      selectInput(
+        inputId = "gbl_sel_varB",
+        label = "Select Question B",
+        choices = filtered_choices_B(),
+        selected = get_groupedQs_I()[[1]][2]
+      )
     })
     
     gblvar1 <- reactive({
       var_info <- get_var_info()
-      gblvar1_lookup <- var_info[which(var_info$ColLab == input$gbl_sel_varA),]
+      gblvar1_lookup <- var_info[which(var_info$ColLab == input$gbl_sel_varA), ]
       gv1input <- gblvar1_lookup$Col_ID
     })
     
@@ -546,7 +579,7 @@ shinyServer(
     
     gblvar2 <- reactive({
       var_info <- get_var_info()
-      gblvar2_lookup <- var_info[which(var_info$ColLab == input$gbl_sel_varB),]
+      gblvar2_lookup <- var_info[which(var_info$ColLab == input$gbl_sel_varB), ]
       gv2input <- gblvar2_lookup$Col_ID
     })
     
@@ -555,11 +588,8 @@ shinyServer(
     #' Something will need to change here to determine the correct plot type
     #' based on the 
     d_global <- reactive({
-      
       d_country <- get_C_data()
-      d_country[ , c(gblvar1(),
-                     gblvar2())]
-      
+      d_country[, c(gblvar1(), gblvar2())]
     })
     
     #' Here it would be good to add:
@@ -575,148 +605,103 @@ shinyServer(
     #' Integer (mean)
     
     output$global_p1 <- renderPlot({
-      
-      ggplot(d_global(),
-             aes(x=.data[[gblvar1()]],
-                 y=.data[[gblvar2()]])) +
+      ggplot(d_global(), aes(x = .data[[gblvar1()]], y = .data[[gblvar2()]])) +
         geom_point() +
-        geom_smooth(method="lm", se=FALSE)+
+        geom_smooth(method = "lm", se = FALSE) +
         theme_minimal()
-      
     })
     
-    
-    # base leaflet - show countries
     
     # Load world shapefile data from rnaturalearth
     world <- ne_countries(scale = "medium", returnclass = "sf")
     
-    highlighted_countries <- world %>%
-      filter(iso_a3 %in% country_codes_rds$B_COUNTRY_ALPHA)
-    
-    
-    # render lists
+    # Render list of countries in data set
     output$pickRegion <- renderUI({
-      pickerInput("pickRegion","Select a region:", choices = country_region$`Region Name`, multiple = TRUE)
-    })
-    
-    output$selectAspect <- renderUI({
-      selectInput("selectAspect","Select aspect:", choices = get_sectionsOrd())
-    })
-    
-    
-    # highlighted_countries <- world %>%
-    #   filter(iso_a3 %in% country_codes_rds$B_COUNTRY_ALPHA) %>%
-    #   st_transform(crs = 2193)
-    # 
-    # # Render the leaflet map
-    # output$worldMap <- renderLeaflet({
-    #   leaflet(options = leafletOptions(crs = leafletCRS(
-    #     crsClass = "L.Proj.CRS",
-    #     code = "EPSG:2193",
-    #     proj4def = "+proj=tmerc +lat_0=0 +lon_0=173 +k=1 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs",
-    #     # proj4def = "+proj=merc +lat_0=0 +lon_0=23 +k=1 +x_0=0 +y_0=0 +axis=wsu +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
-    #     resolutions = c(8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16)))) %>%
-    #     # addProviderTiles("CartoDB.PositronNoLabels") %>%
-    #     addPolygons(
-    #       data = highlighted_countries,
-    #       color = "green",
-    #       weight = 1,
-    #       fillColor = "lightgreen",
-    #       fillOpacity = 0.75,
-    #       label = ~name
-    #     ) %>%
-    #     setView(lng = 173, lat = -41, zoom = 5)
-    #   # setView(lng = 0, lat = 0, zoom = 2)
-    # })
-    
-    
-    # Render the leaflet map
-    output$worldMap <- renderLeaflet({
-      leaflet() %>%
-        addProviderTiles("CartoDB.PositronNoLabels") %>%
-        # addTiles() %>%
-        # setView(lng = 174.8, lat = -36, zoom = 2) %>%
-        setView(lng = 0, lat = 0, zoom = 1) %>%
-        addPolygons(
-          data = highlighted_countries,
-          color = "green",
-          weight = 1,
-          fillColor = "lightgreen",
-          fillOpacity = 0.75,
-          label = ~name
-        )
-
-    })
-    
-    output$dynamicUI <- renderUI({
-      req(input$pickRegion)
-      
-      selected_aspect <- color_data[color_data$Color == input$color, ]
-      
-      fluidRow(
-        box(
-          title = paste("Details for", selected_color$Color), 
-          status = "primary", 
-          solidHeader = TRUE, 
-          width = 12,
-          tableOutput("colorTable") # Display the data in a table
+      pickerInput(
+        inputId = "pickRegion",
+        label = "Select one or more countries",
+        choices = picker_country_list,
+        multiple = TRUE,
+        options = list(
+          `actions-box` = TRUE,
+          `live-search` = TRUE,
+          `selectAllText` = "Select all countries"
         )
       )
     })
     
-    
-    output$teste1 <- renderUI({
-      selectInput("tstcolor", "Choose a color:", 
-                  choices = c("Red", "Green", "Blue"))
+    # Render topic of questions to be shown to user
+    output$pickTopic <- renderUI({
+      pickerInput(
+        "pickTopic",
+        "Select topic:",
+        choices = get_sectionsOrd(),
+        multiple = TRUE,
+        options = list(`actions-box` = TRUE, `live-search` = TRUE)
+      )
     })
     
-    
-    output$teste2 <- renderUI({
-      selectInput("tstnumber", "Choose a number:", 
-                  choices = c("one", "two", "three"))
+    # Render the leaflet map
+    output$worldMap <- renderLeaflet({
+      # Get selected countries from the input picker
+      selected_countries <- input$pickRegion
+      
+      # If selected countries exist, filter them; otherwise, use all countries
+      if (length(selected_countries) > 0) {
+        highlighted_countries <- world %>%
+          dplyr::filter(name_en %in% selected_countries) # TODO a few countries do not get selected if 'select all' pressed. redo this line later
+      } else {
+        highlighted_countries <- world %>%
+          dplyr::filter(iso_a3 %in% WVS7_part_countries$B_COUNTRY_ALPHA) # Use the entire dataset if no countries are selected
+      }
+      
+      # Render the map
+      leaflet(options = leafletOptions(
+        zoomControl = FALSE,
+        minZoom = 1,
+        maxZoom = 1,
+        dragging = FALSE
+      )) %>%
+        addProviderTiles("CartoDB.PositronNoLabels") %>%
+        # addTiles() %>%
+        # setView(lng = 174.8, lat = -36, zoom = 1) %>%
+        setView(lng = 0, lat = 0, zoom = 1) %>%
+        addPolygons(
+          data =  highlighted_countries,
+          # TODO make highlighted_countries a reactive function
+          color = "green",
+          weight = 1,
+          fillColor = "lightgreen",
+          fillOpacity = 0.75,
+          label = ~ name
+        )
     })
     
-    # test_vis_miss <- get_I_data()
-    test_vis_miss <- reactive({
-      d.I <- get_I_data()
-      d.I
-    })
+    # output$teste1 <- renderUI({
+    #   selectInput("tstcolor", "Choose a color:", 
+    #               choices = c("Red", "Green", "Blue"))
+    # })
+    # 
+    # 
+    # output$teste2 <- renderUI({
+    #   selectInput("tstnumber", "Choose a number:", 
+    #               choices = c("one", "two", "three"))
+    # })
     
-    # get data of countries
-    vis_miss_countries <- reactive({
-      d.C <- get_C_data()
-      d.C
-    })
     
+    # TODO add vis_miss_ly code provided by Nick
     # vis_miss
     output$Missing <- renderPlot({
-      vis_miss(vis_miss_countries(),
+      vis_miss(get_C_data(),
                cluster = input$cluster)
-      #+ coord_flip() # this function only works for axis LABELS
     })
     
-    
-     # # Reactive expression to transpose and format data for vis_miss
-    # transposed_vis_miss <- reactive({
-    #   t.vismiss <- vis_miss_countries()  # Original data
-    #   t.vismiss <- t(t.vismiss)          # Transpose the data
-    #   t.vismiss <- as.data.frame(t.vismiss) # Convert to a data frame
-    #   t.vismiss <- tibble::rownames_to_column(t.vismiss, var = "variable") # Add rownames as a column
-    #   t.vismiss
-    # })
-    
-    # # Render plot
-    # output$Missing <- renderPlot({
-    #   transposed_data <- transposed_vis_miss() # Get the transposed data
-    #   
-    #   # Ensure column names are suitable for vis_miss
-    #   colnames(transposed_data) <- make.names(colnames(transposed_data), unique = TRUE)
-    #   
-    #   # Visualize missingness in the transposed data
-    #   vis_miss(transposed_data, cluster = input$cluster) +
-    #     theme(axis.text.x = element_text(angle = 90, hjust = 1))
-    # })
-    
-    
+    output$Missing_sampled <- renderPlot({
+      downsized_data <- get_I_data() %>%
+        sample_n(10000) %>%    # Select 10,000 random rows
+        select(sample(1:ncol(.), 50)) # Select 50 random columns, but in the future that will change to user-selected columns showing all 100k rows
+      
+      vis_miss(downsized_data, cluster = input$sampled_cluster)
+    })
+
   }) # end server

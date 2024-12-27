@@ -1,3 +1,3 @@
 ## World Map
 <br>
-Participating coutries
+Participating countries

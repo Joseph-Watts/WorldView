@@ -3,18 +3,6 @@
 #' Code based on: https://shiny.posit.co/r/gallery/life-sciences/biodiversity-national-parks/
 #' WVS data source: https://www.worldvaluessurvey.org/WVSDocumentationWV7.jsp
 
-#####################
-# SUPPORT FUNCTIONS #
-#####################
-
-#' Currently none
-
-# ##################
-# # DATA WRANGLING # - move to global.R
-# ##################
-
-# Currently done within Server Logic
-
 ################
 # SERVER LOGIC #
 ################
@@ -79,6 +67,7 @@ shinyServer(
       var_info <- get_var_info()
       sections <- as.list(unique(var_info$Section))
       sections_ord <- unique(factor(var_info$Section, ordered = TRUE, levels = sections))
+      sections_ord <- sections_ord[-1]
       sections_ord
     })
     
@@ -99,7 +88,7 @@ shinyServer(
     
     
     ########################
-    # PDF VIEW
+    # PDF & CODEBOOK VIEW
     ########################
     
     # Master Survery Questionnaire PDF
@@ -108,7 +97,11 @@ shinyServer(
                   src = "F00011012-WVS_WAVE_7_MASTER_QUESTIONNAIRE_2017-2021_ENGLISH.pdf")
     })
     
-    
+    # Codebook PDF
+    output$codebookview <- renderUI({
+      tags$iframe(style = "height:100vh; width:100%; scrolling=yes",
+                  src = "F00011055-WVS7_Codebook_Variables_report_V6.0.pdf")
+    })
     
     
     
@@ -612,33 +605,71 @@ shinyServer(
     })
     
     
+    ########################
+    # Map View
+    ########################
+    
     # Load world shapefile data from rnaturalearth
     world <- ne_countries(scale = "medium", returnclass = "sf")
+    
+    # TODO create an observe function to save the current selection of countries and use that in the map and charts render
     
     # Render list of countries in data set
     output$pickRegion <- renderUI({
       pickerInput(
         inputId = "pickRegion",
-        label = "Select one or more countries",
+        label = "Select up to 6 countries",
         choices = picker_country_list,
         multiple = TRUE,
         options = list(
-          `actions-box` = TRUE,
           `live-search` = TRUE,
-          `selectAllText` = "Select all countries"
+          `max-options` = 6
+        )
+      )
+    })
+      
+    # Render topics to be selected by user
+    output$pickTopic <- renderUI({
+      pickerInput(
+        inputId = "pickTopic",
+        label = "Select topic",
+        choices = get_sectionsOrd(),
+        multiple = TRUE,
+        options = list(
+          `actions-box` = TRUE,
+          `live-search` = TRUE
         )
       )
     })
     
-    # Render topic of questions to be shown to user
-    output$pickTopic <- renderUI({
-      pickerInput(
-        "pickTopic",
-        "Select topic:",
-        choices = get_sectionsOrd(),
-        multiple = TRUE,
-        options = list(`actions-box` = TRUE, `live-search` = TRUE)
-      )
+    observeEvent(input$pickTopic, {
+      grouped <- get_groupedQs_I()
+      grouped <- lapply(grouped, function(category) {
+        # Check if the category is a character vector
+        if (is.character(category)) {
+          category[!sapply(category, function(item) {
+            any(sapply(ignored_questions, function(q) grepl(q, item)))
+          })]
+        } else {
+          # Return the category unchanged if it's not a character vector
+          category
+        }
+      })
+      grouped <- grouped[names(grouped) %in% input$pickTopic]
+      
+      # Render questions user can select
+      output$pickQuestion <- renderUI({
+        pickerInput(
+          inputId = "pickQuestion",
+          label = "Select up to 10 questions",
+          choices = grouped,
+          multiple = TRUE,
+          options = list(
+            `live-search` = TRUE,
+            `max-options` = 10
+          )
+        )
+      })
     })
     
     # Render the leaflet map
@@ -649,7 +680,7 @@ shinyServer(
       # If selected countries exist, filter them; otherwise, use all countries
       if (length(selected_countries) > 0) {
         highlighted_countries <- world %>%
-          dplyr::filter(name_en %in% selected_countries) # TODO a few countries do not get selected if 'select all' pressed. redo this line later
+          dplyr::filter(name_en %in% selected_countries) # TODO a few countries do not get selected when 'select all' is pressed. redo this line later
       } else {
         highlighted_countries <- world %>%
           dplyr::filter(iso_a3 %in% WVS7_part_countries$B_COUNTRY_ALPHA) # Use the entire dataset if no countries are selected
@@ -658,17 +689,14 @@ shinyServer(
       # Render the map
       leaflet(options = leafletOptions(
         zoomControl = FALSE,
-        minZoom = 1,
-        maxZoom = 1,
+        minZoom = 2,
+        maxZoom = 2,
         dragging = FALSE
       )) %>%
         addProviderTiles("CartoDB.PositronNoLabels") %>%
-        # addTiles() %>%
-        # setView(lng = 174.8, lat = -36, zoom = 1) %>%
-        setView(lng = 0, lat = 0, zoom = 1) %>%
+        setView(lng = 0, lat = 25, zoom = 2) %>%
         addPolygons(
           data =  highlighted_countries,
-          # TODO make highlighted_countries a reactive function
           color = "green",
           weight = 1,
           fillColor = "lightgreen",
@@ -677,17 +705,100 @@ shinyServer(
         )
     })
     
-    # output$teste1 <- renderUI({
-    #   selectInput("tstcolor", "Choose a color:", 
-    #               choices = c("Red", "Green", "Blue"))
-    # })
-    # 
-    # 
-    # output$teste2 <- renderUI({
-    #   selectInput("tstnumber", "Choose a number:", 
-    #               choices = c("one", "two", "three"))
-    # })
+    ########################
+    # Corrplot chart
+    ########################
     
+    observeEvent(input$pickQuestion, {
+      req(input$pickQuestion) # Ensure that pickQuestion is available
+      
+      selected_countries <- if (length(input$pickRegion) < 0) input$pickRegion else indiv_ordinal$B_COUNTRY
+      xt_pickQ <- str_extract(input$pickQuestion, "^Q\\d+")
+      
+      # Filter and select the data based on user inputs
+      charts_data <- indiv_ordinal %>%
+        dplyr::filter(B_COUNTRY %in% selected_countries) %>%
+        dplyr::select(all_of(xt_pickQ))
+      
+      # # Render the pairs plot
+      # output$pairsChart <- renderPlot({
+      #   ggpairs(charts_data)#, mapping = aes(color = charts_data$B_COUNTRY)) +
+      # })
+      
+      # Calculate the correlation matrix (only if there is more than one column)
+      if (ncol(charts_data) > 1) {
+        corr_matrix <- cor(charts_data, use = "pairwise.complete.obs")
+        
+        # Render the correlation plot
+        output$corrChart <- renderPlot({
+          corrplot::corrplot(
+            corr_matrix,
+            method = input$method,
+            order = input$order,
+            tl.cex = input$tl_cex,
+            type = input$type,
+            diag = input$diag,
+            addCoef.col = if (input$addCoef_col) input$coef_color else NULL,
+            tl.srt = input$tl_srt,
+            bg = input$bg
+          )
+        })
+      } else {
+        output$corrChart <- renderPlot({
+          plot(1, 1, main = "Not enough data for correlation plot", type = "n") # Placeholder if not enough data
+        })
+      }  
+      
+    })
+    
+    output$downloadPlot <- downloadHandler(
+      filename = function() {
+        paste("corrplot", Sys.Date(), ".png", sep = "")
+      },
+      content = function(file) {
+        png(file, width = 800, height = 600) # Save as PNG
+        corrplot(
+          corr_matrix,
+          method = input$method,
+          order = input$order,
+          tl.cex = input$tl_cex,
+          type = input$type,
+          diag = input$diag,
+          addCoef.col = if (input$addCoef_col) input$coef_color else NULL,
+          tl.srt = input$tl_srt,
+          bg = input$bg
+        )
+        dev.off()
+      }
+    )
+    
+    ########################
+    # Control Buttons
+    ########################
+    
+    observeEvent(input$next1, {
+      updateTabsetPanel(session, "mapTabs",
+                        selected = "correlations")
+    })
+    
+    observeEvent(input$next2, {
+      updateTabsetPanel(session, "mapTabs",
+                        selected = "anova")
+    })
+    
+    observeEvent(input$prev1, {
+      updateTabsetPanel(session, "mapTabs",
+                        selected = "map_view")
+    })
+    
+    observeEvent(input$prev2, {
+      updateTabsetPanel(session, "mapTabs",
+                        selected = "correlations")
+    })
+    
+    ########################
+    # Missing Data chart
+    ########################
     
     # TODO add vis_miss_ly code provided by Nick
     # vis_miss
@@ -703,5 +814,12 @@ shinyServer(
       
       vis_miss(downsized_data, cluster = input$sampled_cluster)
     })
-
+    
+    # TODO add boxplot of variables (IQR range 0.5-5)
+    
+    output$textTest <- renderPrint({
+      cat(paste("AQUI DESGRACA!"))
+    })
+    
+    
   }) # end server

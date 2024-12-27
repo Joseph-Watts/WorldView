@@ -44,15 +44,15 @@ shinyUI(fluidPage(
   includeCSS("www/style.css"),
   
   # load google analytics script
-  tags$head(includeScript("www/google-analytics-bioNPS.js")),
+  tags$head(includeScript("www/google-analytics-bioNPS.js"),
   
   # remove shiny "red" warning messages on GUI
   tags$style(
     type = "text/css",
     ".shiny-output-error { visibility: hidden; }",
     ".shiny-output-error:before { visibility: hidden; }",
-    HTML(
-      ".blue-button {
+    HTML("
+      .blue-button {
                     background-color: #33aaff !important;
                     color: white !important;
                     border-color: #33aaff !important;
@@ -60,11 +60,17 @@ shinyUI(fluidPage(
       
       .green-button {
                     background-color: #00a65a !important;
-                    color: black !important;
+                    color: white !important;
                     border-color: #00a65a !important;
-      }"
-    )
-  ), 
+      }
+
+      .nav-pills .nav-link.active {
+                    background-color: #00a65a !important;
+                    color: white !important;
+      }
+    "))
+  ),
+  
   dashboardPage(
     
     skin = "green",
@@ -90,15 +96,21 @@ shinyUI(fluidPage(
                        ),
                        
                        menuItem(
-                         "Master Survery Questionnaire",
+                         "Master Survey Questionnaire",
                          tabName = "pdfview",
-                         icon = icon("stats", lib = "glyphicon")
+                         icon = icon("comment", lib = "glyphicon")
+                       ),
+                       
+                       menuItem(
+                         "Questionnaire Codebook",
+                         tabName = "codebookview",
+                         icon = icon("book", lib = "glyphicon")
                        ),
                        
                        menuItem(
                          "Data Tables",
                          tabName = "dummy",
-                         icon = icon('list-alt', lib = "glyphicon"),
+                         icon = icon('list', lib = "glyphicon"),
                          startExpanded = F,
                          
                          menuSubItem(
@@ -121,13 +133,13 @@ shinyUI(fluidPage(
                        ),
                        
                        menuItem(
-                         "Intelligence",
+                         "Hypothesis Analysis & Testing",
                          tabName = "dummy",
                          icon = icon('info-sign', lib = "glyphicon"),
                          startExpanded = F,
                          
                          menuSubItem(
-                           "Choropleth",
+                           "World Map view",
                            tabName = "map",
                            icon = icon("globe", lib = "glyphicon")
                          ),
@@ -169,35 +181,87 @@ shinyUI(fluidPage(
         
         tabItem(tabName = "map",
                 includeMarkdown("www/choropleth.md"),
-
-                # top row
-                fluidRow(
-                  column(6, uiOutput("pickRegion")),
-                  column(6, uiOutput("pickTopic"))
-                ),
                 
-                # bottom row
-                fluidRow(
-                  # left side
-                  column(6, leafletOutput("worldMap", height = "80vh", width = "100%")),
-
-                  # right side
-                  column(6,
-                         # first row inside the right side
+                tabsetPanel(id = "mapTabs", type = "pills",
+                    tabPanel("Map view", value = "map_view",
                          fluidRow(
-                           column(6, uiOutput("global_varA")),
-                           column(6, uiOutput("global_varB"))
+                           # verbatimTextOutput(outputId = "textTest")
+                           column(3, uiOutput("pickRegion"))
                          ),
-                         # second row inside the right side
                          fluidRow(
-                           column(12, plotOutput("global_p1", height = "600px"))
-                         )
-                  )
-                )
+                           column(12, shinycssloaders::withSpinner(leafletOutput("worldMap", height = "60vh", width = "100%")))
+                         ),
+                         fluidRow(
+                           column(12, div(style = "float:right",
+                                          actionButton("next1", "Next", class = "green-button"))))
+                    ),
+                    tabPanel("Correlations", value = "correlations",
+                         fluidRow(
+                           column(3, uiOutput("pickTopic")),
+                           column(3, uiOutput("pickQuestion"))
+                         ),
+                         fluidRow(
+                           column(10, shinycssloaders::withSpinner(plotOutput("corrChart", height = "70vh", width = "100%"))),
+                           column(2,
+                                  # materialSwitch(inputId = "tglHeatmap", label = "Toggle heatmap",status = "danger"),
+                                  # prettyToggle(
+                                  #   inputId = "tglHeatmap",
+                                  #   label_on = "Heatmap",
+                                  #   label_off = "Ellipse",
+                                  #   value = FALSE,
+                                  #   shape = "curve"
+                                  # )
+                                  # Radio buttons for method
+                                  radioButtons("method", "Method:", choices = c("ellipse", "color"), selected = "ellipse"),
+
+                                  # Radio buttons for order
+                                  radioButtons("order", "Order:", choices = c("FPC", "alphabet"), selected = "FPC"),
+
+                                  # Slider for text size
+                                  sliderInput("tl_cex", "Text Size:", min = 0.5, max = 2, value = 0.8, step = 0.1),
+
+                                  # Radio buttons for plot type
+                                  radioButtons("type", "Type:", choices = c("full", "upper"), selected = "upper"),
+
+                                  # Checkbox for diagonal
+                                  checkboxInput("diag", "Show Diagonal", value = FALSE),
+
+                                  # Checkbox for adding coefficient colors
+                                  checkboxInput("addCoef_col", "Show Coefficients", value = TRUE),
+
+                                  # Dropdown for coefficient color
+                                  selectInput("coef_color", "Coefficient Color:", choices = c("black", "blue", "red"), selected = "black"),
+
+                                  # Slider for text rotation
+                                  sliderInput("tl_srt", "Text Rotation:", min = 0, max = 90, value = 45),
+
+                                  # Radio buttons for background color
+                                  radioButtons("bg", "Background Color:", choices = c("grey", "white"), selected = "white"),
+
+                                  # Download button to export plot
+                                  downloadButton("downloadPlot", "Download Plot")
+                                  
+                                  )
+                         ),
+                         fluidRow(
+                           column(12, div(style = "float:right",
+                                          actionButton("prev1", "Previous", class = "green-button"),
+                                          actionButton("next2", "Next", class = "green-button"))))
+                    ),
+                    tabPanel("ANOVA", value = "anova",
+                             fluidRow(
+                               column(12, div(style = "float:right",
+                                              actionButton("prev2", "Previous", class = "green-button"))))
+                    )
+                ),
         ),
         
         tabItem(tabName = "pdfview",
-                fluidRow(column(12, uiOutput("pdfview")))
+                fluidRow(column(12, shinycssloaders::withSpinner(uiOutput("pdfview"))))
+        ),
+        
+        tabItem(tabName = "codebookview",
+                fluidRow(column(12, shinycssloaders::withSpinner(uiOutput("codebookview"))))
         ),
         
         tabItem(tabName = "EDA",
@@ -211,8 +275,8 @@ shinyUI(fluidPage(
                   class = "green-button",
                   size = "extra-small"
                 ),
-                fluidRow(column(6,uiOutput("DTchoice"))),
-                fluidRow(column(12,DT::dataTableOutput(outputId = "Table"))),
+                fluidRow(column(6, uiOutput("DTchoice"))),
+                fluidRow(column(12, DT::dataTableOutput(outputId = "Table"))),
                 bsPopover(
                   id = "q1",
                   title = "Tidy data",
@@ -233,67 +297,69 @@ shinyUI(fluidPage(
                 checkboxInput(inputId = "cluster",
                               label = "Cluster missingness",
                               value = FALSE),
-                fluidRow(column(12, plotOutput("Missing", height = "90vh")))
+                fluidRow(column(12, shinycssloaders::withSpinner(plotOutput("Missing", height = "90vh"))))
         ),
         
         tabItem(tabName = "vis_miss_sampled",
-                # actionButton("countries_tbl", "Countries View"),
-                # actionButton("indiv_tbl", "Individual answers View"),
                 checkboxInput(inputId = "sampled_cluster",
                               label = "Cluster missingness",
                               value = FALSE),
-                fluidRow(column(12, plotOutput("Missing_sampled", height = "90vh")))
+                fluidRow(column(12, shinycssloaders::withSpinner(plotOutput("Missing_sampled", height = "90vh"))))
         ),
         
         tabItem(tabName ="withinCountry",
-                fluidRow(column(6, uiOutput("wc_country_sel"))),
-                fluidRow(column(6, tableOutput("c_total_obs"))),
+                fluidRow(
+                  column(6, uiOutput("wc_country_sel"))
+                  ),
+                fluidRow(
+                  column(6, shinycssloaders::withSpinner(tableOutput("c_total_obs")))
+                  ),
                 fluidRow(
                   column(6, uiOutput("wc_qA")),
                   column(6, uiOutput("wc_qB"))
                 ),
                 fluidRow(
-                  column(6, tableOutput("stats_wc_qA")),
-                  column(6, tableOutput("stats_wc_qB"))
+                  column(6, shinycssloaders::withSpinner(tableOutput("stats_wc_qA"))),
+                  column(6, shinycssloaders::withSpinner(tableOutput("stats_wc_qB")))
                 ),
                 fluidRow(
-                  column(6, plotOutput("plot_wc_qA_levels")),
-                  column(6, plotOutput("plot_wc_qB_levels"))
+                  column(6, shinycssloaders::withSpinner(plotOutput("plot_wc_qA_levels"))),
+                  column(6, shinycssloaders::withSpinner(plotOutput("plot_wc_qB_levels")))
                 ),
                 tags$br(),
                 fluidRow(
-                  column(6, plotOutput("plot_wc_qA_prop")),
-                  column(6, plotOutput("plot_wc_qB_prop"))
+                  column(6, shinycssloaders::withSpinner(plotOutput("plot_wc_qA_prop"))),
+                  column(6, shinycssloaders::withSpinner(plotOutput("plot_wc_qB_prop")))
                 ),
                 tags$br(),
-                fluidRow(column(12, plotOutput("test_output_plot"))),
-                fluidRow(column(12, tableOutput("test_output_table"))),
+                fluidRow(column(12, shinycssloaders::withSpinner(plotOutput("test_output_plot")))),
+                fluidRow(column(12, shinycssloaders::withSpinner(tableOutput("test_output_table")))),
                 fluidRow(column(12, textOutput("test_output_stats")))
                 
         ),
         
         tabItem(tabName = "betweenCountries",
-                fluidRow(column(6,uiOutput("bc_question"))),
+                fluidRow(column(6, uiOutput("bc_question"))),
                 fluidRow(
-                  column(6,uiOutput("bc_countryA")),
-                  column(6,uiOutput("bc_countryB"))
+                  column(6, uiOutput("bc_countryA")),
+                  column(6, uiOutput("bc_countryB"))
                 ),
                 fluidRow(
-                  column(6,tableOutput("cA_total_obs")),
-                  column(6,tableOutput("cB_total_obs"))
+                  column(6, shinycssloaders::withSpinner(tableOutput("cA_total_obs"))),
+                  column(6, shinycssloaders::withSpinner(tableOutput("cB_total_obs")))
                 ),
                 fluidRow(
-                  column(6,tableOutput("stats_bc_cA")),
-                  column(6,tableOutput("stats_bc_cB"))
+                  column(6, shinycssloaders::withSpinner(tableOutput("stats_bc_cA"))),
+                  column(6, shinycssloaders::withSpinner(tableOutput("stats_bc_cB")))
                 ),
                 fluidRow(
-                  column(6,plotOutput("plot_bc_qcA_levels")),
-                  column(6,plotOutput("plot_bc_qcB_levels"))
+                  column(6, shinycssloaders::withSpinner(plotOutput("plot_bc_qcA_levels"))),
+                  column(6, shinycssloaders::withSpinner(plotOutput("plot_bc_qcB_levels")))
                 ),
                 tags$br(),
                 fluidRow(
-                  column(6,plotOutput("plot_bc_qA_prop")),
-                  column(6,plotOutput("plot_bc_qB_prop"))
+                  column(6, shinycssloaders::withSpinner(plotOutput("plot_bc_qA_prop"))),
+                  column(6, shinycssloaders::withSpinner(plotOutput("plot_bc_qB_prop")))
                 )
         ),
         

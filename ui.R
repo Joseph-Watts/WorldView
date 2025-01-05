@@ -212,35 +212,34 @@ shinyUI(fluidPage(
                                   #   shape = "curve"
                                   # )
                                   # Radio buttons for method
-                                  radioButtons("method", "Method:", choices = c("ellipse", "color"), selected = "ellipse"),
+                                  radioButtons("corr_method", "Method:", choices = c("ellipse", "color"), selected = "ellipse"),
 
                                   # Radio buttons for order
-                                  radioButtons("order", "Order:", choices = c("FPC", "alphabet"), selected = "FPC"),
+                                  radioButtons("corr_order", "Order:", choices = c("FPC", "alphabet", "AOE", "hclust"), selected = "FPC"),
 
                                   # Slider for text size
-                                  sliderInput("tl_cex", "Text Size:", min = 0.5, max = 2, value = 0.8, step = 0.1),
+                                  sliderInput("corr_tl_cex", "Text Size:", min = 0.5, max = 2, value = 0.8, step = 0.1),
 
                                   # Radio buttons for plot type
-                                  radioButtons("type", "Type:", choices = c("full", "upper"), selected = "upper"),
+                                  radioButtons("corr_type", "Type:", choices = c("full", "upper"), selected = "upper"),
 
                                   # Checkbox for diagonal
-                                  checkboxInput("diag", "Show Diagonal", value = FALSE),
+                                  checkboxInput("corr_diag", "Show Diagonal", value = FALSE),
 
                                   # Checkbox for adding coefficient colors
-                                  checkboxInput("addCoef_col", "Show Coefficients", value = TRUE),
+                                  checkboxInput("corr_addCoef_col", "Show Coefficients", value = TRUE),
 
                                   # Dropdown for coefficient color
-                                  selectInput("coef_color", "Coefficient Color:", choices = c("black", "blue", "red"), selected = "black"),
+                                  selectInput("corr_coef_color", "Coefficient Color:", choices = c("black", "blue", "red"), selected = "black"),
 
                                   # Slider for text rotation
-                                  sliderInput("tl_srt", "Text Rotation:", min = 0, max = 90, value = 45),
+                                  sliderInput("corr_tl_srt", "Text Rotation:", min = 0, max = 90, value = 45),
 
                                   # Radio buttons for background color
-                                  radioButtons("bg", "Background Color:", choices = c("grey", "white"), selected = "white"),
+                                  radioButtons("corr_bg", "Background Color:", choices = c("darkgrey", "white"), selected = "white"),
 
                                   # Download button to export plot
-                                  downloadButton("downloadPlot", "Download Plot")
-                                  
+                                  downloadButton("corr_downloadPlot", "Download Plot")
                                   )
                          ),
                          fluidRow(
@@ -249,6 +248,12 @@ shinyUI(fluidPage(
                                           actionButton("next2", "Next", class = "green-button"))))
                     ),
                     tabPanel("ANOVA", value = "anova",
+                             fluidRow(
+                               column(12, shinycssloaders::withSpinner(plotOutput("anovaPlot", height = "70vh", width = "100%")))
+                             ),
+                             fluidRow(
+                               column(12, shinycssloaders::withSpinner(verbatimTextOutput("anovaSummary")))
+                             ),
                              fluidRow(
                                column(12, div(style = "float:right",
                                               actionButton("prev2", "Previous", class = "green-button"))))

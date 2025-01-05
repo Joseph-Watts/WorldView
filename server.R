@@ -627,7 +627,7 @@ shinyServer(
         )
       )
     })
-      
+    
     # Render topics to be selected by user
     output$pickTopic <- renderUI({
       pickerInput(
@@ -655,6 +655,7 @@ shinyServer(
           category
         }
       })
+      
       grouped <- grouped[names(grouped) %in% input$pickTopic]
       
       # Render questions user can select
@@ -705,6 +706,7 @@ shinyServer(
         )
     })
     
+    
     ########################
     # Corrplot chart
     ########################
@@ -733,44 +735,113 @@ shinyServer(
         output$corrChart <- renderPlot({
           corrplot::corrplot(
             corr_matrix,
-            method = input$method,
-            order = input$order,
-            tl.cex = input$tl_cex,
-            type = input$type,
-            diag = input$diag,
-            addCoef.col = if (input$addCoef_col) input$coef_color else NULL,
-            tl.srt = input$tl_srt,
-            bg = input$bg
+            method = input$corr_method,
+            order = input$corr_order,
+            tl.cex = input$corr_tl_cex,
+            type = input$corr_type,
+            diag = input$corr_diag,
+            addCoef.col = if (input$corr_addCoef_col) input$corr_coef_color else NULL,
+            tl.srt = input$corr_tl_srt,
+            bg = input$corr_bg
           )
         })
       } else {
         output$corrChart <- renderPlot({
           plot(1, 1, main = "Not enough data for correlation plot", type = "n") # Placeholder if not enough data
         })
-      }  
+      }
+      
+      output$corr_downloadPlot <- downloadHandler(
+        filename = function() {
+          paste("corrplot", Sys.Date(), ".png", sep = "")
+        },
+        content = function(file) {
+          png(file, width = 800, height = 600) # Save as PNG
+          corrplot::corrplot(
+            corr_matrix,
+            method = input$corr_method,
+            order = input$corr_order,
+            tl.cex = input$corr_tl_cex,
+            type = input$corr_type,
+            diag = input$corr_diag,
+            addCoef.col = if (input$corr_addCoef_col) input$corr_coef_color else NULL,
+            tl.srt = input$corr_tl_srt,
+            bg = input$corr_bg
+          )
+          dev.off()
+        }
+      )
       
     })
     
-    output$downloadPlot <- downloadHandler(
-      filename = function() {
-        paste("corrplot", Sys.Date(), ".png", sep = "")
-      },
-      content = function(file) {
-        png(file, width = 800, height = 600) # Save as PNG
-        corrplot(
-          corr_matrix,
-          method = input$method,
-          order = input$order,
-          tl.cex = input$tl_cex,
-          type = input$type,
-          diag = input$diag,
-          addCoef.col = if (input$addCoef_col) input$coef_color else NULL,
-          tl.srt = input$tl_srt,
-          bg = input$bg
-        )
-        dev.off()
+    
+    ########################
+    # ANOVA
+    ########################
+    
+    anovaData <- reactive({
+      req(input$pickRegion, input$pickQuestion)
+      d <- indiv_ordinal %>%
+        filter(B_COUNTRY %in% input$pickRegion,
+               Question %in% input$pickQuestion) # ajustar para selecionar todas as COLUNAS de questoes ao inves de linhas de questoes que o gepeto sugeriu
+      d
+    })
+    
+    anovaResults <- reactive({
+      data <- anovaData()
+      if (nrow(data) > 0) {
+        aov(Response ~ Country * Question, data = data)
+      } else {
+        NULL
       }
-    )
+    })
+    
+    significanceTests <- reactive({
+      data <- anovaData()
+      if (nrow(data) > 0) {
+        pairwise.t.test(data$Response, interaction(data$Country, data$Question), p.adjust.method = "bonferroni")
+      } else {
+        NULL
+      }
+    })
+    
+    output$anovaSummary <- renderPrint({
+      anova_model <- anovaResults()
+      if (!is.null(anova_model)) {
+        summary(anova_model)
+      } else {
+        "Not enough data for ANOVA."
+      }
+    })
+    
+    output$anovaPlot <- renderPlot({
+      data <- anovaData()
+      sig_tests <- significanceTests()
+      
+      if (nrow(data) > 0 && !is.null(sig_tests)) {
+        sig_levels <- sig_tests$p.value
+        comparisons <- as.data.frame(t(combn(unique(interaction(data$Country, data$Question)), 2)))
+        colnames(comparisons) <- c("group1", "group2")
+        comparisons$p_value <- mapply(function(g1, g2) sig_levels[g1, g2], comparisons$group1, comparisons$group2)
+        
+        # Filter for significant comparisons (optional)
+        significant_comparisons <- comparisons %>%
+          filter(!is.na(p_value) & p_value < 0.05)
+        
+        ggplot(data, aes(x = Country, y = Response, fill = Question)) +
+          geom_boxplot() +
+          geom_signif(comparisons = significant_comparisons[, c("group1", "group2")],
+                      map_signif_level = TRUE) +
+          labs(title = "Two-Way ANOVA Plot with Significance",
+               x = "Country",
+               y = "Response") +
+          theme_minimal()
+      } else {
+        ggplot() +
+          labs(title = "No Data Available for Selected Inputs") +
+          theme_void()
+      }
+    })
     
     ########################
     # Control Buttons
@@ -796,6 +867,7 @@ shinyServer(
                         selected = "correlations")
     })
     
+    
     ########################
     # Missing Data chart
     ########################
@@ -820,6 +892,5 @@ shinyServer(
     output$textTest <- renderPrint({
       cat(paste("AQUI DESGRACA!"))
     })
-    
     
   }) # end server

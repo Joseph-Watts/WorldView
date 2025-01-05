@@ -6,7 +6,8 @@ library(shiny)
 
 required_packages <- c('collapsibleTree', 'DT', 'ggplot2', 'gt', 'gtsummary', 'leaflet', 'leaflet.extras', 'naniar',
                        'readxl', 'rnaturalearth', 'rvest', 'sf', 'shinyBS', 'shinycssloaders', 'shinydashboard',
-                       'shinyWidgets', 'tidyverse', 'tigris', 'vcd', 'dplyr', 'recipes', 'corrgram', 'corrplot')
+                       'shinyWidgets', 'tidyverse', 'tigris', 'vcd', 'dplyr', 'recipes', 'corrgram', 'corrplot',
+                       'ggpubr', 'rstatix')
 
 for (packageName in required_packages) {
   if (!requireNamespace(packageName, quietly = TRUE)) {
@@ -38,6 +39,9 @@ library(recipes)
 library(GGally)
 library(corrgram)
 library(corrplot)
+library(ggpubr)
+library(rstatix)
+
 
 
 # ###############################################################
@@ -78,7 +82,7 @@ indiv_ordinal <- as.data.frame(lapply(indiv_ordinal, function(col) {
 ignored_questions <- c("Q223", "Q266", "Q267", "Q268", "Q272", "Q290")
 
 # Questions that doesn't fit the translation between nominal to numeric
-
+# TBD
 
 
 # transformation of non-ordinal data into numerical
@@ -141,8 +145,9 @@ indiv_ordinal <- indiv_ordinal[, setdiff(names(indiv_ordinal), ignored_questions
   )) %>% ######################################  ######################################
   dplyr::mutate(across(
     c(Q149, Q150),
-    ~ case_when(. == "Freedom" ~ 1, . == "Equality" |
-                  . == "Security" ~ 0, TRUE ~ NA_real_)
+    ~ case_when(. == "Freedom" ~ 1,
+                . == "Equality" | . == "Security" ~ 0, 
+                TRUE ~ NA_real_)
   )) %>% ######################################  ######################################
   dplyr::mutate(across(
     c(Q152, Q153),
@@ -361,7 +366,7 @@ factor_info <- sapply(indiv_ordinal, function(x) {
 # length(factor_info)
 
 
-
+# Print all factors for each factor variable
 print_factor_levels <- function(data) {
   # Loop through columns of the data frame
   factor_columns <- names(data)[sapply(data, is.factor)]  # Select only factor columns

@@ -62,6 +62,16 @@ shinyServer(
       d.Qs
     })
     
+    # Create Question text List and their 'ID'
+    get_questions_List <- reactive({
+      d <- orig_codebook_data[, c(1, 2, 10)]
+      d <- split(d, d$Section)
+      c <- lapply(d, function(group) {
+        setNames(group$Col_ID, group$ColLab)
+        })
+      c
+    }) # TODO get the list ordered by 'Col_ID' not by 'Section'
+    
     # Fetch just sections
     get_sectionsOrd <- reactive({
       var_info <- get_var_info()
@@ -84,9 +94,6 @@ shinyServer(
     }) # this function can be copied to get countries
     
     
-    
-    
-    
     ########################
     # PDF & CODEBOOK VIEW
     ########################
@@ -102,7 +109,6 @@ shinyServer(
       tags$iframe(style = "height:100vh; width:100%; scrolling=yes",
                   src = "F00011055-WVS7_Codebook_Variables_report_V6.0.pdf")
     })
-    
     
     
     ########################
@@ -128,12 +134,7 @@ shinyServer(
       }
       DT::datatable(data = DTdata, options = list(scrollX = TRUE))
     })
-    
 
-    
-    
-    
-    
     
     ########################
     # Within country 
@@ -381,6 +382,7 @@ shinyServer(
     
     ###########################################################################
  
+    
     ########################
     # Between Countries
     ########################
@@ -503,8 +505,6 @@ shinyServer(
         ggtitle("Factor level proportions") +
         labs(x = input$bc_sel_q, y = "proportion")
     })
-    
-    
     
     #' ---
     #' Global
@@ -643,7 +643,8 @@ shinyServer(
     })
     
     observeEvent(input$pickTopic, {
-      grouped <- get_groupedQs_I()
+      grouped <- get_questions_List()
+      # grouped <- get_groupedQs_I()
       grouped <- lapply(grouped, function(category) {
         # Check if the category is a character vector
         if (is.character(category)) {
@@ -664,6 +665,7 @@ shinyServer(
           inputId = "pickQuestion",
           label = "Select up to 10 questions",
           choices = grouped,
+          # choices = setNames(WVS7_question_list$Question_Num, WVS7_question_list$Question),
           multiple = TRUE,
           options = list(
             `live-search` = TRUE,
@@ -712,12 +714,18 @@ shinyServer(
     ########################
     
     observeEvent(input$pickQuestion, {
-      req(input$pickQuestion) # Ensure that pickQuestion is available
+      req(input$pickQuestion)
       
-      selected_countries <- if (length(input$pickRegion) < 0) input$pickRegion else indiv_ordinal$B_COUNTRY
-      xt_pickQ <- str_extract(input$pickQuestion, "^Q\\d+")
+      if (length(input$pickRegion) > 0) {
+        selected_countries <- input$pickRegion
+      } else {
+        selected_countries <- levels(indiv_ordinal$B_COUNTRY)
+      }
+      # browser()
+      xt_pickQ <- str_extract(input$pickQuestion, "^(Q|E|F|G|H)\\d+") # TODO need to check error occurring when the last section group is selected
       
       # Filter and select the data based on user inputs
+      # charts_data <- indiv_ordinal[indiv_ordinal$B_COUNTRY %in% selected_countries, input$pickQuestion]
       charts_data <- indiv_ordinal %>%
         dplyr::filter(B_COUNTRY %in% selected_countries) %>%
         dplyr::select(all_of(xt_pickQ))
@@ -780,69 +788,140 @@ shinyServer(
     ########################
     
     anovaData <- reactive({
-      req(input$pickRegion, input$pickQuestion)
-      d <- indiv_ordinal %>%
-        filter(B_COUNTRY %in% input$pickRegion,
-               Question %in% input$pickQuestion) # ajustar para selecionar todas as COLUNAS de questoes ao inves de linhas de questoes que o gepeto sugeriu
+      d <- indiv_ordinal[indiv_ordinal$B_COUNTRY %in% input$pickRegion, c("B_COUNTRY", input$pickQuestion)]
       d
     })
     
-    anovaResults <- reactive({
-      data <- anovaData()
-      if (nrow(data) > 0) {
-        aov(Response ~ Country * Question, data = data)
+    significanceTest <- reactive({
+      d <- anovaData()
+      if (nrow(d) > 0) {
+        for (col_index in 2:ncol(d)) {
+          pairwise.t.test(d[, col_index], interaction(d$B_COUNTRY, d[, col_index]), p.adjust.method = "bonferroni")
+        }
       } else {
         NULL
       }
     })
     
-    significanceTests <- reactive({
-      data <- anovaData()
-      if (nrow(data) > 0) {
-        pairwise.t.test(data$Response, interaction(data$Country, data$Question), p.adjust.method = "bonferroni")
-      } else {
-        NULL
+    anovaResults <- reactive({
+      d <- anovaData()
+      for (col_index in 2:ncol(d)) {
+        anv <- aov(d[, col_index] ~ B_COUNTRY, data = d)
       }
+      anv
+    })
+    
+    output$modelSummary <- renderPrint({
+      d <- anovaData()
+      mdl <- lm(B_COUNTRY ~ ., data = d)
+      mdl
     })
     
     output$anovaSummary <- renderPrint({
-      anova_model <- anovaResults()
-      if (!is.null(anova_model)) {
-        summary(anova_model)
-      } else {
-        "Not enough data for ANOVA."
-      }
-    })
-    
-    output$anovaPlot <- renderPlot({
-      data <- anovaData()
-      sig_tests <- significanceTests()
+      # anova_model <- anovaResults()
       
-      if (nrow(data) > 0 && !is.null(sig_tests)) {
-        sig_levels <- sig_tests$p.value
-        comparisons <- as.data.frame(t(combn(unique(interaction(data$Country, data$Question)), 2)))
-        colnames(comparisons) <- c("group1", "group2")
-        comparisons$p_value <- mapply(function(g1, g2) sig_levels[g1, g2], comparisons$group1, comparisons$group2)
-        
-        # Filter for significant comparisons (optional)
-        significant_comparisons <- comparisons %>%
-          filter(!is.na(p_value) & p_value < 0.05)
-        
-        ggplot(data, aes(x = Country, y = Response, fill = Question)) +
-          geom_boxplot() +
-          geom_signif(comparisons = significant_comparisons[, c("group1", "group2")],
-                      map_signif_level = TRUE) +
-          labs(title = "Two-Way ANOVA Plot with Significance",
-               x = "Country",
-               y = "Response") +
-          theme_minimal()
-      } else {
-        ggplot() +
-          labs(title = "No Data Available for Selected Inputs") +
-          theme_void()
+      d <- anovaData()
+      for (col_index in 2:ncol(d)) {
+        anv <- aov(d[, col_index] ~ B_COUNTRY, data = d)
+        print(anv)
       }
+      anv
+      # if (!is.null(anova_model)) {
+      #
+      # } else {
+      #   "Not enough data for ANOVA."
+      # }
     })
     
+    output$anovaBoxplot <- renderPlot({
+      data <- anovaData()
+      # sig_tests <- significanceTests()
+      
+      # if (nrow(data) > 0 && !is.null(sig_tests)) {
+      #   sig_levels <- sig_tests$p.value
+      #   comparisons <- as.data.frame(t(combn(unique(interaction(data$Country, data$Question)), 2)))
+      #   colnames(comparisons) <- c("group1", "group2")
+      #   comparisons$p_value <- mapply(function(g1, g2) sig_levels[g1, g2], comparisons$group1, comparisons$group2)
+      
+      # # Filter for significant comparisons (optional)
+      # significant_comparisons <- comparisons %>%
+      #   filter(!is.na(p_value) & p_value < 0.05)
+      
+      if (length(input$pickRegion) > 0) {
+        selected_countries <- input$pickRegion
+      } else {
+        output$anovaBoxplot <- renderPlot({
+          plot(1, 1, main = "Boxplot chart can't be calculated with the current country selection. Please select up to a maximum of 6.", type = "n") # Placeholder if not enough data
+        })
+      }
+      
+      bxplt <- data |>
+        pivot_longer(cols = starts_with(c("Q", "E", "F_", "G_", "H_")),
+                     names_to = "question",
+                     values_to = "response")
+      
+      ggplot(bxplt, aes(x = question, y = response, fill = B_COUNTRY)) +
+        geom_boxplot(notch = input$bxplt_notch) +
+        labs(x = "Question", y = "Responses", title = "Distribution of Question Responses grouped by Country") +
+        scale_fill_viridis(discrete = TRUE, option = "D") +  # Colorblind-friendly palette
+        theme_minimal() +
+        theme(
+          axis.title = element_text(size = 14),
+          # Resize axis titles
+          axis.text = element_text(size = 12),
+          # Resize axis text
+          plot.title = element_text(size = 16, face = "bold"),
+          # Resize plot title
+          legend.position = "bottom"  # Move legend to bottom
+        )
+    }) # TODO include labeling with explanations about colouring and outliers
+    
+    # output$anovaPlot <- renderPlot({
+    #   data <- anovaData()
+    #   sig_tests <- significanceTests()
+    #   
+    # if (nrow(data) > 0 && !is.null(sig_tests)) {
+    #   sig_levels <- sig_tests$p.value
+    #   comparisons <- as.data.frame(t(combn(unique(interaction(data$Country, data$Question)), 2)))
+    #   colnames(comparisons) <- c("group1", "group2")
+    #   comparisons$p_value <- mapply(function(g1, g2) sig_levels[g1, g2], comparisons$group1, comparisons$group2)
+    #     
+    # # Filter for significant comparisons (optional)
+    # significant_comparisons <- comparisons %>%
+    #   filter(!is.na(p_value) & p_value < 0.05)
+    #     
+    #     ggplot(data, aes(x = Country, y = Response, fill = Question)) +
+    #       geom_boxplot() +
+    #       geom_signif(comparisons = significant_comparisons[, c("group1", "group2")],
+    #                   map_signif_level = TRUE) +
+    #       labs(title = "Two-Way ANOVA Plot with Significance",
+    #            x = "Country",
+    #            y = "Response") +
+    #       theme_minimal()
+    #   } else {
+    #     ggplot() +
+    #       labs(title = "No Data Available for Selected Inputs") +
+    #       theme_void()
+    #   }
+    # })
+    
+    
+    ####
+    # colour pallets to be used
+    
+    # paletteer_dynamic("cartography::green.pal", 20)
+    # paletteer_c("ggthemes::Classic Area Green", 30)
+    # paletteer_c("grDevices::Greens", 30)
+    # paletteer_d("ggsci::green_material")
+    # paletteer_d("ggthemes::calc")
+    # paletteer_d("ggthemes::gdoc")
+    # paletteer_d("ggthemes::Color_Blind")
+    # paletteer_d("ggthemes::Classic_10_Light")
+    # paletteer_d("ggthemes::Classic_10_Medium")
+    # paletteer_d("ggthemes::excel_Droplet")
+    
+    ###
+
     ########################
     # Control Buttons
     ########################

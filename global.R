@@ -7,7 +7,7 @@ library(shiny)
 required_packages <- c('collapsibleTree', 'DT', 'ggplot2', 'gt', 'gtsummary', 'leaflet', 'leaflet.extras', 'naniar',
                        'readxl', 'rnaturalearth', 'rvest', 'sf', 'shinyBS', 'shinycssloaders', 'shinydashboard',
                        'shinyWidgets', 'tidyverse', 'tigris', 'vcd', 'dplyr', 'recipes', 'corrgram', 'corrplot',
-                       'ggpubr', 'rstatix')
+                       'ggpubr', 'rstatix', 'broom', 'AICcmodavg', 'viridis')
 
 for (packageName in required_packages) {
   if (!requireNamespace(packageName, quietly = TRUE)) {
@@ -33,14 +33,17 @@ library(shinydashboard)
 library(shinyWidgets)
 library(tidyverse)
 library(tigris)
-library(vcd)
+library(vcd) # double check to exclude
 library(dplyr)
-library(recipes)
+library(recipes) # double check to exclude
 library(GGally)
 library(corrgram)
 library(corrplot)
 library(ggpubr)
 library(rstatix)
+library(broom)
+library(AICcmodavg)
+library(viridis)
 
 
 
@@ -55,7 +58,6 @@ library(rstatix)
 # setting seed for reproducibility
 set.seed(20241211)
 
-
 # load original data
 orig_indiv_data <- readRDS("WVS_Dataset/WVS7_Individual.rds")
 orig_country_data <- readRDS("WVS_Dataset/WVS7_Country.rds")
@@ -67,9 +69,13 @@ orig_UNSD_data <- read_excel("WVS_Dataset/UNSD — Methodology.xlsx")
 WVS7_part_countries <- orig_country_data[c(1:2)]
 UNSD_countries_list <- orig_UNSD_data[c(3:12)]
 
+# countries and questions simple lists
+WVS7_countries_list <- levels(orig_indiv_data$B_COUNTRY)
+# WVS7_question_list <- data.frame(Question_Num = sub("[-].*", "", d.Qs), Question = d.Qs)
+
+
 # transform into ordinal
-indiv_ordinal <- orig_indiv_data
-indiv_ordinal <- as.data.frame(lapply(indiv_ordinal, function(col) {
+indiv_ordinal <- as.data.frame(lapply(orig_indiv_data, function(col) {
   if (is.ordered(col)) {
     as.numeric(col)
   } else {
@@ -77,8 +83,10 @@ indiv_ordinal <- as.data.frame(lapply(indiv_ordinal, function(col) {
   }
 }))
 
+
+
+
 # Ignored questions (given the number of factors they have or any other condition)
-# Q223, Q266, Q267, Q268, Q272 and Q290
 ignored_questions <- c("Q223", "Q266", "Q267", "Q268", "Q272", "Q290")
 
 # Questions that doesn't fit the translation between nominal to numeric
@@ -320,7 +328,7 @@ indiv_ordinal <- indiv_ordinal[, setdiff(names(indiv_ordinal), ignored_questions
     )
   ) %>% ######################################  ######################################
   dplyr::mutate(H_URBRURAL = case_when(H_URBRURAL == "Urban" ~ 1, H_URBRURAL == "Rural" ~ 0, TRUE ~ NA_real_))
-
+# faltam 2 questoes pra ajustar
 
 
 # #########################
@@ -344,6 +352,7 @@ picker_country_list <- WVS7_part_countries %>%
   group_by(`Region Name`) %>%
   summarise(Countries = list(`B_COUNTRY`), .groups = "drop") %>%
   deframe()
+
 
 
 #####################

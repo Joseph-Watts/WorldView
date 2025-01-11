@@ -249,7 +249,14 @@ shinyUI(fluidPage(
                     ),
                     tabPanel("ANOVA", value = "anova",
                              fluidRow(
-                               column(12, shinycssloaders::withSpinner(plotOutput("anovaPlot", height = "70vh", width = "100%")))
+                               column(10, shinycssloaders::withSpinner(plotOutput("anovaBoxplot", height = "70vh", width = "100%"))),
+                               column(2, checkboxInput("bxplt_notch", "Show Notches", value = FALSE))
+                             ),
+                             # fluidRow(
+                             #   column(12, shinycssloaders::withSpinner(plotOutput("anovaChart")))
+                             # ),
+                             fluidRow(
+                               column(12, shinycssloaders::withSpinner(verbatimTextOutput("modelSummary")))
                              ),
                              fluidRow(
                                column(12, shinycssloaders::withSpinner(verbatimTextOutput("anovaSummary")))

@@ -44,20 +44,21 @@ shinyUI(fluidPage(
   includeCSS("www/style.css"),
   
   # load google analytics script
-  tags$head(includeScript("www/google-analytics-bioNPS.js"),
+  tags$head(includeScript("www/google-analytics.js")),
   
   # remove shiny "red" warning messages on GUI
   tags$style(
     type = "text/css",
     ".shiny-output-error { visibility: hidden; }",
     ".shiny-output-error:before { visibility: hidden; }",
-    HTML("
+    HTML(
+      "
       .blue-button {
                     background-color: #33aaff !important;
                     color: white !important;
                     border-color: #33aaff !important;
       }
-      
+
       .green-button {
                     background-color: #00a65a !important;
                     color: white !important;
@@ -68,7 +69,8 @@ shinyUI(fluidPage(
                     background-color: #00a65a !important;
                     color: white !important;
       }
-    "))
+    "
+    )
   ),
   
   dashboardPage(
@@ -120,14 +122,8 @@ shinyUI(fluidPage(
                          ),
                          
                          menuSubItem(
-                           "Missing Data Visualization",
+                           "Missing Data Visualizations",
                            tabName = "vis_miss",
-                           icon = icon("warning-sign", lib = "glyphicon")
-                         ),
-                         
-                         menuSubItem(
-                           "Missing Data Visualization Sampled",
-                           tabName = "vis_miss_sampled",
                            icon = icon("warning-sign", lib = "glyphicon")
                          )
                        ),
@@ -161,6 +157,12 @@ shinyUI(fluidPage(
                          "FAQ",
                          tabName = "faq",
                          icon = icon("question-sign", lib = "glyphicon")
+                       ),
+                       
+                       menuItem(
+                         "About the team",
+                         tabName = "dummy",
+                         icon = icon("user", lib = "glyphicon")
                        )
                        
                      ) # end sidebarMenu
@@ -175,8 +177,67 @@ shinyUI(fluidPage(
         ),
         
         tabItem(tabName = "home",
-                # home section
                 includeMarkdown("www/home.md")
+        ),
+        
+        tabItem(tabName = "pdfview",
+                fluidRow(column(12, shinycssloaders::withSpinner(uiOutput("pdfview"))))
+        ),
+        
+        tabItem(tabName = "codebookview",
+                fluidRow(column(12, shinycssloaders::withSpinner(uiOutput("codebookview"))))
+        ),
+        
+        tabItem(tabName = "EDA",
+                includeMarkdown("www/DTable.md"),
+                tags$style(type = "text/css", "#q1 {vertical-align: top;}"),
+                # bsButton(
+                #   "q1",
+                #   label = "",
+                #   icon = icon("question"),
+                #   style = "info",
+                #   class = "green-button",
+                #   size = "extra-small"
+                # ),
+                fluidRow(column(6, uiOutput("DTchoice"))),
+                fluidRow(column(12, DT::dataTableOutput(outputId = "Table"))),
+                # bsPopover(
+                #   id = "q1",
+                #   title = "Tidy data",
+                #   content = paste0(
+                #     "You should read the ",
+                #     a("tidy data paper", href = "http://vita.had.co.nz/papers/tidy-data.pdf", target =
+                #         "_blank")
+                #   ),
+                #   placement = "top",
+                #   trigger = "focus",
+                #   options = list(container = "body")
+                # )
+        ),
+        
+        tabItem(tabName = "vis_miss",
+                includeMarkdown("www/miss_vars.md"),
+                
+                tabsetPanel(id = "MissingViews", type = "pills",
+                            tabPanel("Top 15 Missing", value = "top_miss",
+                                     fluidRow(column(12, shinycssloaders::withSpinner(plotOutput("Top_miss_indiv", height = "60vh")))),
+                                     fluidRow(column(12, shinycssloaders::withSpinner(plotOutput("Top_miss_country", height = "60vh"))))
+                            ),
+                            
+                            tabPanel("Missing data from Individual Responses", value = "indiv_miss",
+                                     checkboxInput(inputId = "cluster_indiv",
+                                                   label = "Cluster missingness",
+                                                   value = FALSE),
+                                     fluidRow(column(12, shinycssloaders::withSpinner(plotOutput("Indiv_missing_with_ratio", height = "85vh"))))
+                            ),
+                            
+                            tabPanel("Missing data from Countries responses", value = "countries_miss",
+                                     checkboxInput(inputId = "cluster_ctry",
+                                                   label = "Cluster missingness",
+                                                   value = FALSE),
+                                     fluidRow(column(12, shinycssloaders::withSpinner(plotOutput("Missing", height = "85vh"))))
+                            )
+                )
         ),
         
         tabItem(tabName = "map",
@@ -185,7 +246,6 @@ shinyUI(fluidPage(
                 tabsetPanel(id = "mapTabs", type = "pills",
                     tabPanel("Map view", value = "map_view",
                          fluidRow(
-                           # verbatimTextOutput(outputId = "textTest")
                            column(3, uiOutput("pickRegion"))
                          ),
                          fluidRow(
@@ -265,58 +325,7 @@ shinyUI(fluidPage(
                                column(12, div(style = "float:right",
                                               actionButton("prev2", "Previous", class = "green-button"))))
                     )
-                ),
-        ),
-        
-        tabItem(tabName = "pdfview",
-                fluidRow(column(12, shinycssloaders::withSpinner(uiOutput("pdfview"))))
-        ),
-        
-        tabItem(tabName = "codebookview",
-                fluidRow(column(12, shinycssloaders::withSpinner(uiOutput("codebookview"))))
-        ),
-        
-        tabItem(tabName = "EDA",
-                includeMarkdown("www/DTable.md"),
-                tags$style(type = "text/css", "#q1 {vertical-align: top;}"),
-                bsButton(
-                  "q1",
-                  label = "",
-                  icon = icon("question"),
-                  style = "info",
-                  class = "green-button",
-                  size = "extra-small"
-                ),
-                fluidRow(column(6, uiOutput("DTchoice"))),
-                fluidRow(column(12, DT::dataTableOutput(outputId = "Table"))),
-                bsPopover(
-                  id = "q1",
-                  title = "Tidy data",
-                  content = paste0(
-                    "You should read the ",
-                    a("tidy data paper", href = "http://vita.had.co.nz/papers/tidy-data.pdf", target =
-                        "_blank")
-                  ),
-                  placement = "top",
-                  trigger = "focus",
-                  options = list(container = "body")
                 )
-        ),
-        
-        tabItem(tabName = "vis_miss",
-                actionButton("countries_tbl", "Countries View"),
-                actionButton("indiv_tbl", "Individual answers View"),
-                checkboxInput(inputId = "cluster",
-                              label = "Cluster missingness",
-                              value = FALSE),
-                fluidRow(column(12, shinycssloaders::withSpinner(plotOutput("Missing", height = "90vh"))))
-        ),
-        
-        tabItem(tabName = "vis_miss_sampled",
-                checkboxInput(inputId = "sampled_cluster",
-                              label = "Cluster missingness",
-                              value = FALSE),
-                fluidRow(column(12, shinycssloaders::withSpinner(plotOutput("Missing_sampled", height = "90vh"))))
         ),
         
         tabItem(tabName ="withinCountry",

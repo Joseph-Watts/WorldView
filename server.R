@@ -866,12 +866,9 @@ shinyServer(
         scale_fill_viridis(discrete = TRUE, option = "D") +  # Colorblind-friendly palette
         theme_minimal() +
         theme(
-          axis.title = element_text(size = 14),
-          # Resize axis titles
-          axis.text = element_text(size = 12),
-          # Resize axis text
-          plot.title = element_text(size = 16, face = "bold"),
-          # Resize plot title
+          axis.title = element_text(size = 14), # Resize axis titles
+          axis.text = element_text(size = 12), # Resize axis text
+          plot.title = element_text(size = 16, face = "bold"), # Resize plot title
           legend.position = "bottom"  # Move legend to bottom
         )
     }) # TODO include labeling with explanations about colouring and outliers
@@ -954,22 +951,79 @@ shinyServer(
     # TODO add vis_miss_ly code provided by Nick
     # vis_miss
     output$Missing <- renderPlot({
-      vis_miss(get_C_data(),
-               cluster = input$cluster)
+      vis_miss(get_C_data(), cluster = input$cluster_ctry) +
+        theme(axis.text.x = element_blank())
     })
     
-    output$Missing_sampled <- renderPlot({
-      downsized_data <- get_I_data() %>%
-        sample_n(10000) %>%    # Select 10,000 random rows
-        select(sample(1:ncol(.), 50)) # Select 50 random columns, but in the future that will change to user-selected columns showing all 100k rows
+    output$Indiv_missing_with_ratio <- renderPlot({
+      d <- sample_with_missing_ratio(orig_indiv_data, sample_size = 2500)
       
-      vis_miss(downsized_data, cluster = input$sampled_cluster)
+      vis_miss(d, cluster = input$cluster_indiv) +
+        theme(axis.text.x = element_blank())
+    })
+    
+    output$Top_miss_indiv <- renderPlot({
+      top_miss <- miss_var_summary(orig_indiv_data) %>%
+        slice_head(n = 15) %>%
+        mutate(
+          pct_miss = as.numeric(pct_miss),
+          variable = forcats::fct_reorder(variable, pct_miss, .desc = TRUE)
+        )
+      
+      top_miss %>%
+        ggplot(aes(x = variable, y = pct_miss, fill = variable)) +
+        geom_bar(stat = "identity") +
+        geom_text(
+          aes(label = round(pct_miss, 1)),
+          vjust = -0.5,
+          size = 4.5,
+          fontface = "bold"
+        ) +
+        scale_fill_viridis_d(option = "viridis") +
+        labs(
+          title = "Percentage of Missing Data of Individual Responses",
+          x = "Variable",
+          y = "Percentage Missing",
+          fill = "Variable"
+        ) +
+        theme_minimal() +
+        theme(
+          plot.title = element_text(face = "bold", size = 16),
+          axis.text.x = element_text(angle = 45, hjust = 1)
+        )
+    })
+    
+    output$Top_miss_country <- renderPlot({
+      top_miss <- miss_var_summary(orig_country_data) %>%
+        slice_head(n = 15) %>%
+        mutate(
+          pct_miss = as.numeric(pct_miss),
+          variable = forcats::fct_reorder(variable, pct_miss, .desc = TRUE)
+        )
+      
+      top_miss %>%
+        ggplot(aes(x = variable, y = pct_miss, fill = variable)) +
+        geom_bar(stat = "identity") +
+        geom_text(
+          aes(label = round(pct_miss, 1)),
+          vjust = -0.5,
+          size = 4.5,
+          fontface = "bold"
+        ) +
+        scale_fill_viridis_d(option = "viridis") +
+        labs(
+          title = "Percentage of Missing Data in Country Data Consolidation",
+          x = "Variable",
+          y = "Percentage Missing",
+          fill = "Variable"
+        ) +
+        theme_minimal() +
+        theme(
+          plot.title = element_text(face = "bold", size = 16),
+          axis.text.x = element_text(angle = 45, hjust = 1)
+        )
     })
     
     # TODO add boxplot of variables (IQR range 0.5-5)
-    
-    output$textTest <- renderPrint({
-      cat(paste("AQUI DESGRACA!"))
-    })
     
   }) # end server

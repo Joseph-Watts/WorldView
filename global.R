@@ -5,8 +5,8 @@
 library(shiny)
 
 required_packages <- c('collapsibleTree', 'DT', 'ggplot2', 'gt', 'gtsummary', 'leaflet', 'leaflet.extras', 'naniar',
-                       'readxl', 'rnaturalearth', 'rvest', 'sf', 'shinyBS', 'shinycssloaders', 'shinydashboard',
-                       'shinyWidgets', 'tidyverse', 'tigris', 'vcd', 'dplyr', 'recipes', 'corrgram', 'corrplot',
+                       'readxl', 'rnaturalearth', 'rnaturalearthdata', 'rvest', 'sf', 'shinyBS', 'shinycssloaders', 'shinydashboard',
+                       'shinyWidgets', 'tidyverse', 'tigris', 'vcd', 'dplyr', 'recipes', 'GGally', 'corrgram', 'corrplot',
                        'ggpubr', 'rstatix', 'broom', 'AICcmodavg', 'viridis')
 
 for (packageName in required_packages) {
@@ -45,18 +45,17 @@ library(broom)
 library(AICcmodavg)
 library(viridis)
 
+# setting seed for reproducibility
+set.seed(20241211)
 
 
 # ###############################################################
-# # WAVE 7 WRANGLING CODE BLOCK                                 #
+# # WAVE 7 DATA WRANGLING CODE BLOCK                            #
 # #                                                             #
 # # Other waves may have different data wrangling requirements, #
 # # but as they are similar, just copy this block and change it #
 # # accordingly                                                 #
 # ###############################################################
-
-# setting seed for reproducibility
-set.seed(20241211)
 
 # load original data
 orig_indiv_data <- readRDS("WVS_Dataset/WVS7_Individual.rds")
@@ -359,6 +358,7 @@ picker_country_list <- WVS7_part_countries %>%
 # SUPPORT FUNCTIONS #
 #####################
 
+#####
 # Identify factor variables and print the number of levels for each
 factor_info <- sapply(indiv_ordinal, function(x) {
   if (is.factor(x)) {
@@ -373,8 +373,9 @@ factor_info <- sapply(indiv_ordinal, function(x) {
 # print(factor_info)
 # 
 # length(factor_info)
+#####
 
-
+#####
 # Print all factors for each factor variable
 print_factor_levels <- function(data) {
   # Loop through columns of the data frame
@@ -394,10 +395,42 @@ print_factor_levels <- function(data) {
 
 # print_factor_levels(orig_indiv_data)
 # print_factor_levels(indiv_ordinal)
+######
 
 
+#####
+# Sample data and keep the missing ratio for each variable
+sample_with_missing_ratio <- function(data, sample_size) {
+  # Get the total number of rows in the dataset
+  total_rows <- nrow(data)
+  
+  # Calculate the sampled dataset
+  sampled_data <- data %>%
+    # For each column, sample missing and non-missing rows proportionally
+    reframe(across(everything(), ~ {
+      missing_indices <- which(is.na(.))
+      non_missing_indices <- which(!is.na(.))
+      
+      # Number of missing and non-missing rows to sample
+      num_missing <- round(sample_size * length(missing_indices) / total_rows)
+      num_non_missing <- round(sample_size * length(non_missing_indices) / total_rows)
+      
+      # Sample indices for missing and non-missing values
+      sampled_missing <- sample(missing_indices, size = num_missing, replace = FALSE)
+      sampled_non_missing <- sample(non_missing_indices, size = num_non_missing, replace = FALSE)
+      
+      # Combine the sampled values
+      combined_indices <- sort(c(sampled_missing, sampled_non_missing))
+      .[combined_indices] # Return the sampled values
+    }))
+  
+  return(sampled_data)
+}
+
+# sampled_data <- sample_with_missing_ratio(orig_indiv_data, sample_size = 2500)
+# vis_miss(sampled_data)
+#####
 
 # ##################
 # # DATA WRANGLING #
 # ##################
-

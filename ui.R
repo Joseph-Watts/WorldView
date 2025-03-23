@@ -160,8 +160,8 @@ shinyUI(fluidPage(
                        ),
                        
                        menuItem(
-                         "About the team",
-                         tabName = "dummy",
+                         "About the Team",
+                         tabName = "team",
                          icon = icon("user", lib = "glyphicon")
                        )
                        
@@ -386,6 +386,10 @@ shinyUI(fluidPage(
         
         tabItem(tabName = "faq",
                 includeMarkdown("www/faq.md")
+        ),
+        
+        tabItem(tabName = "team",
+                includeMarkdown("www/team.md")
         )
         
       ) #end tabItems

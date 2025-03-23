@@ -618,12 +618,12 @@ shinyServer(
     output$pickRegion <- renderUI({
       pickerInput(
         inputId = "pickRegion",
-        label = "Select up to 6 countries",
+        label = "Select up to 4 countries",
         choices = picker_country_list,
         multiple = TRUE,
         options = list(
           `live-search` = TRUE,
-          `max-options` = 6
+          `max-options` = 4
         )
       )
     })
@@ -663,13 +663,13 @@ shinyServer(
       output$pickQuestion <- renderUI({
         pickerInput(
           inputId = "pickQuestion",
-          label = "Select up to 10 questions",
+          label = "Select up to 6 questions",
           choices = grouped,
           # choices = setNames(WVS7_question_list$Question_Num, WVS7_question_list$Question),
           multiple = TRUE,
           options = list(
             `live-search` = TRUE,
-            `max-options` = 10
+            `max-options` = 6
           )
         )
       })

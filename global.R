@@ -84,7 +84,6 @@ indiv_ordinal <- as.data.frame(lapply(orig_indiv_data, function(col) {
 
 
 
-
 # Ignored questions (given the number of factors they have or any other condition)
 ignored_questions <- c("Q223", "Q266", "Q267", "Q268", "Q272", "Q290")
 

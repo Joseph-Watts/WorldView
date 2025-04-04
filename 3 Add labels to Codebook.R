@@ -33,3 +33,5 @@ CB_var_info$ColLab <- paste0(CB_var_info$Col_ID,"-",CB_var_info$Col_Label)
 
 # Save new codebook updated with labels
 write_xlsx(CB_var_info, "WVS_Dataset/WVS7_Codebook_updated_labels.xlsx")
+
+

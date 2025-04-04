@@ -2,6 +2,13 @@ library(tidyverse)
 library(gtsummary)
 library(readxl)
 
+
+
+#####################
+# SUPPORT FUNCTIONS #
+#####################
+
+
 within_country_compare <- function(data, v1, v2, Country){
 
   comp_d <- data[data$B_COUNTRY == Country, c(v1, v2)] %>% na.omit()
@@ -113,37 +120,110 @@ within_country_compare <- function(data, v1, v2, Country){
 
 }
 
-if(testing){
+#' if(testing){
+#'   
+#'   #' Individual level data
+#'   d_ind <- read_rds("WVS_Dataset/WVS7_Individual.rds")
+#'   
+#'   # Testing two ordered factors
+#'   test_output <- within_country_compare(data = d_ind, 
+#'                                         v1 = "Q1",
+#'                                         v2 = "Q2",
+#'                                         Country = "New Zealand")
+#'   test_output$plot
+#'   test_output$table
+#'   test_output$stats
+#'   
+#'   #' Testing combining a factor and integer
+#'   test_output <- within_country_compare(data = d_ind, 
+#'                                         v1 = "Q46",
+#'                                         v2 = "Q48",
+#'                                         Country = "New Zealand")
+#'   test_output$plot
+#'   test_output$table
+#'   test_output$stats
+#'   
+#'   #' Testing two integers
+#'   test_output <- within_country_compare(data = d_ind, 
+#'                                         v1 = "Q48",
+#'                                         v2 = "Q176",
+#'                                         Country = "New Zealand")
+#'   test_output$plot
+#'   test_output$table
+#'   test_output$stats
+#'   
+#' }
+
+
+#####
+# Identify factor variables and print the number of levels for each
+factor_info <- sapply(indiv_ordinal, function(x) {
+  if (is.factor(x)) {
+    return(length(levels(x)))
+  } else {
+    return(NA)  # NA for non-factor variables
+  }
+})
+
+# # Filter and print only factor variables
+# factor_info <- factor_info[!is.na(factor_info)]
+# print(factor_info)
+# 
+# length(factor_info)
+#####
+
+#####
+# Print all factors for each factor variable
+print_factor_levels <- function(data) {
+  # Loop through columns of the data frame
+  factor_columns <- names(data)[sapply(data, is.factor)]  # Select only factor columns
   
-  #' Individual level data
-  d_ind <- read_rds("WVS_Dataset/WVS7_Individual.rds")
-  
-  # Testing two ordered factors
-  test_output <- within_country_compare(data = d_ind, 
-                                        v1 = "Q1",
-                                        v2 = "Q2",
-                                        Country = "New Zealand")
-  test_output$plot
-  test_output$table
-  test_output$stats
-  
-  #' Testing combining a factor and integer
-  test_output <- within_country_compare(data = d_ind, 
-                                        v1 = "Q46",
-                                        v2 = "Q48",
-                                        Country = "New Zealand")
-  test_output$plot
-  test_output$table
-  test_output$stats
-  
-  #' Testing two integers
-  test_output <- within_country_compare(data = d_ind, 
-                                        v1 = "Q48",
-                                        v2 = "Q176",
-                                        Country = "New Zealand")
-  test_output$plot
-  test_output$table
-  test_output$stats
-  
+  # Iterate through factor columns and check the number of levels
+  for (col_name in factor_columns) {
+    column <- data[[col_name]]
+    
+    if (length(levels(column)) < 15) {  # Check for fewer than 15 levels
+      cat(sprintf("Variable '%s' has %d levels:\n", col_name, length(levels(column))))
+      print(levels(column))
+      cat("\n")  # Add a blank line for readability
+    }
+  }
 }
 
+# print_factor_levels(orig_indiv_data)
+# print_factor_levels(indiv_ordinal)
+######
+
+
+#####
+# Sample data and keep the missing ratio for each variable
+sample_with_missing_ratio <- function(data, sample_size) {
+  # Get the total number of rows in the dataset
+  total_rows <- nrow(data)
+  
+  # Calculate the sampled dataset
+  sampled_data <- data %>%
+    # For each column, sample missing and non-missing rows proportionally
+    reframe(across(everything(), ~ {
+      missing_indices <- which(is.na(.))
+      non_missing_indices <- which(!is.na(.))
+      
+      # Number of missing and non-missing rows to sample
+      num_missing <- round(sample_size * length(missing_indices) / total_rows)
+      num_non_missing <- round(sample_size * length(non_missing_indices) / total_rows)
+      
+      # Sample indices for missing and non-missing values
+      sampled_missing <- sample(missing_indices, size = num_missing, replace = FALSE)
+      sampled_non_missing <- sample(non_missing_indices, size = num_non_missing, replace = FALSE)
+      
+      # Combine the sampled values
+      combined_indices <- sort(c(sampled_missing, sampled_non_missing))
+      .[combined_indices] # Return the sampled values
+    }))
+  
+  return(sampled_data)
+}
+
+# sampled_data <- sample_with_missing_ratio(orig_indiv_data, sample_size = 2500)
+# vis_miss(sampled_data)
+#####

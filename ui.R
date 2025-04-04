@@ -84,11 +84,11 @@ shinyUI(fluidPage(
                        HTML(
                          paste0(
                            "<br>",
-                           "<a href='https://www.worldvaluessurvey.org' target='_blank'><img style = 'display: block; margin-left: auto; margin-right: auto;' src='logoWVS215crop.png' width = '186'></a>",
+                           "<a href='https://www.worldvaluessurvey.org' target='_blank'><img style = 'display: block; margin-left: auto; margin-right: auto;' src='images/logo_v1.png' width = '186'></a>",
                            "<br>",
                            "<p style = 'text-align: center;'><small>Data visualisation tool for <br> PSYC382: Culture and Cognition</small></p>",
                            "<br>"
-                         )
+                         ) # sidebar bg color -> #222d32
                        ),
                        
                        menuItem(

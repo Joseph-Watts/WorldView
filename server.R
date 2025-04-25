@@ -112,27 +112,24 @@ shinyServer(
     
     
     ########################
-    # DataTable
+    # DataTables
     ########################
     
-    output$DTchoice <- renderUI ({
-      radioButtons(
-        "DTdata",
-        "Choose Dataset",
-        choices = c("Country", "Individuals"),
-        selected = "Country"
-      )
+    # output$DTchoice <- renderUI ({
+    #   radioButtons(
+    #     "DTdata",
+    #     "Choose Dataset",
+    #     choices = c("Country", "Individuals"),
+    #     selected = "Country"
+    #   )
+    # })
+    
+    output$Table_country <- DT::renderDataTable({
+      DT::datatable(data = get_C_data(), options = list(scrollX = TRUE))
     })
     
-    output$Table <- DT::renderDataTable({
-      if (input$DTdata == "Country") {
-        #DTdata<-d_country
-        DTdata <- get_C_data()
-      } else if (input$DTdata == "Individuals") {
-        #DTdata<-d_ind_longID
-        DTdata <- get_I_longID()
-      }
-      DT::datatable(data = DTdata, options = list(scrollX = TRUE))
+    output$Table_indiv <- DT::renderDataTable({
+      DT::datatable(data = get_I_longID(), options = list(scrollX = TRUE))
     })
 
     
@@ -712,6 +709,113 @@ shinyServer(
     ########################
     # Corrplot chart
     ########################
+
+    output$menuCorrPlot <- renderUI({
+      dropdownButton(
+        inputId = "dropdownCorrPlot",
+        label = "Options",
+        icon = icon("sliders"),
+        status = "success",
+        circle = FALSE,
+        
+        # Radio buttons for method
+        materialSwitch(
+          inputId = "corr_method",
+          label = "Ellipse / Color",
+          status = "success"
+        ),
+        
+        # Radio buttons for order
+        prettyRadioButtons(
+          inputId = "corr_order",
+          label = "Order",
+          thick = TRUE,
+          choices = c("FPC", "alphabet", "AOE", "hclust"),
+          selected = "FPC",
+          animation = "pulse",
+          status = "success"
+        ),
+        
+        # Slider for text size
+        # sliderInput(
+        #   "corr_tl_cex",
+        #   "Text Size:",
+        #   min = 0.5,
+        #   max = 2,
+        #   value = 1,
+        #   step = 0.1
+        # ),
+        
+        noUiSliderInput(
+          inputId = "corr_tl_cex",
+          label = "Text Size",
+          min = 0.5,
+          max = 2,
+          value = 1,
+          step = 0.1,
+          tooltips = FALSE,
+          color = "green"
+        ),
+        
+        # Radio buttons for plot type
+        materialSwitch(
+          inputId = "corr_type",
+          label = "Type",
+          status = "success"
+        ),
+        
+        # Checkbox for diagonal - prettyCheckbox
+        prettyCheckbox(
+          inputId = "corr_diag",
+          label = "Show Diagonal",
+          value = FALSE,
+          thick = TRUE,
+          animation = "pulse",
+          status = "success"
+        ),
+        
+        # Checkbox for adding coefficient - prettyCheckbox
+        prettyCheckbox(
+          inputId = "corr_addCoef",
+          label = "Show Coefficients",
+          value = TRUE,
+          thick = TRUE,
+          animation = "pulse",
+          status = "success"
+        ),
+        
+        # Dropdown for coefficient colors
+        prettyRadioButtons(
+          inputId = "corr_coef_color",
+          label = "Coefficient Color",
+          thick = TRUE,
+          choices = c("Black", "Blue", "Red"),
+          selected = "Black",
+          animation = "pulse",
+          status = "success"
+        ),
+        
+        # Slider for text rotation
+        sliderInput(
+          "corr_tl_srt",
+          "Text Rotation:",
+          min = 0,
+          max = 90,
+          value = 45
+        ),
+        
+        # Radio buttons for background color - material switch
+        materialSwitch(
+          inputId = "corr_bg",
+          label = "Background Color",
+          status = "success"
+        ),
+        
+        # Download button to export plot
+        downloadButton("corr_downloadPlot", "Download Plot")
+      )
+    })
+    
     
     observeEvent(input$pickQuestion, {
       req(input$pickQuestion)
@@ -743,14 +847,14 @@ shinyServer(
         output$corrChart <- renderPlot({
           corrplot::corrplot(
             corr_matrix,
-            method = input$corr_method,
+            method = if (input$corr_method == TRUE) "color" else "ellipse",
             order = input$corr_order,
             tl.cex = input$corr_tl_cex,
-            type = input$corr_type,
+            type = if (input$corr_type == TRUE) "full" else "upper",
             diag = input$corr_diag,
-            addCoef.col = if (input$corr_addCoef_col) input$corr_coef_color else NULL,
+            addCoef.col = if (input$corr_addCoef) input$corr_coef_color else NULL,
             tl.srt = input$corr_tl_srt,
-            bg = input$corr_bg
+            bg = if (input$corr_bg == TRUE) "darkgrey" else "white"
           )
         })
       } else {
@@ -767,14 +871,14 @@ shinyServer(
           png(file, width = 800, height = 600) # Save as PNG
           corrplot::corrplot(
             corr_matrix,
-            method = input$corr_method,
+            method = if (input$corr_method == TRUE) "color" else "ellipse",
             order = input$corr_order,
             tl.cex = input$corr_tl_cex,
-            type = input$corr_type,
+            type = if (input$corr_type == TRUE) "full" else "upper",
             diag = input$corr_diag,
-            addCoef.col = if (input$corr_addCoef_col) input$corr_coef_color else NULL,
+            addCoef.col = if (input$corr_addCoef) input$corr_coef_color else NULL,
             tl.srt = input$corr_tl_srt,
-            bg = input$corr_bg
+            bg = if (input$corr_bg == TRUE) "darkgrey" else "white"
           )
           dev.off()
         }

@@ -58,13 +58,13 @@ shinyUI(fluidPage(
                     color: white !important;
                     border-color: #33aaff !important;
       }
-
+      
       .green-button {
                     background-color: #00a65a !important;
                     color: white !important;
                     border-color: #00a65a !important;
       }
-
+      
       .nav-pills .nav-link.active {
                     background-color: #00a65a !important;
                     color: white !important;
@@ -91,34 +91,54 @@ shinyUI(fluidPage(
                          ) # sidebar bg color -> #222d32
                        ),
                        
+                       ####################### HOME #######################
                        menuItem(
                          "Home",
                          tabName = "home",
                          icon = icon("home")
                        ),
+                       ####################### HOME #######################
                        
+                       
+                       ############## VARIABLE DOCUMENTATION ##############
                        menuItem(
-                         "Master Survey Questionnaire",
-                         tabName = "pdfview",
-                         icon = icon("comment", lib = "glyphicon")
+                         "Variable Documentation",
+                         tabName = "dummy",
+                         icon = icon('info-sign', lib = "glyphicon"),
+                         startExpanded = F,
+                         
+                         menuSubItem(
+                           "Master Survey Questionnaire",
+                           tabName = "pdfview",
+                           icon = icon("comment", lib = "glyphicon")
+                         ),
+                         
+                         menuSubItem(
+                           "Questionnaire Codebook",
+                           tabName = "codebookview",
+                           icon = icon("book", lib = "glyphicon")
+                         )
                        ),
+                       ############## VARIABLE DOCUMENTATION ##############
                        
-                       menuItem(
-                         "Questionnaire Codebook",
-                         tabName = "codebookview",
-                         icon = icon("book", lib = "glyphicon")
-                       ),
                        
+                       ################## RAW DATA TABLES #################
                        menuItem(
-                         "Data Tables",
+                         "Raw Data Tables",
                          tabName = "dummy",
                          icon = icon('list', lib = "glyphicon"),
                          startExpanded = F,
                          
                          menuSubItem(
-                           "WVS7 Data Table",
-                           tabName = "EDA",
-                           icon = icon("th", lib = "glyphicon")
+                           "Participant-level Data",
+                           tabName = "EDA_indiv",
+                           icon = icon("user", lib = "glyphicon")
+                         ),
+                         
+                         menuSubItem(
+                           "Country-level Data",
+                           tabName = "EDA_country",
+                           icon = icon("globe", lib = "glyphicon")
                          ),
                          
                          menuSubItem(
@@ -127,43 +147,108 @@ shinyUI(fluidPage(
                            icon = icon("warning-sign", lib = "glyphicon")
                          )
                        ),
+                       ################## RAW DATA TABLES #################
                        
+                       
+                       ################ SUMMARY STATISTICS ################
                        menuItem(
-                         "Hypothesis Analysis & Testing",
+                         "Summary Statistics",
                          tabName = "dummy",
                          icon = icon('info-sign', lib = "glyphicon"),
                          startExpanded = F,
                          
                          menuSubItem(
-                           "World Map view",
-                           tabName = "map",
-                           icon = icon("globe", lib = "glyphicon")
-                         ),
-                         
-                         menuSubItem(
-                           "Within Country",
+                           "Individual-level",
                            tabName = "withinCountry",
-                           icon = icon("save", lib = "glyphicon")
+                           icon = icon("user", lib = "glyphicon")
                          ),
                          
                          menuSubItem(
-                           "Between Countries",
-                           tabName = "betweenCountries",
-                           icon = icon("random", lib = "glyphicon")
+                           "Country-level",
+                           tabName = "betweenCountries", ## placeholder
+                           icon = icon("globe", lib = "glyphicon")
                          )
                        ),
+                       ################ SUMMARY STATISTICS ################
                        
+                       
+                       ################## VISUALISATIONS ##################
+                       menuItem(
+                         "Visualisations",
+                         tabName = "dummy",
+                         icon = icon('picture', lib = "glyphicon"),
+                         startExpanded = F,
+                         
+                         menuSubItem(
+                           "Map View",
+                           tabName = "map", ## placeholder
+                           icon = icon("map-marker", lib = "glyphicon")
+                         ),
+                         
+                         menuSubItem(
+                           "Scatterplot - Participants",
+                           tabName = "dummy", ## placeholder
+                           icon = icon("equalizer", lib = "glyphicon")
+                         ),
+                         menuSubItem(
+                           "Scatterplot - Countries",
+                           tabName = "dummy", ## placeholder
+                           icon = icon("equalizer", lib = "glyphicon")
+                         ),
+                         
+                         menuSubItem(
+                           "Bar Graph",
+                           tabName = "dummy", ## placeholder
+                           icon = icon("stats", lib = "glyphicon")
+                         ),
+                         
+                         menuSubItem(
+                           "Heatmap",
+                           tabName = "dummy", ## placeholder
+                           icon = icon("fire", lib = "glyphicon")
+                         )
+                       ),
+                       ################## VISUALISATIONS ##################
+                       
+                       
+                       ###################### MODELS ######################
+                       menuItem(
+                         "Models",
+                         tabName = "dummy",
+                         icon = icon('screenshot', lib = "glyphicon"),
+                         startExpanded = F,
+                         
+                         menuSubItem(
+                           "Kendall's Rank Correlations",
+                           tabName = "dummy", ## placeholder
+                           icon = icon("sort-by-attributes-alt", lib = "glyphicon")
+                         ),
+                         
+                         menuSubItem(
+                           "ANOVA",
+                           tabName = "dummy", ## placeholder
+                           icon = icon("th", lib = "glyphicon")
+                         )
+                       ),
+                       ###################### MODELS ######################
+                       
+                       
+                       ######################## FAQ #######################
                        menuItem(
                          "FAQ",
                          tabName = "faq",
                          icon = icon("question-sign", lib = "glyphicon")
                        ),
+                       ######################## FAQ #######################
                        
+                       
+                       ###################### ABOUT #######################
                        menuItem(
                          "About the Team",
                          tabName = "team",
                          icon = icon("user", lib = "glyphicon")
                        )
+                       ###################### ABOUT #######################
                        
                      ) # end sidebarMenu
     ), # end dashboardSidebar
@@ -188,31 +273,16 @@ shinyUI(fluidPage(
                 fluidRow(column(12, shinycssloaders::withSpinner(uiOutput("codebookview"))))
         ),
         
-        tabItem(tabName = "EDA",
+        tabItem(tabName = "EDA_indiv",
                 includeMarkdown("www/DTable.md"),
                 tags$style(type = "text/css", "#q1 {vertical-align: top;}"),
-                # bsButton(
-                #   "q1",
-                #   label = "",
-                #   icon = icon("question"),
-                #   style = "info",
-                #   class = "green-button",
-                #   size = "extra-small"
-                # ),
-                fluidRow(column(6, uiOutput("DTchoice"))),
-                fluidRow(column(12, DT::dataTableOutput(outputId = "Table"))),
-                # bsPopover(
-                #   id = "q1",
-                #   title = "Tidy data",
-                #   content = paste0(
-                #     "You should read the ",
-                #     a("tidy data paper", href = "http://vita.had.co.nz/papers/tidy-data.pdf", target =
-                #         "_blank")
-                #   ),
-                #   placement = "top",
-                #   trigger = "focus",
-                #   options = list(container = "body")
-                # )
+                fluidRow(column(12, DT::dataTableOutput(outputId = "Table_indiv"))),
+
+        ),
+        tabItem(tabName = "EDA_country",
+                includeMarkdown("www/DTable.md"),
+                tags$style(type = "text/css", "#q1 {vertical-align: top;}"),
+                fluidRow(column(12, DT::dataTableOutput(outputId = "Table_country"))),
         ),
         
         tabItem(tabName = "vis_miss",
@@ -258,49 +328,13 @@ shinyUI(fluidPage(
                     tabPanel("Correlations", value = "correlations",
                          fluidRow(
                            column(3, uiOutput("pickTopic")),
-                           column(3, uiOutput("pickQuestion"))
+                           column(3, uiOutput("pickQuestion")),
+                           column(3, uiOutput("menuCorrPlot"))
+                           
                          ),
                          fluidRow(
-                           column(10, shinycssloaders::withSpinner(plotOutput("corrChart", height = "70vh", width = "100%"))),
-                           column(2,
-                                  # materialSwitch(inputId = "tglHeatmap", label = "Toggle heatmap",status = "danger"),
-                                  # prettyToggle(
-                                  #   inputId = "tglHeatmap",
-                                  #   label_on = "Heatmap",
-                                  #   label_off = "Ellipse",
-                                  #   value = FALSE,
-                                  #   shape = "curve"
-                                  # )
-                                  # Radio buttons for method
-                                  radioButtons("corr_method", "Method:", choices = c("ellipse", "color"), selected = "ellipse"),
-
-                                  # Radio buttons for order
-                                  radioButtons("corr_order", "Order:", choices = c("FPC", "alphabet", "AOE", "hclust"), selected = "FPC"),
-
-                                  # Slider for text size
-                                  sliderInput("corr_tl_cex", "Text Size:", min = 0.5, max = 2, value = 0.8, step = 0.1),
-
-                                  # Radio buttons for plot type
-                                  radioButtons("corr_type", "Type:", choices = c("full", "upper"), selected = "upper"),
-
-                                  # Checkbox for diagonal
-                                  checkboxInput("corr_diag", "Show Diagonal", value = FALSE),
-
-                                  # Checkbox for adding coefficient colors
-                                  checkboxInput("corr_addCoef_col", "Show Coefficients", value = TRUE),
-
-                                  # Dropdown for coefficient color
-                                  selectInput("corr_coef_color", "Coefficient Color:", choices = c("black", "blue", "red"), selected = "black"),
-
-                                  # Slider for text rotation
-                                  sliderInput("corr_tl_srt", "Text Rotation:", min = 0, max = 90, value = 45),
-
-                                  # Radio buttons for background color
-                                  radioButtons("corr_bg", "Background Color:", choices = c("darkgrey", "white"), selected = "white"),
-
-                                  # Download button to export plot
-                                  downloadButton("corr_downloadPlot", "Download Plot")
-                                  )
+                           column(12, plotOutput("corrChart", height = "70vh", width = "100%"))
+                           # column(2, uiOutput("menuCorrPlot"))
                          ),
                          fluidRow(
                            column(12, div(style = "float:right",

@@ -4,7 +4,7 @@
 
 ### Joseph Watts
 
-![Joseph Watts](/images/JW.png "text")
+![Joseph Watts, Project lead](/images/JW.png "text")
 
 Senior Lecturer Above the Bar
 
@@ -39,3 +39,4 @@ Master in Applied Data Science
 Master in Applied Data Science
 
 [LinkedIn Page.](https://www.linkedin.com/in/nicki-cartlidge-571b3b51/)
+

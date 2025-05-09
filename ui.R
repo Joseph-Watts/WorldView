@@ -94,6 +94,7 @@ shinyUI(fluidPage(
                        ####################### HOME #######################
                        menuItem(
                          "Home",
+                         # tabName = "home",
                          tabName = "home",
                          icon = icon("home")
                        ),
@@ -313,53 +314,62 @@ shinyUI(fluidPage(
         tabItem(tabName = "map",
                 includeMarkdown("www/choropleth.md"),
                 
-                tabsetPanel(id = "mapTabs", type = "pills",
-                    tabPanel("Map view", value = "map_view",
-                         fluidRow(
-                           column(3, uiOutput("pickRegion"))
-                         ),
-                         fluidRow(
-                           column(12, shinycssloaders::withSpinner(leafletOutput("worldMap", height = "60vh", width = "100%")))
-                         ),
-                         fluidRow(
-                           column(12, div(style = "float:right",
-                                          actionButton("next1", "Next", class = "green-button"))))
-                    ),
-                    tabPanel("Correlations", value = "correlations",
-                         fluidRow(
-                           column(3, uiOutput("pickTopic")),
-                           column(3, uiOutput("pickQuestion")),
-                           column(3, uiOutput("menuCorrPlot"))
-                           
-                         ),
-                         fluidRow(
-                           column(12, plotOutput("corrChart", height = "70vh", width = "100%"))
-                           # column(2, uiOutput("menuCorrPlot"))
-                         ),
-                         fluidRow(
-                           column(12, div(style = "float:right",
-                                          actionButton("prev1", "Previous", class = "green-button"),
-                                          actionButton("next2", "Next", class = "green-button"))))
-                    ),
-                    tabPanel("ANOVA", value = "anova",
-                             fluidRow(
-                               column(10, shinycssloaders::withSpinner(plotOutput("anovaBoxplot", height = "70vh", width = "100%"))),
-                               column(2, checkboxInput("bxplt_notch", "Show Notches", value = FALSE))
-                             ),
-                             # fluidRow(
-                             #   column(12, shinycssloaders::withSpinner(plotOutput("anovaChart")))
-                             # ),
-                             fluidRow(
-                               column(12, shinycssloaders::withSpinner(verbatimTextOutput("modelSummary")))
-                             ),
-                             fluidRow(
-                               column(12, shinycssloaders::withSpinner(verbatimTextOutput("anovaSummary")))
-                             ),
-                             fluidRow(
-                               column(12, div(style = "float:right",
-                                              actionButton("prev2", "Previous", class = "green-button"))))
-                    )
-                )
+                fluidRow(
+                  column(3, uiOutput("pickRegion"))
+                ),
+                fluidRow(
+                  column(12, shinycssloaders::withSpinner(leafletOutput("worldMap", height = "60vh", width = "100%")))
+                ),
+                fluidRow(
+                  column(12, div(style = "float:right",
+                                 actionButton("next1", "Next", class = "green-button"))))
+                
+                # tabsetPanel(id = "mapTabs", type = "pills",
+                #     tabPanel("Map view", value = "map_view",
+                #          fluidRow(
+                #            column(3, uiOutput("pickRegion"))
+                #          ),
+                #          fluidRow(
+                #            column(12, shinycssloaders::withSpinner(leafletOutput("worldMap", height = "60vh", width = "100%")))
+                #          ),
+                #          fluidRow(
+                #            column(12, div(style = "float:right",
+                #                           actionButton("next1", "Next", class = "green-button"))))
+                #     ),
+                #     tabPanel("Correlations", value = "correlations",
+                #          fluidRow(
+                #            column(3, uiOutput("pickTopic")),
+                #            column(3, uiOutput("pickQuestion")),
+                #            column(3, uiOutput("menuCorrPlot"))
+                #            
+                #          ),
+                #          fluidRow(
+                #            column(12, plotOutput("corrChart", height = "70vh", width = "100%"))
+                #          ),
+                #          fluidRow(
+                #            column(12, div(style = "float:right",
+                #                           actionButton("prev1", "Previous", class = "green-button"),
+                #                           actionButton("next2", "Next", class = "green-button"))))
+                #     ),
+                #     tabPanel("ANOVA", value = "anova",
+                #              fluidRow(
+                #                column(10, shinycssloaders::withSpinner(plotOutput("anovaBoxplot", height = "70vh", width = "100%"))),
+                #                column(2, checkboxInput("bxplt_notch", "Show Notches", value = FALSE))
+                #              ),
+                #              # fluidRow(
+                #              #   column(12, shinycssloaders::withSpinner(plotOutput("anovaChart")))
+                #              # ),
+                #              fluidRow(
+                #                column(12, shinycssloaders::withSpinner(verbatimTextOutput("modelSummary")))
+                #              ),
+                #              fluidRow(
+                #                column(12, shinycssloaders::withSpinner(verbatimTextOutput("anovaSummary")))
+                #              ),
+                #              fluidRow(
+                #                column(12, div(style = "float:right",
+                #                               actionButton("prev2", "Previous", class = "green-button"))))
+                #     )
+                # )
         ),
         
         tabItem(tabName ="withinCountry",

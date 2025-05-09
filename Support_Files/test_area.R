@@ -563,3 +563,244 @@ server <- function(input, output, session) {
 if (interactive())
   shinyApp(ui, server)
 
+#==============================================================================
+
+world <- ne_countries(scale = "medium", returnclass = "sf")
+unique(world$admin)
+
+
+
+summary(world)
+
+
+
+leaflet(options = leafletOptions(
+  zoomControl = T,
+  minZoom = 2,
+  maxZoom = 10,
+  dragging = T
+)) %>%
+  addProviderTiles("CartoDB.PositronNoLabels") %>%
+  setView(lng = 0, lat = 25, zoom = 2) %>%
+  addPolygons(
+    data =  world %>%
+      dplyr::filter(iso_a3 %in% WVS7_part_countries$B_COUNTRY_ALPHA),
+    color = "green",
+    weight = 1,
+    fillColor = "lightgreen",
+    fillOpacity = 0.75,
+    label = ~ name
+  )
+
+
+
+a <- world %>% dplyr::filter(iso_a3 %in% WVS7_part_countries$B_COUNTRY_ALPHA)
+a
+
+
+setdiff(WVS7_part_countries$B_COUNTRY_ALPHA, a$sov_a3)
+
+
+
+
+
+
+#===============================================================================
+library(shiny)
+library(leaflet)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(dplyr)
+library(sf)
+
+# Define list of alpha-3 codes
+selected_countries <- c("USA", "BRA", "FRA", "IND", "ZAF")
+
+# Load Natural Earth countries
+world <- ne_countries(scale = "medium", returnclass = "sf")
+
+# Filter by selected alpha-3 codes
+selected_sf <- world %>%
+  filter(iso_a3 %in% selected_countries)
+
+# Create hover labels
+selected_sf <- selected_sf %>%
+  mutate(hover_label = paste0("<strong>", name, "</strong><br/>Population: ", scales::comma(pop_est)))
+
+# Define UI
+ui <- fluidPage(
+  titlePanel("Leaflet Map with Natural Earth Countries"),
+  leafletOutput("countryMap", height = "600px")
+)
+
+# Define server logic
+server <- function(input, output, session) {
+  output$countryMap <- renderLeaflet({
+    leaflet(selected_sf) %>%
+      addProviderTiles(providers$CartoDB.Positron) %>%
+      addPolygons(
+        fillColor = "steelblue",
+        fillOpacity = 0.6,
+        weight = 1,
+        color = "white",
+        label = lapply(selected_sf$hover_label, HTML),
+        highlightOptions = highlightOptions(weight = 3, color = "#666", fillOpacity = 0.8, bringToFront = TRUE)
+      )
+  })
+}
+
+# Run the application
+shinyApp(ui, server)
+
+
+
+
+
+
+
+#===============================================================================
+
+
+library(shiny)
+library(leaflet)
+library(rnaturalearth)
+library(dplyr)
+library(sf)
+
+# Define list of ISO alpha-3 codes
+selected_iso3 <- c("USA", "BRA", "IND", "FRA", "ZAF")  # Modify as needed
+
+# Load Natural Earth country polygons
+world <- ne_countries(scale = "medium", returnclass = "sf")
+
+# Filter countries by ISO_A3 codes
+selected_countries <- world %>%
+  filter(iso_a3 %in% selected_iso3) %>%
+  mutate(label = paste0(name, "<br>Population: ", scales::comma(pop_est)))
+
+# UI
+ui <- fluidPage(
+  titlePanel("Selected Countries Map"),
+  leafletOutput("map", height = "600px")
+)
+
+# Server
+server <- function(input, output, session) {
+  output$map <- renderLeaflet({
+    leaflet(data = selected_countries) %>%
+      addProviderTiles("CartoDB.Positron") %>%
+      addPolygons(
+        fillColor = "steelblue",
+        weight = 1,
+        color = "white",
+        fillOpacity = 0.7,
+        label = lapply(selected_countries$label, HTML),
+        highlightOptions = highlightOptions(
+          weight = 2,
+          color = "#666",
+          fillOpacity = 0.9,
+          bringToFront = TRUE
+        )
+      )
+  })
+}
+
+# Run the application 
+shinyApp(ui = ui, server = server)
+
+
+
+#================================================================================
+library(shiny)
+library(leaflet)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(dplyr)
+library(sf)
+
+# Load Natural Earth countries
+world <- ne_countries(scale = "medium", returnclass = "sf")
+
+# Prepare hover labels
+world <- world %>%
+  mutate(hover_label = paste0("<strong>", name, "</strong><br/>Population: ", scales::comma(pop_est)))
+
+# UI
+ui <- fluidPage(
+  titlePanel("Click to Select Countries"),
+  fluidRow(
+    column(
+      width = 4,
+      selectInput(
+        inputId = "country_select",
+        label = "Select a country:",
+        choices = sort(world$name),
+        selected = NULL,
+        multiple = TRUE,
+        selectize = TRUE
+      )
+    )
+  ),
+  leafletOutput("countryMap", height = "600px")
+)
+
+# Server
+server <- function(input, output, session) {
+  session$onSessionEnded(function() {
+    stopApp()
+  })
+  
+  # Track selected countries
+  selected <- reactiveValues(codes = character())
+  
+  # Base map
+  output$countryMap <- renderLeaflet({
+    leaflet(world) %>%
+      addProviderTiles(providers$CartoDB.Positron) %>%
+      addPolygons(
+        layerId = ~iso_a3,
+        fillColor = "lightgray",
+        fillOpacity = 0.5,
+        color = "white",
+        weight = 1,
+        label = lapply(world$hover_label, HTML),
+        highlightOptions = highlightOptions(weight = 2, color = "#333", bringToFront = TRUE)
+      )
+  })
+  
+  # On country click
+  observeEvent(input$countryMap_shape_click, {
+    clicked_id <- input$countryMap_shape_click$id
+    if (!is.null(clicked_id)) {
+      if (clicked_id %in% selected$codes) {
+        selected$codes <- setdiff(selected$codes, clicked_id)  # Deselect
+      } else {
+        selected$codes <- c(selected$codes, clicked_id)        # Select
+      }
+      
+      # Subset selected countries
+      selected_sf <- world %>% filter(iso_a3 %in% selected$codes)
+      
+      # Clear previous highlights
+      leafletProxy("countryMap") %>%
+        clearGroup("selected") %>%
+        addPolygons(
+          data = selected_sf,
+          group = "selected",
+          fillColor = "steelblue",
+          fillOpacity = 0.7,
+          color = "black",
+          weight = 2,
+          label = lapply(selected_sf$hover_label, HTML)
+        )
+    }
+  })
+}
+
+# Run the app
+shinyApp(ui, server)
+
+
+
+
+# sort(levels(orig_country_data$B_COUNTRY_ALPHA), decreasing = F)

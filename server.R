@@ -15,7 +15,7 @@ shinyServer(
     })
     
     ########################
-    # Read in data files   
+    # Read in data files
     ########################
     
     # WVS7_Individual.rds
@@ -115,26 +115,19 @@ shinyServer(
     # DataTables
     ########################
     
-    # output$DTchoice <- renderUI ({
-    #   radioButtons(
-    #     "DTdata",
-    #     "Choose Dataset",
-    #     choices = c("Country", "Individuals"),
-    #     selected = "Country"
-    #   )
-    # })
+    # Data table - Individual responses
+    output$Table_indiv <- DT::renderDataTable({
+      DT::datatable(data = get_I_longID(), options = list(scrollX = TRUE))
+    })
     
+    # Data table - Country aggregate responses
     output$Table_country <- DT::renderDataTable({
       DT::datatable(data = get_C_data(), options = list(scrollX = TRUE))
     })
     
-    output$Table_indiv <- DT::renderDataTable({
-      DT::datatable(data = get_I_longID(), options = list(scrollX = TRUE))
-    })
-
     
     ########################
-    # Within country 
+    # Within country
     ########################
     
     # Reactive control for selected required country
@@ -609,8 +602,6 @@ shinyServer(
     # Load world shapefile data from rnaturalearth
     world <- ne_countries(scale = "medium", returnclass = "sf")
     
-    # TODO create an observe function to save the current selection of countries and use that in the map and charts render
-    
     # Render list of countries in data set
     output$pickRegion <- renderUI({
       pickerInput(
@@ -672,18 +663,36 @@ shinyServer(
       })
     })
     
+    # # Handle clicks on selectable countries
+    # observeEvent(input$countryMap_shape_click, {
+    #   clicked_id <- input$countryMap_shape_click$id
+    #   if (!is.null(clicked_id) && clicked_id %in% allowed_iso) {
+    #     if (clicked_id %in% selected$codes) {
+    #       selected$codes <- setdiff(selected$codes, clicked_id)
+    #     } else {
+    #       selected$codes <- unique(c(selected$codes, clicked_id))
+    #     }
+    #     
+    #     # # Update the dropdown
+    #     # updateSelectInput(
+    #     #   session,
+    #     #   "country_select",
+    #     #   selected = selectable_countries$name[selectable_countries$iso_a3 %in% selected$codes]
+    #     # )
+    #   }
+    # })
+    
     # Render the leaflet map
     output$worldMap <- renderLeaflet({
       # Get selected countries from the input picker
       selected_countries <- input$pickRegion
-      
       # If selected countries exist, filter them; otherwise, use all countries
       if (length(selected_countries) > 0) {
         highlighted_countries <- world %>%
-          dplyr::filter(name_en %in% selected_countries) # TODO a few countries do not get selected when 'select all' is pressed. redo this line later
+          dplyr::filter(iso_a3 %in% selected_countries)
       } else {
         highlighted_countries <- world %>%
-          dplyr::filter(iso_a3 %in% WVS7_part_countries$B_COUNTRY_ALPHA) # Use the entire dataset if no countries are selected
+          dplyr::filter(iso_a3 %in% WVS7_part_countries$B_COUNTRY_ALPHA)
       }
       
       # Render the map
@@ -735,16 +744,6 @@ shinyServer(
           animation = "pulse",
           status = "success"
         ),
-        
-        # Slider for text size
-        # sliderInput(
-        #   "corr_tl_cex",
-        #   "Text Size:",
-        #   min = 0.5,
-        #   max = 2,
-        #   value = 1,
-        #   step = 0.1
-        # ),
         
         noUiSliderInput(
           inputId = "corr_tl_cex",
@@ -815,7 +814,6 @@ shinyServer(
         downloadButton("corr_downloadPlot", "Download Plot")
       )
     })
-    
     
     observeEvent(input$pickQuestion, {
       req(input$pickQuestion)
@@ -955,7 +953,7 @@ shinyServer(
         selected_countries <- input$pickRegion
       } else {
         output$anovaBoxplot <- renderPlot({
-          plot(1, 1, main = "Boxplot chart can't be calculated with the current country selection. Please select up to a maximum of 6.", type = "n") # Placeholder if not enough data
+          plot(1, 1, main = "Boxplot chart can't be calculated with the current country selection. Please select up to a maximum of 4.", type = "n")
         })
       }
       

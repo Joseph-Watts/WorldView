@@ -19,6 +19,7 @@ UNSD_countries_list <- orig_UNSD_data[c(3:12)]
 
 # countries and questions simple lists
 WVS7_countries_list <- levels(orig_indiv_data$B_COUNTRY)
+WVS7_iso_list <- levels(orig_country_data$B_COUNTRY_ALPHA)
 # WVS7_question_list <- data.frame(Question_Num = sub("[-].*", "", d.Qs), Question = d.Qs)
 
 
@@ -291,9 +292,12 @@ WVS7_part_countries <- WVS7_part_countries %>%
   mutate(`Region Name` = ifelse(is.na(`Region Name`), "Not defined", `Region Name`))
 
 picker_country_list <- WVS7_part_countries %>%
-  arrange(`B_COUNTRY`) %>%
+  arrange(`Region Name`, `B_COUNTRY`) %>%
   group_by(`Region Name`) %>%
-  summarise(Countries = list(`B_COUNTRY`), .groups = "drop") %>%
+  summarise(
+    Countries = list(setNames(B_COUNTRY_ALPHA, B_COUNTRY)),
+    .groups = "drop"
+  ) %>%
   deframe()
 
 

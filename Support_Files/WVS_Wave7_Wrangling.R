@@ -276,7 +276,6 @@ dplyr::mutate(
   )
 ) %>% ######################################  ######################################
 dplyr::mutate(H_URBRURAL = case_when(H_URBRURAL == "Urban" ~ 1, H_URBRURAL == "Rural" ~ 0, TRUE ~ NA_real_))
-# faltam 2 questoes pra ajustar
 
 
 

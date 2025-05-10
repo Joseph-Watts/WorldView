@@ -46,10 +46,10 @@ shinyUI(fluidPage(
   # load google analytics script
   tags$head(includeScript("www/google-analytics.js")),
   
-  # remove shiny "red" warning messages on GUI
+  
   tags$style(
     type = "text/css",
-    ".shiny-output-error { visibility: hidden; }",
+    ".shiny-output-error { visibility: hidden; }", # remove shiny "red" warning messages on GUI
     ".shiny-output-error:before { visibility: hidden; }",
     HTML(
       "
@@ -65,9 +65,27 @@ shinyUI(fluidPage(
                     border-color: #00a65a !important;
       }
       
-      .nav-pills .nav-link.active {
-                    background-color: #00a65a !important;
-                    color: white !important;
+      /* Inactive pills */
+      .nav-pills > li > a {
+        background-color: #f0f0f0;
+        color: #333;
+        border: 2px solid #ccc;
+        border-radius: 5px;
+        margin-right: 5px;
+      }
+
+      /* Active pill */
+      .nav-pills > li.active > a,
+      .nav-pills > li.active > a:focus,
+      .nav-pills > li.active > a:hover {
+        background-color: #00a65a; /* Green */
+        border-radius: 5px;
+        border: 2px solid #00a65a;
+        color: white;
+      }
+      
+      .dropdown-menu {
+        z-index: 1050 !important;  /* Higher than Leaflet controls */
       }
     "
     )
@@ -103,7 +121,7 @@ shinyUI(fluidPage(
                        
                        ############## VARIABLE DOCUMENTATION ##############
                        menuItem(
-                         "Variable Documentation",
+                         "Dataset Documentation",
                          tabName = "dummy",
                          icon = icon('info-sign', lib = "glyphicon"),
                          startExpanded = F,
@@ -182,7 +200,7 @@ shinyUI(fluidPage(
                          
                          menuSubItem(
                            "Map View",
-                           tabName = "map", ## placeholder
+                           tabName = "map_view", ## placeholder
                            icon = icon("map-marker", lib = "glyphicon")
                          ),
                          
@@ -207,6 +225,12 @@ shinyUI(fluidPage(
                            "Heatmap",
                            tabName = "dummy", ## placeholder
                            icon = icon("fire", lib = "glyphicon")
+                         ),
+                         
+                         menuSubItem(
+                           "Histogram",
+                           tabName = "dummy", ## placeholder
+                           icon = icon("stats", lib = "glyphicon")
                          )
                        ),
                        ################## VISUALISATIONS ##################
@@ -311,66 +335,75 @@ shinyUI(fluidPage(
                 )
         ),
         
-        tabItem(tabName = "map",
-                includeMarkdown("www/choropleth.md"),
-                
-                fluidRow(
-                  column(3, uiOutput("pickRegion"))
-                ),
-                fluidRow(
-                  column(12, shinycssloaders::withSpinner(leafletOutput("worldMap", height = "60vh", width = "100%")))
-                ),
-                fluidRow(
-                  column(12, div(style = "float:right",
-                                 actionButton("next1", "Next", class = "green-button"))))
-                
-                # tabsetPanel(id = "mapTabs", type = "pills",
-                #     tabPanel("Map view", value = "map_view",
-                #          fluidRow(
-                #            column(3, uiOutput("pickRegion"))
-                #          ),
-                #          fluidRow(
-                #            column(12, shinycssloaders::withSpinner(leafletOutput("worldMap", height = "60vh", width = "100%")))
-                #          ),
-                #          fluidRow(
-                #            column(12, div(style = "float:right",
-                #                           actionButton("next1", "Next", class = "green-button"))))
-                #     ),
-                #     tabPanel("Correlations", value = "correlations",
-                #          fluidRow(
-                #            column(3, uiOutput("pickTopic")),
-                #            column(3, uiOutput("pickQuestion")),
-                #            column(3, uiOutput("menuCorrPlot"))
-                #            
-                #          ),
-                #          fluidRow(
-                #            column(12, plotOutput("corrChart", height = "70vh", width = "100%"))
-                #          ),
-                #          fluidRow(
-                #            column(12, div(style = "float:right",
-                #                           actionButton("prev1", "Previous", class = "green-button"),
-                #                           actionButton("next2", "Next", class = "green-button"))))
-                #     ),
-                #     tabPanel("ANOVA", value = "anova",
-                #              fluidRow(
-                #                column(10, shinycssloaders::withSpinner(plotOutput("anovaBoxplot", height = "70vh", width = "100%"))),
-                #                column(2, checkboxInput("bxplt_notch", "Show Notches", value = FALSE))
-                #              ),
-                #              # fluidRow(
-                #              #   column(12, shinycssloaders::withSpinner(plotOutput("anovaChart")))
-                #              # ),
-                #              fluidRow(
-                #                column(12, shinycssloaders::withSpinner(verbatimTextOutput("modelSummary")))
-                #              ),
-                #              fluidRow(
-                #                column(12, shinycssloaders::withSpinner(verbatimTextOutput("anovaSummary")))
-                #              ),
-                #              fluidRow(
-                #                column(12, div(style = "float:right",
-                #                               actionButton("prev2", "Previous", class = "green-button"))))
-                #     )
-                # )
-        ),
+        
+        tabItem(tabName = "map_view",
+                fluidRow(column(12, uiOutput("countrySelect"))),
+                fluidRow(column(12, leafletOutput("map", height = "60vh", width = "100%"))),
+                # fluidRow(column(12, div(style = "float:right",
+                #                         actionButton("next1", "Next", class = "green-button"))))
+        ), 
+        
+        
+        # tabItem(tabName = "map",
+        #         includeMarkdown("www/choropleth.md"),
+        #         
+        #         fluidRow(
+        #           column(3, uiOutput("pickRegion"))
+        #         ),
+        #         fluidRow(
+        #           column(12, shinycssloaders::withSpinner(leafletOutput("worldMap", height = "60vh", width = "100%")))
+        #         ),
+        #         fluidRow(
+        #           column(12, div(style = "float:right",
+        #                          actionButton("next1", "Next", class = "green-button"))))
+        #         
+        #         # tabsetPanel(id = "mapTabs", type = "pills",
+        #         #     tabPanel("Map view", value = "map_view",
+        #         #          fluidRow(
+        #         #            column(3, uiOutput("pickRegion"))
+        #         #          ),
+        #         #          fluidRow(
+        #         #            column(12, shinycssloaders::withSpinner(leafletOutput("worldMap", height = "60vh", width = "100%")))
+        #         #          ),
+        #         #          fluidRow(
+        #         #            column(12, div(style = "float:right",
+        #         #                           actionButton("next1", "Next", class = "green-button"))))
+        #         #     ),
+        #         #     tabPanel("Correlations", value = "correlations",
+        #         #          fluidRow(
+        #         #            column(3, uiOutput("pickTopic")),
+        #         #            column(3, uiOutput("pickQuestion")),
+        #         #            column(3, uiOutput("menuCorrPlot"))
+        #         #            
+        #         #          ),
+        #         #          fluidRow(
+        #         #            column(12, plotOutput("corrChart", height = "70vh", width = "100%"))
+        #         #          ),
+        #         #          fluidRow(
+        #         #            column(12, div(style = "float:right",
+        #         #                           actionButton("prev1", "Previous", class = "green-button"),
+        #         #                           actionButton("next2", "Next", class = "green-button"))))
+        #         #     ),
+        #         #     tabPanel("ANOVA", value = "anova",
+        #         #              fluidRow(
+        #         #                column(10, shinycssloaders::withSpinner(plotOutput("anovaBoxplot", height = "70vh", width = "100%"))),
+        #         #                column(2, checkboxInput("bxplt_notch", "Show Notches", value = FALSE))
+        #         #              ),
+        #         #              # fluidRow(
+        #         #              #   column(12, shinycssloaders::withSpinner(plotOutput("anovaChart")))
+        #         #              # ),
+        #         #              fluidRow(
+        #         #                column(12, shinycssloaders::withSpinner(verbatimTextOutput("modelSummary")))
+        #         #              ),
+        #         #              fluidRow(
+        #         #                column(12, shinycssloaders::withSpinner(verbatimTextOutput("anovaSummary")))
+        #         #              ),
+        #         #              fluidRow(
+        #         #                column(12, div(style = "float:right",
+        #         #                               actionButton("prev2", "Previous", class = "green-button"))))
+        #         #     )
+        #         # )
+        # ),
         
         tabItem(tabName ="withinCountry",
                 fluidRow(

@@ -599,120 +599,209 @@ shinyServer(
     # Map View
     ########################
     
-    # Load world shapefile data from rnaturalearth
+    # Load world map with ISO_A3 codes
     world <- ne_countries(scale = "medium", returnclass = "sf")
     
-    # Render list of countries in data set
-    output$pickRegion <- renderUI({
+    # Define dynamic list of available ISO-A3 countries (can be updated)
+    available_iso <- WVS7_iso_list
+    
+    # Filter map to show only available countries
+    world_available <- world %>% filter(iso_a3 %in% available_iso)
+    
+    output$countrySelect <- renderUI({
       pickerInput(
-        inputId = "pickRegion",
+        inputId = "country_picker",
         label = "Select up to 4 countries",
         choices = picker_country_list,
         multiple = TRUE,
         options = list(
           `live-search` = TRUE,
-          `max-options` = 4
+          `max-options` = 4,
+          `max-options-text` = "You can only select up to 4 countries."
         )
       )
     })
     
-    # Render topics to be selected by user
-    output$pickTopic <- renderUI({
-      pickerInput(
-        inputId = "pickTopic",
-        label = "Select topic",
-        choices = get_sectionsOrd(),
-        multiple = TRUE,
-        options = list(
-          `actions-box` = TRUE,
-          `live-search` = TRUE
-        )
-      )
-    })
+    # Reactive values to store selected countries
+    selected <- reactiveVal(character())
     
-    observeEvent(input$pickTopic, {
-      grouped <- get_questions_List()
-      # grouped <- get_groupedQs_I()
-      grouped <- lapply(grouped, function(category) {
-        # Check if the category is a character vector
-        if (is.character(category)) {
-          category[!sapply(category, function(item) {
-            any(sapply(ignored_questions, function(q) grepl(q, item)))
-          })]
+    # Observe clicks on the map
+    observeEvent(input$map_shape_click, {
+      click <- input$map_shape_click
+      iso_clicked <- click$id
+      
+      if (!is.null(iso_clicked) && iso_clicked %in% available_iso) {
+        current <- selected()
+        if (iso_clicked %in% current) {
+          selected(setdiff(current, iso_clicked))  # deselect if already selected
         } else {
-          # Return the category unchanged if it's not a character vector
-          category
+          selected(c(current, iso_clicked))        # add if not selected
         }
-      })
-      
-      grouped <- grouped[names(grouped) %in% input$pickTopic]
-      
-      # Render questions user can select
-      output$pickQuestion <- renderUI({
-        pickerInput(
-          inputId = "pickQuestion",
-          label = "Select up to 6 questions",
-          choices = grouped,
-          # choices = setNames(WVS7_question_list$Question_Num, WVS7_question_list$Question),
-          multiple = TRUE,
-          options = list(
-            `live-search` = TRUE,
-            `max-options` = 6
-          )
-        )
-      })
-    })
-    
-    # # Handle clicks on selectable countries
-    # observeEvent(input$countryMap_shape_click, {
-    #   clicked_id <- input$countryMap_shape_click$id
-    #   if (!is.null(clicked_id) && clicked_id %in% allowed_iso) {
-    #     if (clicked_id %in% selected$codes) {
-    #       selected$codes <- setdiff(selected$codes, clicked_id)
-    #     } else {
-    #       selected$codes <- unique(c(selected$codes, clicked_id))
-    #     }
-    #     
-    #     # # Update the dropdown
-    #     # updateSelectInput(
-    #     #   session,
-    #     #   "country_select",
-    #     #   selected = selectable_countries$name[selectable_countries$iso_a3 %in% selected$codes]
-    #     # )
-    #   }
-    # })
-    
-    # Render the leaflet map
-    output$worldMap <- renderLeaflet({
-      # Get selected countries from the input picker
-      selected_countries <- input$pickRegion
-      # If selected countries exist, filter them; otherwise, use all countries
-      if (length(selected_countries) > 0) {
-        highlighted_countries <- world %>%
-          dplyr::filter(iso_a3 %in% selected_countries)
-      } else {
-        highlighted_countries <- world %>%
-          dplyr::filter(iso_a3 %in% WVS7_part_countries$B_COUNTRY_ALPHA)
       }
-      
-      # Render the map
-      leaflet(options = leafletOptions(
-        zoomControl = FALSE,
-        minZoom = 2,
-        maxZoom = 2,
-        dragging = FALSE
-      )) %>%
-        addProviderTiles("CartoDB.PositronNoLabels") %>%
-        setView(lng = 0, lat = 25, zoom = 2) %>%
+    })
+    
+    # Sync picker with map clicks
+    observe({
+      updatePickerInput(session, "country_picker", selected = selected())
+    })
+    
+    # Update from pickerInput
+    observeEvent(input$country_picker, {
+      # In case picker bypasses limit (e.g., programmatic update)
+      selected(head(input$country_picker, 4))
+    })
+    
+    # Render the map
+    output$map <- renderLeaflet({
+      leaflet(world_available,
+              options = leafletOptions(
+                zoomControl = FALSE,
+                minZoom = 2,
+                maxZoom = 5,
+                dragging = TRUE)) %>%
+        addProviderTiles("CartoDB.Positron") %>%
+        setView(0, 20, zoom = 2) %>%
         addPolygons(
-          data =  highlighted_countries,
-          color = "green",
+          layerId = ~iso_a3,
+          label = ~name,
           weight = 1,
-          fillColor = "lightgreen",
-          fillOpacity = 0.75,
-          label = ~ name
+          color = "black",
+          fillColor = ~ifelse(iso_a3 %in% selected(), "green", "lightgray"),
+          fillOpacity = 0.7,
+          highlightOptions = highlightOptions(weight = 3, color = "#666", fillOpacity = 0.8)
         )
     })
+    
+    # Update fill color dynamically
+    observe({
+      leafletProxy("map", data = world_available) %>%
+        clearShapes() %>%
+        addPolygons(
+          layerId = ~iso_a3,
+          label = ~name,
+          weight = 1,
+          color = "black",
+          fillColor = ~ifelse(iso_a3 %in% selected(), "green", "lightgray"),
+          fillOpacity = 0.7,
+          highlightOptions = highlightOptions(weight = 3, color = "#666", fillOpacity = 0.8)
+        )
+    })
+
+    
+    # # Load world shapefile data from rnaturalearth
+    # world <- ne_countries(scale = "medium", returnclass = "sf")
+    # 
+    # # Render list of countries in data set
+    # output$pickRegion <- renderUI({
+    #   pickerInput(
+    #     inputId = "pickRegion",
+    #     label = "Select up to 4 countries",
+    #     choices = picker_country_list,
+    #     multiple = TRUE,
+    #     options = list(
+    #       `live-search` = TRUE,
+    #       `max-options` = 4
+    #     )
+    #   )
+    # })
+    # 
+    # # Render topics to be selected by user
+    # output$pickTopic <- renderUI({
+    #   pickerInput(
+    #     inputId = "pickTopic",
+    #     label = "Select topic",
+    #     choices = get_sectionsOrd(),
+    #     multiple = TRUE,
+    #     options = list(
+    #       `actions-box` = TRUE,
+    #       `live-search` = TRUE
+    #     )
+    #   )
+    # })
+    # 
+    # observeEvent(input$pickTopic, {
+    #   grouped <- get_questions_List()
+    #   # grouped <- get_groupedQs_I()
+    #   grouped <- lapply(grouped, function(category) {
+    #     # Check if the category is a character vector
+    #     if (is.character(category)) {
+    #       category[!sapply(category, function(item) {
+    #         any(sapply(ignored_questions, function(q) grepl(q, item)))
+    #       })]
+    #     } else {
+    #       # Return the category unchanged if it's not a character vector
+    #       category
+    #     }
+    #   })
+    #   
+    #   grouped <- grouped[names(grouped) %in% input$pickTopic]
+    #   
+    #   # Render questions user can select
+    #   output$pickQuestion <- renderUI({
+    #     pickerInput(
+    #       inputId = "pickQuestion",
+    #       label = "Select up to 6 questions",
+    #       choices = grouped,
+    #       # choices = setNames(WVS7_question_list$Question_Num, WVS7_question_list$Question),
+    #       multiple = TRUE,
+    #       options = list(
+    #         `live-search` = TRUE,
+    #         `max-options` = 6
+    #       )
+    #     )
+    #   })
+    # })
+    # 
+    # # # Handle clicks on selectable countries
+    # # observeEvent(input$countryMap_shape_click, {
+    # #   clicked_id <- input$countryMap_shape_click$id
+    # #   if (!is.null(clicked_id) && clicked_id %in% allowed_iso) {
+    # #     if (clicked_id %in% selected$codes) {
+    # #       selected$codes <- setdiff(selected$codes, clicked_id)
+    # #     } else {
+    # #       selected$codes <- unique(c(selected$codes, clicked_id))
+    # #     }
+    # #     
+    # #     # # Update the dropdown
+    # #     # updateSelectInput(
+    # #     #   session,
+    # #     #   "country_select",
+    # #     #   selected = selectable_countries$name[selectable_countries$iso_a3 %in% selected$codes]
+    # #     # )
+    # #   }
+    # # })
+    # 
+    # # Render the leaflet map
+    # output$worldMap <- renderLeaflet({
+    #   # Get selected countries from the input picker
+    #   selected_countries <- input$pickRegion
+    #   # If selected countries exist, filter them; otherwise, use all countries
+    #   if (length(selected_countries) > 0) {
+    #     highlighted_countries <- world %>%
+    #       dplyr::filter(iso_a3 %in% selected_countries)
+    #   } else {
+    #     highlighted_countries <- world %>%
+    #       dplyr::filter(iso_a3 %in% WVS7_part_countries$B_COUNTRY_ALPHA)
+    #   }
+    #   
+    #   # Render the map
+    #   leaflet(options = leafletOptions(
+    #     zoomControl = FALSE,
+    #     minZoom = 2,
+    #     maxZoom = 2,
+    #     dragging = FALSE
+    #   )) %>%
+    #     addProviderTiles("CartoDB.PositronNoLabels") %>%
+    #     setView(lng = 0, lat = 25, zoom = 2) %>%
+    #     addPolygons(
+    #       data =  highlighted_countries,
+    #       color = "green",
+    #       weight = 1,
+    #       fillColor = "lightgreen",
+    #       fillOpacity = 0.75,
+    #       label = ~ name
+    #     )
+    # })
     
     
     ########################
@@ -1026,22 +1115,22 @@ shinyServer(
     ########################
     
     observeEvent(input$next1, {
-      updateTabsetPanel(session, "mapTabs",
+      updateTabsetPanel(session, "map_viewTabs",
                         selected = "correlations")
     })
     
     observeEvent(input$next2, {
-      updateTabsetPanel(session, "mapTabs",
+      updateTabsetPanel(session, "map_viewTabs",
                         selected = "anova")
     })
     
     observeEvent(input$prev1, {
-      updateTabsetPanel(session, "mapTabs",
+      updateTabsetPanel(session, "map_viewTabs",
                         selected = "map_view")
     })
     
     observeEvent(input$prev2, {
-      updateTabsetPanel(session, "mapTabs",
+      updateTabsetPanel(session, "map_viewTabs",
                         selected = "correlations")
     })
     

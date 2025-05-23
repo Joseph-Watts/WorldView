@@ -8,7 +8,7 @@ library(readxl)
 # SUPPORT FUNCTIONS #
 #####################
 
-
+#####
 within_country_compare <- function(data, v1, v2, Country){
 
   comp_d <- data[data$B_COUNTRY == Country, c(v1, v2)] %>% na.omit()
@@ -27,7 +27,7 @@ within_country_compare <- function(data, v1, v2, Country){
       geom_bin_2d() +
       theme_minimal()
 
-    v_table <- tbl_summary(comp_d)
+    # v_table <- tbl_summary(comp_d)
     
     #' If both factors are ordered perform a kendall cor.test
     if(sum(v_classes == "orderedfactor") == 2){
@@ -70,7 +70,7 @@ within_country_compare <- function(data, v1, v2, Country){
       scale_fill_brewer(palette = "Pastel2") +
       theme_minimal()
 
-    v_table <- tbl_summary(comp_d)
+    # v_table <- tbl_summary(comp_d)
     
     if("factor" %in% v_classes){
       
@@ -102,7 +102,7 @@ within_country_compare <- function(data, v1, v2, Country){
       geom_smooth(method=lm) +
       theme_minimal()
     
-    v_table <- tbl_summary(comp_d)
+    # v_table <- tbl_summary(comp_d)
     
     comp_d_int <- comp_d
     comp_d_int[,v1] <- as.integer(comp_d_int[,v1])
@@ -114,9 +114,11 @@ within_country_compare <- function(data, v1, v2, Country){
     
   }
   
+  v_table <- tbl_summary(comp_d)
+  
   return(list("plot" = v_plot, 
-         "table" = v_table, 
-         "stats" = v_stats))
+              "table" = v_table, 
+              "stats" = v_stats))
 
 }
 
@@ -153,7 +155,7 @@ within_country_compare <- function(data, v1, v2, Country){
 #'   test_output$stats
 #'   
 #' }
-
+#####
 
 #####
 # Identify factor variables and print the number of levels for each
@@ -226,4 +228,19 @@ sample_with_missing_ratio <- function(data, sample_size) {
 
 # sampled_data <- sample_with_missing_ratio(orig_indiv_data, sample_size = 2500)
 # vis_miss(sampled_data)
+#####
+
+
+#####
+# create a list of all Qs grouped by their category, but the value passed is their Q#
+picker_Qs_list <- function(grouped_list) {
+  lapply(grouped_list, function(group) {
+    setNames(
+      # Values passed to input (e.g., "Q1", "Q2")
+      sub("^(Q[0-9]+).*", "\\1", group),
+      # Labels shown to user
+      group
+    )
+  })
+}
 #####

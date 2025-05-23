@@ -112,7 +112,6 @@ shinyUI(fluidPage(
                        ####################### HOME #######################
                        menuItem(
                          "Home",
-                         # tabName = "home",
                          tabName = "home",
                          icon = icon("home")
                        ),
@@ -181,6 +180,12 @@ shinyUI(fluidPage(
                            tabName = "withinCountry",
                            icon = icon("user", lib = "glyphicon")
                          ),
+                         
+                         # menuSubItem(
+                         #   "individualStats",
+                         #   tabName = "individualStats",
+                         #   icon = icon("user", lib = "glyphicon")
+                         # ),
                          
                          menuSubItem(
                            "Country-level",
@@ -407,11 +412,13 @@ shinyUI(fluidPage(
         
         tabItem(tabName ="withinCountry",
                 fluidRow(
-                  column(6, uiOutput("wc_country_sel"))
-                  ),
-                fluidRow(
+                  column(6, uiOutput("wc_country_sel")),
                   column(6, shinycssloaders::withSpinner(tableOutput("c_total_obs")))
                   ),
+                # fluidRow(
+                #   column(6, shinycssloaders::withSpinner(tableOutput("c_total_obs")))
+                #   ),
+                tags$br(),
                 fluidRow(
                   column(6, uiOutput("wc_qA")),
                   column(6, uiOutput("wc_qB"))
@@ -420,6 +427,8 @@ shinyUI(fluidPage(
                   column(6, shinycssloaders::withSpinner(tableOutput("stats_wc_qA"))),
                   column(6, shinycssloaders::withSpinner(tableOutput("stats_wc_qB")))
                 ),
+                # fluidRow(column(12, textOutput("test_output_stats"))),
+                # tags$br(),
                 fluidRow(
                   column(6, shinycssloaders::withSpinner(plotOutput("plot_wc_qA_levels"))),
                   column(6, shinycssloaders::withSpinner(plotOutput("plot_wc_qB_levels")))
@@ -433,8 +442,28 @@ shinyUI(fluidPage(
                 fluidRow(column(12, shinycssloaders::withSpinner(plotOutput("test_output_plot")))),
                 fluidRow(column(12, shinycssloaders::withSpinner(tableOutput("test_output_table")))),
                 fluidRow(column(12, textOutput("test_output_stats")))
-                
+
         ),
+        
+        # tabItem(tabName = "individualStats",
+        #         fluidRow(
+        #           column(7, uiOutput("individualStats_selectQuestion")),
+        #           column(3, tableOutput("individualStats_totalObs")),
+        #           column(2, tableOutput("individualStats_totalNAObs"))
+        #         ),
+        #         fluidRow(
+        #           column(7,), # spacing
+        #           column(5, tableOutput("statsSelectedQuestion"))
+        #         ),
+        #         fluidRow(
+        #           column(6, plotOutput("plotQuestionlevels", height = "600px")),
+        #           column(6, plotOutput("plotQuestionProp", height = "600px"))
+        #         )
+        # ),
+        # 
+        # tabItem(tabName = "countryStats"
+        #         
+        # ),
         
         tabItem(tabName = "betweenCountries",
                 fluidRow(column(6, uiOutput("bc_question"))),

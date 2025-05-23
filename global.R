@@ -6,7 +6,7 @@ library(shiny)
 required_packages <- c('collapsibleTree', 'DT', 'ggplot2', 'gt', 'gtsummary', 'leaflet', 'leaflet.extras', 'naniar',
                        'readxl', 'rnaturalearth', 'rnaturalearthdata', 'rvest', 'sf', 'shinyBS', 'shinycssloaders', 'shinydashboard',
                        'shinyWidgets', 'tidyverse', 'tigris', 'vcd', 'dplyr', 'recipes', 'GGally', 'corrgram', 'corrplot',
-                       'ggpubr', 'rstatix', 'broom', 'AICcmodavg', 'viridis')
+                       'ggpubr', 'rstatix', 'broom', 'AICcmodavg', 'viridis', 'scales', 'colorspace', 'plotly')
 
 for (packageName in required_packages) {
   if (!requireNamespace(packageName, quietly = TRUE)) {
@@ -43,6 +43,9 @@ library(rstatix)
 library(broom)
 library(AICcmodavg)
 library(viridis)
+library(scales)
+library(colorspace)
+library(plotly)
 
 
 # ####################################

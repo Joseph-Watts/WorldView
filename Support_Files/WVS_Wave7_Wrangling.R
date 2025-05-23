@@ -281,7 +281,7 @@ dplyr::mutate(H_URBRURAL = case_when(H_URBRURAL == "Urban" ~ 1, H_URBRURAL == "R
 
 
 
-# picker list
+# picker lists
 WVS7_part_countries <- WVS7_part_countries %>%
   left_join(
     UNSD_countries_list %>%
@@ -298,7 +298,6 @@ picker_country_list <- WVS7_part_countries %>%
     .groups = "drop"
   ) %>%
   deframe()
-
 
 # #########################
 # # END OF WAVE 7         #

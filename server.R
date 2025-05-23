@@ -37,12 +37,12 @@ shinyServer(
       d
     })
     
-    # WVS7_Individual.rds modified to have concatenated IDs 
+    # orig_indiv_data modified to have full question as name of column
     get_I_longID <- reactive({
       d.I <- get_I_data()
       d.var_info <- get_var_info()
       
-      for (i in 4:293) {
+      for (i in 4:293) { # from Q1 to Q290
         names(d.I)[i] <- d.var_info$ColLab[i]
       }
       d.I
@@ -81,7 +81,7 @@ shinyServer(
       sections_ord
     })
     
-    #' #' Grouping Questions by section for input options
+    # Grouping Questions by section for input options
     get_groupedQs_I <- reactive({
       var_info <- get_var_info()
       sections <- as.list(unique(var_info$Section))
@@ -89,9 +89,10 @@ shinyServer(
       testDD <- data.frame(group = sections_ord,
                            qvar = var_info$ColLab)
       choicesgrpQ <- split(testDD$qvar, testDD$group, lex.order = FALSE)
-      choicesgrpQ <- choicesgrpQ[-1]
+      choicesgrpQ <- choicesgrpQ[-1] # removes first item of list - IDs and sequencing values
+      choicesgrpQ <- head(choicesgrpQ, -1) # removes last group of the list - observations from interviewer (sort of problematic)
       choicesgrpQ
-    }) # this function can be copied to get countries
+    }) # this reactive can be copied to get countries
     
     
     ########################
@@ -127,6 +128,76 @@ shinyServer(
     
     
     ########################
+    # Individual Stats
+    ########################
+    
+    # Reactive control for selecting question A
+    output$individualStats_selectQuestion <- renderUI({
+      selectInput(
+        inputId = "indivStats_question",
+        label = "Select Question",
+        choices = picker_Qs_list(get_groupedQs_I()),
+        selected = get_groupedQs_I()[[1]][1],
+        width = "700px"
+      )
+    })
+    
+    # Give total count of valid observations for selected question
+    output$individualStats_totalObs <- renderTable({
+      d <- orig_indiv_data |>
+        summarise('Number of valid observations' = sum(!is.na(.data[[input$indivStats_question]])))
+      d
+    })
+    
+    # Give total count of NA observations for selected question
+    output$individualStats_totalNAObs <- renderTable({
+      d <- orig_indiv_data |>
+        summarise('Missing observations' = sum(is.na(.data[[input$indivStats_question]])))
+      d
+    })
+    
+    # Show count stats for selected question factor levels
+    output$statsSelectedQuestion <- renderTable({
+      orig_indiv_data |>
+        group_by(.data[[input$indivStats_question]]) |>
+        summarise('Obs per factor' = n(),
+                  'Percentage' = round(100 * n() / nrow(orig_indiv_data), 2))
+    })
+    
+    # Plot Question factor level counts
+    output$plotQuestionlevels <- renderPlot({
+      ggplot(orig_indiv_data,
+             aes(x = .data[[input$indivStats_question]], fill = .data[[input$indivStats_question]])) +
+        geom_bar() +
+        ggtitle("Factor levels by frequency") +
+        theme_minimal() +
+        theme(
+          axis.text.x = element_text(angle = 45, hjust = 1, size = 14),
+          axis.title.y = element_blank(),
+          plot.title = element_text(hjust = 0.5, face = "bold", size = 14),
+          legend.position = "none"
+        )
+    })
+    
+    # Plot Question factor level proportions
+    output$plotQuestionProp <- renderPlot({
+      ggplot(orig_indiv_data,
+             aes(x = "", fill = .data[[input$indivStats_question]])) +
+        geom_bar(position = "fill") +
+        geom_text(
+          stat = "count",
+          aes(label = scales::percent(..count.. / sum(..count..))),
+          position = position_fill(vjust = 0.5),
+          size = 5,
+          colour = 'white'
+        ) +
+        ggtitle("Factor Level Proportions") +
+        labs(x = input$indivStats_question, y = NULL) +
+        theme_minimal()
+    })
+
+    
+    ########################
     # Within country
     ########################
     
@@ -154,7 +225,8 @@ shinyServer(
         inputId = "wc_sel_qA",
         label = "Select Question A",
         choices = get_groupedQs_I(),
-        selected = get_groupedQs_I()[[1]][1]
+        selected = get_groupedQs_I()[[1]][1],
+        width = "100%"
       )
     })
     
@@ -164,7 +236,8 @@ shinyServer(
         inputId = "wc_sel_qB",
         label = "Select Question B",
         choices = get_groupedQs_I(),
-        selected = get_groupedQs_I()[[1]][2]
+        selected = get_groupedQs_I()[[1]][2],
+        width = "100%"
       )
     })
     
@@ -180,14 +253,24 @@ shinyServer(
     output$stats_wc_qA <- renderTable({
       get_country_data() |>
         group_by(.data[[input$wc_sel_qA]]) |>
-        summarise(n = n())
+        summarise('Count' = n()) |>
+        mutate('%' = round(100 * Count / sum(Count), 2))
     })
     
     # Show count stats for Question B factor levels
     output$stats_wc_qB <- renderTable({
       get_country_data() |>
         group_by(.data[[input$wc_sel_qB]]) |>
-        summarise(n = n())
+        summarise('Count' = n()) |>
+        mutate('%' = round(100 * Count / sum(Count), 2))
+    })
+    
+    # Finds the max scale for both 'count' charts
+    wc_max_count <- reactive({
+      data <- get_country_data()
+      varA_counts <- table(data[[input$wc_sel_qA]])
+      varB_counts <- table(data[[input$wc_sel_qB]])
+      max(c(varA_counts, varB_counts), na.rm = TRUE)
     })
     
     # Plot Question A factor level counts
@@ -195,8 +278,11 @@ shinyServer(
       ggplot(get_country_data(),
              aes(x = .data[[input$wc_sel_qA]], fill = .data[[input$wc_sel_qA]])) +
         geom_bar() +
+        scale_y_continuous(limits = c(0, wc_max_count())) +
         ggtitle("Factor levels by frequency") +
-        theme_minimal()
+        labs(x = input$wc_sel_qA, y = "Count") +
+        theme_minimal() +
+        theme(legend.title = element_blank())
     })
     
     # Plot Question A factor level proportions
@@ -205,7 +291,8 @@ shinyServer(
              aes(x = '', fill = .data[[input$wc_sel_qA]])) +
         geom_bar(position = "fill") +
         ggtitle("Factor level proportions") +
-        labs(x = input$wc_sel_qA, y = "proportion")
+        labs(x = input$wc_sel_qA, y = "Proportion") +
+        theme(legend.title = element_blank())
     })
     
     # Plot Question B factor level counts
@@ -213,8 +300,11 @@ shinyServer(
       ggplot(get_country_data(),
              aes(x = .data[[input$wc_sel_qB]], fill = .data[[input$wc_sel_qB]])) +
         geom_bar() +
+        scale_y_continuous(limits = c(0, wc_max_count())) +
         ggtitle("Factor levels by frequency") +
-        theme_minimal()
+        labs(x = input$wc_sel_qA, y = "Count") +
+        theme_minimal() +
+        theme(legend.title = element_blank())
     })
     
     # Plot Question B factor level proportions
@@ -223,7 +313,8 @@ shinyServer(
              aes(x = '', fill = .data[[input$wc_sel_qB]])) +
         geom_bar(position = "fill") +
         ggtitle("Factor level proportions") +
-        labs(x = input$wc_sel_qB, y = "proportion")
+        labs(x = input$wc_sel_qB, y = "Proportion") +
+        theme(legend.title = element_blank())
     })
     
     
@@ -260,7 +351,7 @@ shinyServer(
           geom_bin_2d() +
           theme_minimal()
         
-        v_table <- tbl_summary(comp_d)
+        # v_table <- tbl_summary(comp_d)
         
         #' If both factors are ordered perform a kendall cor.test
         if(sum(v_classes == "orderedfactor") == 2){
@@ -303,7 +394,7 @@ shinyServer(
           scale_fill_brewer(palette = "Pastel2") +
           theme_minimal()
         
-        v_table <- tbl_summary(comp_d)
+        # v_table <- tbl_summary(comp_d)
         
         if("factor" %in% v_classes){
           
@@ -335,7 +426,7 @@ shinyServer(
           geom_smooth(method=lm) +
           theme_minimal()
         
-        v_table <- tbl_summary(comp_d)
+        # v_table <- tbl_summary(comp_d)
         
         comp_d_int <- comp_d
         comp_d_int[,v1] <- as.integer(comp_d_int[,v1])
@@ -346,6 +437,15 @@ shinyServer(
                             method = "kendall")
         
       }
+      
+      v_table <- tbl_summary(comp_d)
+      # sum_tbl <- tbl_summary(comp_d)
+      # v_table <- sum_tbl$table_body %>%
+      #   select(variable, label, stat_0) %>%
+      #   pivot_wider(names_from = variable, values_from = stat_0)
+      
+      
+      
       
       return(list("plot" = v_plot, 
                   "table" = v_table, 
@@ -383,7 +483,8 @@ shinyServer(
         inputId = "bc_sel_q",
         label = "Select Question",
         choices = get_groupedQs_I(),
-        selected = get_groupedQs_I()[[1]][1]
+        selected = get_groupedQs_I()[[1]][1],
+        width = "100%"
       )
     })
     
@@ -450,23 +551,36 @@ shinyServer(
     output$stats_bc_cA <- renderTable({
       get_countryA_data() |>
         group_by(.data[[input$bc_sel_q]]) |>
-        summarise(n = n())
+        summarise('Count' = n()) |>
+        mutate('%' = round(100 * Count / sum(Count), 2))
     }) 
     
     # Show count stats for Question Country B factor levels
     output$stats_bc_cB <- renderTable({
       get_countryB_data() |>
         group_by(.data[[input$bc_sel_q]]) |>
-        summarise(n = n())
+        summarise('Count' = n()) |>
+        mutate('%' = round(100 * Count / sum(Count), 2))
     }) 
     
-    #Plot Question factor level counts for Country A
+    # Finds the max scale for both 'count' charts
+    bc_max_count <- reactive({
+      var <- input$bc_sel_q
+      countsA <- table(get_countryA_data()[[var]])
+      countsB <- table(get_countryB_data()[[var]])
+      max(c(countsA, countsB), na.rm = TRUE)
+    })
+    
+    # Plot Question factor level counts for Country A
     output$plot_bc_qcA_levels <- renderPlot({
       ggplot(get_countryA_data(),
              aes(x = .data[[input$bc_sel_q]], fill = .data[[input$bc_sel_q]])) + #need to figure out this line
         geom_bar() +
-        ggtitle("Country A: Question factor levels by frequency") +
-        theme_minimal()
+        scale_y_continuous(limits = c(0, bc_max_count())) +
+        ggtitle(paste0(input$bc_sel_cA,": Question factor levels by frequency")) +
+        labs(x = input$bc_sel_q, y = "Count") +
+        theme_minimal() +
+        theme(legend.title = element_blank())
     })
     
     # Plot Question factor level proportions Country A
@@ -475,16 +589,20 @@ shinyServer(
              aes(x = '', fill = .data[[input$bc_sel_q]])) +
         geom_bar(position = "fill") +
         ggtitle("Factor level proportions") +
-        labs(x = input$bc_sel_q, y = "proportion")
+        labs(x = input$bc_sel_q, y = "Proportion") +
+        theme(legend.title = element_blank())
     })
     
-    #Plot Question factor level counts for Country B
+    # Plot Question factor level counts for Country B
     output$plot_bc_qcB_levels <- renderPlot({
       ggplot(get_countryB_data(),
              aes(x = .data[[input$bc_sel_q]], fill = .data[[input$bc_sel_q]])) + #need to figure out this line
         geom_bar() +
-        ggtitle("Country B: Question factor levels by frequency") +
-        theme_minimal()
+        scale_y_continuous(limits = c(0, bc_max_count())) +
+        ggtitle(paste0(input$bc_sel_cB,": Question factor levels by frequency")) +
+        labs(x = input$bc_sel_q, y = "Count") +
+        theme_minimal() +
+        theme(legend.title = element_blank())
     })
     
     # Plot Question factor level proportions Country B
@@ -493,7 +611,8 @@ shinyServer(
              aes(x = '', fill = .data[[input$bc_sel_q]])) +
         geom_bar(position = "fill") +
         ggtitle("Factor level proportions") +
-        labs(x = input$bc_sel_q, y = "proportion")
+        labs(x = input$bc_sel_q, y = "Proportion") +
+        theme(legend.title = element_blank())
     })
     
     #' ---

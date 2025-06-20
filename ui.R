@@ -127,7 +127,7 @@ shinyUI(fluidPage(
                          
                          menuSubItem(
                            "Master Survey Questionnaire",
-                           tabName = "pdfview",
+                           tabName = "surveyview",
                            icon = icon("comment", lib = "glyphicon")
                          ),
                          
@@ -177,19 +177,14 @@ shinyUI(fluidPage(
                          
                          menuSubItem(
                            "Individual-level",
-                           tabName = "withinCountry",
+                           tabName = "individualStats",
+                           # tabName = "withinCountry",
                            icon = icon("user", lib = "glyphicon")
                          ),
                          
-                         # menuSubItem(
-                         #   "individualStats",
-                         #   tabName = "individualStats",
-                         #   icon = icon("user", lib = "glyphicon")
-                         # ),
-                         
                          menuSubItem(
                            "Country-level",
-                           tabName = "betweenCountries", ## placeholder
+                           tabName = "betweenCountries",
                            icon = icon("globe", lib = "glyphicon")
                          )
                        ),
@@ -204,38 +199,32 @@ shinyUI(fluidPage(
                          startExpanded = F,
                          
                          menuSubItem(
-                           "Map View",
-                           tabName = "map_view", ## placeholder
-                           icon = icon("map-marker", lib = "glyphicon")
+                           "Bar Graph",
+                           tabName = "barGraph",
+                           icon = icon("stats", lib = "glyphicon")
                          ),
                          
                          menuSubItem(
                            "Scatterplot - Participants",
-                           tabName = "dummy", ## placeholder
+                           tabName = "scatterParticipants",
                            icon = icon("equalizer", lib = "glyphicon")
                          ),
                          menuSubItem(
                            "Scatterplot - Countries",
-                           tabName = "dummy", ## placeholder
+                           tabName = "scatterCountries",
                            icon = icon("equalizer", lib = "glyphicon")
                          ),
                          
                          menuSubItem(
-                           "Bar Graph",
-                           tabName = "dummy", ## placeholder
-                           icon = icon("stats", lib = "glyphicon")
+                           "Correlation", 
+                           tabName = "correlationView",
+                           icon = icon("equalizer", lib = "glyphicon")
                          ),
                          
                          menuSubItem(
                            "Heatmap",
-                           tabName = "dummy", ## placeholder
+                           tabName = "map_view",
                            icon = icon("fire", lib = "glyphicon")
-                         ),
-                         
-                         menuSubItem(
-                           "Histogram",
-                           tabName = "dummy", ## placeholder
-                           icon = icon("stats", lib = "glyphicon")
                          )
                        ),
                        ################## VISUALISATIONS ##################
@@ -250,14 +239,20 @@ shinyUI(fluidPage(
                          
                          menuSubItem(
                            "Kendall's Rank Correlations",
-                           tabName = "dummy", ## placeholder
+                           tabName = "kendallTab",
                            icon = icon("sort-by-attributes-alt", lib = "glyphicon")
                          ),
                          
                          menuSubItem(
                            "ANOVA",
-                           tabName = "dummy", ## placeholder
+                           tabName = "anovaTab",
                            icon = icon("th", lib = "glyphicon")
+                         ),
+                         
+                         menuSubItem(
+                           "Linear Regression",
+                           tabName = "regressionTab",
+                           icon = icon("line-chart")
                          )
                        ),
                        ###################### MODELS ######################
@@ -291,18 +286,25 @@ shinyUI(fluidPage(
                 # INTENTIONALLY EMPTY
         ),
         
+        ####################### HOME #######################
         tabItem(tabName = "home",
                 includeMarkdown("www/home.md")
         ),
+        ####################### HOME #######################
         
-        tabItem(tabName = "pdfview",
-                fluidRow(column(12, shinycssloaders::withSpinner(uiOutput("pdfview"))))
+        
+        ############## VARIABLE DOCUMENTATION ##############
+        tabItem(tabName = "surveyview",
+                fluidRow(column(12, shinycssloaders::withSpinner(uiOutput("surveyview"))))
         ),
         
         tabItem(tabName = "codebookview",
                 fluidRow(column(12, shinycssloaders::withSpinner(uiOutput("codebookview"))))
         ),
+        ############## VARIABLE DOCUMENTATION ##############
         
+        
+        ################## RAW DATA TABLES #################
         tabItem(tabName = "EDA_indiv",
                 includeMarkdown("www/DTable.md"),
                 tags$style(type = "text/css", "#q1 {vertical-align: top;}"),
@@ -339,141 +341,62 @@ shinyUI(fluidPage(
                             )
                 )
         ),
+        ################## RAW DATA TABLES #################
         
         
-        tabItem(tabName = "map_view",
-                fluidRow(column(12, uiOutput("countrySelect"))),
-                fluidRow(column(12, leafletOutput("map", height = "60vh", width = "100%"))),
-                # fluidRow(column(12, div(style = "float:right",
-                #                         actionButton("next1", "Next", class = "green-button"))))
-        ), 
-        
-        
-        # tabItem(tabName = "map",
-        #         includeMarkdown("www/choropleth.md"),
-        #         
-        #         fluidRow(
-        #           column(3, uiOutput("pickRegion"))
-        #         ),
-        #         fluidRow(
-        #           column(12, shinycssloaders::withSpinner(leafletOutput("worldMap", height = "60vh", width = "100%")))
-        #         ),
-        #         fluidRow(
-        #           column(12, div(style = "float:right",
-        #                          actionButton("next1", "Next", class = "green-button"))))
-        #         
-        #         # tabsetPanel(id = "mapTabs", type = "pills",
-        #         #     tabPanel("Map view", value = "map_view",
-        #         #          fluidRow(
-        #         #            column(3, uiOutput("pickRegion"))
-        #         #          ),
-        #         #          fluidRow(
-        #         #            column(12, shinycssloaders::withSpinner(leafletOutput("worldMap", height = "60vh", width = "100%")))
-        #         #          ),
-        #         #          fluidRow(
-        #         #            column(12, div(style = "float:right",
-        #         #                           actionButton("next1", "Next", class = "green-button"))))
-        #         #     ),
-        #         #     tabPanel("Correlations", value = "correlations",
-        #         #          fluidRow(
-        #         #            column(3, uiOutput("pickTopic")),
-        #         #            column(3, uiOutput("pickQuestion")),
-        #         #            column(3, uiOutput("menuCorrPlot"))
-        #         #            
-        #         #          ),
-        #         #          fluidRow(
-        #         #            column(12, plotOutput("corrChart", height = "70vh", width = "100%"))
-        #         #          ),
-        #         #          fluidRow(
-        #         #            column(12, div(style = "float:right",
-        #         #                           actionButton("prev1", "Previous", class = "green-button"),
-        #         #                           actionButton("next2", "Next", class = "green-button"))))
-        #         #     ),
-        #         #     tabPanel("ANOVA", value = "anova",
-        #         #              fluidRow(
-        #         #                column(10, shinycssloaders::withSpinner(plotOutput("anovaBoxplot", height = "70vh", width = "100%"))),
-        #         #                column(2, checkboxInput("bxplt_notch", "Show Notches", value = FALSE))
-        #         #              ),
-        #         #              # fluidRow(
-        #         #              #   column(12, shinycssloaders::withSpinner(plotOutput("anovaChart")))
-        #         #              # ),
-        #         #              fluidRow(
-        #         #                column(12, shinycssloaders::withSpinner(verbatimTextOutput("modelSummary")))
-        #         #              ),
-        #         #              fluidRow(
-        #         #                column(12, shinycssloaders::withSpinner(verbatimTextOutput("anovaSummary")))
-        #         #              ),
-        #         #              fluidRow(
-        #         #                column(12, div(style = "float:right",
-        #         #                               actionButton("prev2", "Previous", class = "green-button"))))
-        #         #     )
-        #         # )
-        # ),
+        ################ SUMMARY STATISTICS ################
+        tabItem(tabName = "individualStats",
+                fluidRow(
+                  column(4, uiOutput("individualStats_selectCountry")),
+                  column(8, uiOutput("individualStats_selectQuestion"))
+                ),
+                fluidRow(
+                  column(6, tableOutput("statsSelectedQuestion")),
+                  column(6, tableOutput("individualStats_totalObs"))
+                ),
+                tags$br(),
+                tags$br(),
+                fluidRow(
+                  column(12, DT::dataTableOutput(outputId = "datatable_filtered_country"))
+                )
+        ),
         
         tabItem(tabName ="withinCountry",
                 fluidRow(
-                  column(6, uiOutput("wc_country_sel")),
-                  column(6, shinycssloaders::withSpinner(tableOutput("c_total_obs")))
-                  ),
-                # fluidRow(
-                #   column(6, shinycssloaders::withSpinner(tableOutput("c_total_obs")))
-                #   ),
+                  column(3, uiOutput("wc_country_sel")),
+                  column(9, shinycssloaders::withSpinner(tableOutput("c_total_obs")))
+                ),
                 tags$br(),
                 fluidRow(
                   column(6, uiOutput("wc_qA")),
                   column(6, uiOutput("wc_qB"))
                 ),
                 fluidRow(
-                  column(6, shinycssloaders::withSpinner(tableOutput("stats_wc_qA"))),
-                  column(6, shinycssloaders::withSpinner(tableOutput("stats_wc_qB")))
+                  column(6, tableOutput("stats_wc_qA")),
+                  column(6, tableOutput("stats_wc_qB"))
                 ),
-                # fluidRow(column(12, textOutput("test_output_stats"))),
-                # tags$br(),
-                fluidRow(
+                fluidRow( # frequency plots
                   column(6, shinycssloaders::withSpinner(plotOutput("plot_wc_qA_levels"))),
                   column(6, shinycssloaders::withSpinner(plotOutput("plot_wc_qB_levels")))
                 ),
                 tags$br(),
-                fluidRow(
-                  column(6, shinycssloaders::withSpinner(plotOutput("plot_wc_qA_prop"))),
-                  column(6, shinycssloaders::withSpinner(plotOutput("plot_wc_qB_prop")))
-                ),
-                tags$br(),
+                # fluidRow( # proportion plots
+                #   column(6, shinycssloaders::withSpinner(plotOutput("plot_wc_qA_prop"))),
+                #   column(6, shinycssloaders::withSpinner(plotOutput("plot_wc_qB_prop")))
+                # ),
+                tags$br(), # kendall test plots
                 fluidRow(column(12, shinycssloaders::withSpinner(plotOutput("test_output_plot")))),
                 fluidRow(column(12, shinycssloaders::withSpinner(tableOutput("test_output_table")))),
                 fluidRow(column(12, textOutput("test_output_stats")))
-
         ),
-        
-        # tabItem(tabName = "individualStats",
-        #         fluidRow(
-        #           column(7, uiOutput("individualStats_selectQuestion")),
-        #           column(3, tableOutput("individualStats_totalObs")),
-        #           column(2, tableOutput("individualStats_totalNAObs"))
-        #         ),
-        #         fluidRow(
-        #           column(7,), # spacing
-        #           column(5, tableOutput("statsSelectedQuestion"))
-        #         ),
-        #         fluidRow(
-        #           column(6, plotOutput("plotQuestionlevels", height = "600px")),
-        #           column(6, plotOutput("plotQuestionProp", height = "600px"))
-        #         )
-        # ),
-        # 
-        # tabItem(tabName = "countryStats"
-        #         
-        # ),
         
         tabItem(tabName = "betweenCountries",
                 fluidRow(column(6, uiOutput("bc_question"))),
                 fluidRow(
-                  column(6, uiOutput("bc_countryA")),
-                  column(6, uiOutput("bc_countryB"))
-                ),
-                fluidRow(
-                  column(6, shinycssloaders::withSpinner(tableOutput("cA_total_obs"))),
-                  column(6, shinycssloaders::withSpinner(tableOutput("cB_total_obs")))
+                  column(3, uiOutput("bc_countryA")),
+                  column(3, shinycssloaders::withSpinner(tableOutput("cA_total_obs"))),
+                  column(3, uiOutput("bc_countryB")),
+                  column(3, shinycssloaders::withSpinner(tableOutput("cB_total_obs")))
                 ),
                 fluidRow(
                   column(6, shinycssloaders::withSpinner(tableOutput("stats_bc_cA"))),
@@ -489,14 +412,310 @@ shinyUI(fluidPage(
                   column(6, shinycssloaders::withSpinner(plotOutput("plot_bc_qB_prop")))
                 )
         ),
+        ################ SUMMARY STATISTICS ################
         
+        
+        ################## VISUALISATIONS ##################
+        tabItem(tabName = "barGraph",
+                fluidRow(
+                  box(width = 3, title = "Controls", status = "primary",
+                      selectizeInput(
+                        inputId = "bar_question",
+                        label = "Select Question:",
+                        choices = grouped_questions,
+                        selected = grouped_questions[[1]][1],
+                        options = list(
+                          placeholder = 'Please select a question',
+                          onInitialize = I('function() { this.setValue(""); }')
+                        )
+                      ),
+                      pickerInput(
+                        inputId = "bar_countries",
+                        label = "Select Countries:",
+                        choices = picker_country_list,
+                        multiple = TRUE,
+                        options = list(`actions-box` = TRUE, `live-search` = TRUE),
+                        selected = c("NZL", "USA")
+                      ),
+                      radioGroupButtons(
+                        inputId = "bar_type",
+                        label = "Display Type:",
+                        choices = c("Count", "Percentage"),
+                        selected = "Percentage",
+                        status = "success"
+                      ),
+                      actionButton("bar_update", "Update Plot", class = "green-button")
+                  ),
+                  box(width = 9, title = "Response Distribution", status = "primary",
+                      shinycssloaders::withSpinner(plotlyOutput("bar_plot", height = "600px"))
+                  )
+                )
+        ),
+        
+        tabItem(tabName = "scatterParticipants",
+                fluidRow(
+                  box(width = 3, title = "Controls", status = "primary",
+                      selectizeInput(
+                        inputId = "scatter_x",
+                        label = "X-axis Question:",
+                        choices = grouped_questions,
+                        selected = grouped_questions[[1]][1]
+                      ),
+                      selectizeInput(
+                        inputId = "scatter_y",
+                        label = "Y-axis Question:",
+                        choices = grouped_questions,
+                        selected = grouped_questions[[1]][2]
+                      ),
+                      pickerInput(
+                        inputId = "scatter_countries",
+                        label = "Select Countries:",
+                        choices = picker_country_list,
+                        multiple = TRUE,
+                        options = list(`actions-box` = TRUE, `live-search` = TRUE),
+                        selected = c("NZL", "USA")
+                      ),
+                      sliderInput(
+                        "scatter_sample",
+                        "Sample Size:",
+                        min = 100, max = 5000, value = 1000, step = 100
+                      ),
+                      actionButton("scatter_update", "Update Plot", class = "green-button")
+                  ),
+                  box(width = 9, title = "Participant Scatterplot", status = "primary",
+                      shinycssloaders::withSpinner(plotlyOutput("scatter_plot", height = "600px"))
+                  )
+                )
+        ),
+        
+        tabItem(tabName = "correlationView",
+                fluidRow(
+                  box(width = 3, title = "Controls", status = "primary",
+                      pickerInput(
+                        inputId = "corr_questions",
+                        label = "Select Questions:",
+                        choices = grouped_questions,
+                        multiple = TRUE,
+                        options = list(`actions-box` = TRUE, `live-search` = TRUE),
+                        selected = grouped_questions[[1]][1:5]
+                      ),
+                      pickerInput(
+                        inputId = "corr_countries",
+                        label = "Select Countries:",
+                        choices = picker_country_list,
+                        multiple = TRUE,
+                        options = list(`actions-box` = TRUE, `live-search` = TRUE),
+                        selected = names(picker_country_list) # All countries
+                      ),
+                      radioGroupButtons(
+                        inputId = "corr_method",
+                        label = "Correlation Method:",
+                        choices = c("Pearson", "Spearman"),
+                        selected = "Pearson",
+                        status = "success"
+                      ),
+                      actionButton("corr_update", "Update Plot", class = "green-button")
+                  ),
+                  box(width = 9, title = "Correlation Matrix", status = "primary",
+                      shinycssloaders::withSpinner(plotOutput("corr_plot", height = "600px"))
+                  )
+                )
+        ),
+        
+        tabItem(tabName = "map_view",
+                fluidRow(
+                  column(12,
+                         box(width = 3, title = "Controls", status = "primary",
+                             selectizeInput(
+                               inputId = "map_question",
+                               label = "Select Question:",
+                               choices = grouped_questions,
+                               selected = grouped_questions[[1]][1]
+                             ),
+                             radioGroupButtons(
+                               inputId = "map_metric",
+                               label = "Display Metric:",
+                               choices = c("Mean", "Median", "Mode"),
+                               selected = "Mean",
+                               status = "success"
+                             ),
+                             actionButton("map_update", "Update Map", class = "green-button")
+                         )
+                  )
+                ),
+                fluidRow(
+                  column(12, leafletOutput("map", height = "700px", width = "100%"))
+                )
+        ),
+        
+        # tabItem(tabName = "barGraph", #placeholder
+        #         
+        # ),
+        # tabItem(tabName = "scatterParticipants",
+        #         # fluidRow(column(12, div(style = "float:right",
+        #         #                         actionButton("next1", "Next", class = "green-button"))))
+        # ),
+        # 
+        # tabItem(tabName = "scatterCountries",
+        #         # fluidRow(column(12, div(style = "float:right",
+        #         #                         actionButton("next1", "Next", class = "green-button"))))
+        # ),
+        # tabItem(tabName = "heatmap",
+        #         # fluidRow(column(12, div(style = "float:right",
+        #         #                         actionButton("next1", "Next", class = "green-button"))))
+        # ),
+        # tabItem(tabName = "map_view",
+        #         fluidRow(column(12, uiOutput("countrySelect"))),
+        #         fluidRow(column(12, leafletOutput("map", height = "60vh", width = "100%"))),
+        #         # fluidRow(column(12, div(style = "float:right",
+        #         #                         actionButton("next1", "Next", class = "green-button"))))
+        # ),
+        ################## VISUALISATIONS ##################
+        
+        
+        ###################### MODELS ######################
+        tabItem(tabName = "kendallTab",
+                fluidRow(
+                  box(width = 3, title = "Controls", status = "primary",
+                      selectizeInput(
+                        inputId = "kendall_var1",
+                        label = "Select Variable 1:",
+                        choices = grouped_questions,
+                        selected = grouped_questions[[1]][1]
+                      ),
+                      selectizeInput(
+                        inputId = "kendall_var2",
+                        label = "Select Variable 2:",
+                        choices = grouped_questions,
+                        selected = grouped_questions[[1]][2]
+                      ),
+                      pickerInput(
+                        inputId = "kendall_countries",
+                        label = "Select Countries:",
+                        choices = picker_country_list,
+                        multiple = TRUE,
+                        options = list(`actions-box` = TRUE, `live-search` = TRUE),
+                        selected = c("NZL", "USA")
+                      ),
+                      sliderInput(
+                        "kendall_sample",
+                        "Sample Size:",
+                        min = 100, max = 5000, value = 1000, step = 100
+                      ),
+                      actionButton("kendall_run", "Run Analysis", class = "green-button")
+                  ),
+                  box(width = 9, title = "Kendall's Rank Correlation", status = "primary",
+                      tabsetPanel(
+                        tabPanel("Results",
+                                 verbatimTextOutput("kendall_results"),
+                                 plotlyOutput("kendall_plot")),
+                        tabPanel("Data",
+                                 DTOutput("kendall_data"))
+                      )
+                  )
+                )
+        ),
+        
+        tabItem(tabName = "anovaTab",
+                fluidRow(
+                  box(width = 3, title = "Controls", status = "primary",
+                      selectizeInput(
+                        inputId = "anova_var",
+                        label = "Select Variable:",
+                        choices = grouped_questions,
+                        selected = grouped_questions[[1]][1]
+                      ),
+                      pickerInput(
+                        inputId = "anova_countries",
+                        label = "Select Countries:",
+                        choices = picker_country_list,
+                        multiple = TRUE,
+                        options = list(`actions-box` = TRUE, `live-search` = TRUE),
+                        selected = c("NZL", "USA", "GBR", "AUS")
+                      ),
+                      sliderInput(
+                        "anova_sample",
+                        "Sample Size:",
+                        min = 100, max = 5000, value = 1000, step = 100
+                      ),
+                      actionButton("anova_run", "Run Analysis", class = "green-button")
+                  ),
+                  box(width = 9, title = "ANOVA Results", status = "primary",
+                      tabsetPanel(
+                        tabPanel("ANOVA Table",
+                                 verbatimTextOutput("anova_results")),
+                        tabPanel("Post Hoc Tests",
+                                 verbatimTextOutput("posthoc_results")),
+                        tabPanel("Visualization",
+                                 plotlyOutput("anova_plot")),
+                        tabPanel("Assumptions",
+                                 verbatimTextOutput("assumptions_check"),
+                                 plotOutput("assumptions_plot"))
+                      )
+                  )
+                )
+        ),
+        
+        tabItem(tabName = "regressionTab",
+                fluidRow(
+                  box(width = 3, title = "Controls", status = "primary",
+                      selectizeInput(
+                        inputId = "regression_dep",
+                        label = "Dependent Variable:",
+                        choices = grouped_questions,
+                        selected = grouped_questions[[1]][1]
+                      ),
+                      selectizeInput(
+                        inputId = "regression_indep",
+                        label = "Independent Variables:",
+                        choices = grouped_questions,
+                        multiple = TRUE,
+                        selected = grouped_questions[[1]][2:3]
+                      ),
+                      pickerInput(
+                        inputId = "regression_country",
+                        label = "Select Country:",
+                        choices = picker_country_list,
+                        multiple = FALSE,
+                        selected = "NZL"
+                      ),
+                      sliderInput(
+                        "regression_sample",
+                        "Sample Size:",
+                        min = 100, max = 5000, value = 1000, step = 100
+                      ),
+                      actionButton("regression_run", "Run Regression", class = "green-button")
+                  ),
+                  box(width = 9, title = "Regression Analysis", status = "primary",
+                      tabsetPanel(
+                        tabPanel("Model Summary",
+                                 verbatimTextOutput("regression_summary")),
+                        tabPanel("Diagnostics",
+                                 plotOutput("regression_diag")),
+                        tabPanel("Coefficients",
+                                 DTOutput("regression_coef")),
+                        tabPanel("Prediction",
+                                 plotlyOutput("regression_prediction"))
+                      )
+                  )
+                )
+        ),
+        ###################### MODELS ######################
+        
+ 
+        ######################## FAQ #######################
         tabItem(tabName = "faq",
                 includeMarkdown("www/faq.md")
         ),
+        ######################## FAQ #######################
         
+        
+        ###################### ABOUT #######################
         tabItem(tabName = "team",
                 includeMarkdown("www/team.md")
         )
+        ###################### ABOUT #######################
+
         
       ) #end tabItems
     ) # end dashboardBody

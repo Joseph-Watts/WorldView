@@ -71,3 +71,8 @@ source(file.path("Support_Files/WVS_Wave7_Wrangling.R"), local = TRUE)
 # #####################
 source(file.path("Support_Files/functions.R"), local = TRUE)
 
+
+
+# Create global variable
+grouped_questions <- get_groupedQs_I()
+

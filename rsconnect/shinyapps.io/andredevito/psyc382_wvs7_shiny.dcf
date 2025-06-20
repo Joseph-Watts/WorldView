@@ -1,0 +1,10 @@
+name: psyc382_wvs7_shiny
+title:
+username: andredevito
+account: andredevito
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 14907841
+bundleId: 10426316
+url: https://andredevito.shinyapps.io/psyc382_wvs7_shiny/
+version: 1

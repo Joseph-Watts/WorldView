@@ -2,9 +2,9 @@
 
 ## <u> Project Lead </u>
 
-### Joseph Watts
+### Joseph W. H. Watts
 
-![Joseph Watts, Project lead](/images/JW.png "text")
+![Joseph W. H. Watts, Project lead](/images/JW.png "text")
 
 Senior Lecturer Above the Bar
 

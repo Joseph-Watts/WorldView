@@ -24,4 +24,4 @@ To access data from other waves, use [THIS](https://www.worldvaluessurvey.org/WV
 
 -   Joseph Watts
 -   Nicki Cartlidge
--   Andre Brescancini De Vito
+-   André De Vito

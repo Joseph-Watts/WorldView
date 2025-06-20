@@ -18,9 +18,8 @@ WVS7_part_countries <- orig_country_data[c(1:2)]
 UNSD_countries_list <- orig_UNSD_data[c(3:12)]
 
 # countries and questions simple lists
-WVS7_countries_list <- levels(orig_indiv_data$B_COUNTRY)
+WVS7_countries_list <- levels(orig_country_data$B_COUNTRY)
 WVS7_iso_list <- levels(orig_country_data$B_COUNTRY_ALPHA)
-# WVS7_question_list <- data.frame(Question_Num = sub("[-].*", "", d.Qs), Question = d.Qs)
 
 
 # transform into ordinal
@@ -285,14 +284,14 @@ dplyr::mutate(H_URBRURAL = case_when(H_URBRURAL == "Urban" ~ 1, H_URBRURAL == "R
 WVS7_part_countries <- WVS7_part_countries %>%
   left_join(
     UNSD_countries_list %>%
-      select(`ISO-alpha3 Code`, `Region Name`),
+      select('ISO-alpha3 Code', 'Region Name'),
     by = c("B_COUNTRY_ALPHA" = "ISO-alpha3 Code")
   ) %>%
-  mutate(`Region Name` = ifelse(is.na(`Region Name`), "Not defined", `Region Name`))
+  mutate('Region Name' = ifelse(is.na('Region Name'), "Not defined", 'Region Name'))
 
 picker_country_list <- WVS7_part_countries %>%
-  arrange(`Region Name`, `B_COUNTRY`) %>%
-  group_by(`Region Name`) %>%
+  arrange('Region Name', 'B_COUNTRY') %>%
+  group_by('Region Name') %>%
   summarise(
     Countries = list(setNames(B_COUNTRY_ALPHA, B_COUNTRY)),
     .groups = "drop"

@@ -4,11 +4,9 @@
 #' WVS data source: https://www.worldvaluessurvey.org/WVSDocumentationWV7.jsp
 
 
-
-#### server logic ####
-################
-# SERVER LOGIC #
-################
+#######################-
+#### SERVER LOGIC #####
+#######################-
 
 shinyServer(
   
@@ -17,9 +15,9 @@ shinyServer(
       stopApp()
     })
     
-    ########################
-    # Read in data files
-    ########################
+    ############################-
+    #### Read in data files ####
+    ############################-
     
     # WVS7_Individual.rds
     get_I_data <- reactive({
@@ -51,7 +49,7 @@ shinyServer(
       d.I
     })
     
-    # Extract Country names in Individual dataset 
+    # Extract Country names in Individual dataset
     get_countries <- reactive({
       d.I <- get_I_data()
       d.country_name <- unique(d.I$B_COUNTRY)
@@ -85,9 +83,9 @@ shinyServer(
     })
     
     
-    ########################
-    # PDF & CODEBOOK VIEW
-    ########################
+    #############################-
+    #### PDF & CODEBOOK VIEW ####
+    #############################-
     
     # Master Survery Questionnaire PDF
     output$surveyview <- renderUI({
@@ -102,9 +100,9 @@ shinyServer(
     })
     
     
-    ########################
-    # DataTables
-    ########################
+    ####################-
+    #### DataTables ####
+    ####################-
     
     # Data table - Individual responses
     output$Table_indiv <- DT::renderDataTable({
@@ -117,11 +115,11 @@ shinyServer(
     })
     
     
-    ########################
-    # Individual Stats
-    ########################
+    ##########################-
+    #### Individual Stats ####
+    ##########################-
     
-    # Reactive control for selecting country 
+    # Reactive control for selecting country
     output$individualStats_selectCountry <- renderUI({
       pickerInput(
         inputId = "indivStats_country",
@@ -135,7 +133,7 @@ shinyServer(
         )
       )
     })
-    
+
     # Reactive control for selecting question
     output$individualStats_selectQuestion <- renderUI({
       pickerInput(
@@ -161,7 +159,7 @@ shinyServer(
           'Total observations' = n()
         )
     })
-    
+
     # Show stats for selected question factor levels
     output$statsSelectedQuestion <- renderTable({
       orig_indiv_data |>
@@ -171,22 +169,21 @@ shinyServer(
           `%` = round(100 * `Obs per factor` / sum(`Obs per factor`), 2)
         )
     })
-    
+
     sum_stats_filtering <- reactive({
       orig_indiv_data %>%
         filter(B_COUNTRY_ALPHA == input$indivStats_country) %>%
         select('COUNTRY NAME' = B_COUNTRY, 'COUNTRY CODE' = B_COUNTRY_ALPHA, all_of(input$indivStats_question))
     })
-    
+
     output$datatable_filtered_country <- DT::renderDataTable({
       DT::datatable(data = sum_stats_filtering(), options = list(pageLength = 10, scrollX = TRUE))
     })
     
     
-    
-    ########################
-    # Country Stats
-    ########################
+    #######################-
+    #### Country Stats ####
+    #######################-
     
     # Reactive control for selecting country
     output$countryStats_selectCountry <- renderUI({
@@ -278,10 +275,9 @@ shinyServer(
     })
     
     
-    
-    ########################
-    # Within country
-    ########################
+    ########################-
+    #### Within country ####
+    ########################-
     
     # Reactive control for selected required country
     output$wc_country_sel <- renderUI({
@@ -550,7 +546,7 @@ shinyServer(
       
     })
     
-    ############################ TEST OUTPUT SECTION ##########################
+    ############################ TEST OUTPUT SECTION ##########################-
 
     output$test_output_plot <- renderPlot({
       test_output <- within_country_compare()
@@ -567,12 +563,12 @@ shinyServer(
       print(test_output$stats)
     })
 
-    ###########################################################################
+    ###########################################################################-
  
     
-    ########################
-    # Between Countries
-    ########################
+    ###########################-
+    #### Between Countries ####
+    ###########################-
     
     # Reactive control for selecting BC question
     output$bc_question <- renderUI({
@@ -825,23 +821,59 @@ shinyServer(
       var_info$Col_ID[var_info$ColLab == label]
     }
     
-    ########################
-    # Bar chart
-    ########################
+    ###################-
+    #### Bar chart ####
+    ###################-
     
     # Bar plot server logic
+    # output$bar_plot <- renderPlotly({
+    #   input$bar_update
+    #   
+    #   isolate({
+    #     req(input$bar_question, input$bar_countries)
+    #     
+    #     # Get the question ID from the display name
+    #     q_id <- get_question_id(input$bar_question)
+    #     
+    #     # Prepare data
+    #     plot_data <- orig_indiv_data %>%
+    #       filter(B_COUNTRY_ALPHA %in% input$bar_countries) %>%
+    #       select(country = B_COUNTRY, response = !!q_id) %>%
+    #       mutate(response = as.factor(response)) %>%
+    #       count(country, response) %>%
+    #       group_by(country) %>%
+    #       mutate(percent = n / sum(n) * 100)
+    #     
+    #     # Create plot based on selected type
+    #     if (input$bar_type == "Percentage") {
+    #       p <- ggplot(plot_data, aes(x = response, y = percent, fill = country)) +
+    #         geom_bar(stat = "identity", position = position_dodge()) +
+    #         labs(y = "Percentage (%)", title = paste("Distribution of", input$bar_question))
+    #     } else {
+    #       p <- ggplot(plot_data, aes(x = response, y = n, fill = country)) +
+    #         geom_bar(stat = "identity", position = position_dodge()) +
+    #         labs(y = "Count", title = paste("Distribution of", input$bar_question))
+    #     }
+    #     
+    #     p <- p +
+    #       labs(x = "Response", fill = "Country") +
+    #       scale_fill_viridis_d() +
+    #       theme_minimal() +
+    #       theme(axis.text.x = element_text(angle = 45, hjust = 1))
+    #     
+    #     ggplotly(p) %>% 
+    #       layout(legend = list(orientation = "h", y = -0.2))
+    #   })
+    # })
+    
+    
     output$bar_plot <- renderPlotly({
       input$bar_update
-      
       isolate({
         req(input$bar_question, input$bar_countries)
         
-        # Get the question ID from the display name
-        # var_info <- get_var_info()
-        # q_id <- var_info$Col_ID[var_info$ColLab == input$bar_question]
         q_id <- get_question_id(input$bar_question)
         
-        # Prepare data
         plot_data <- orig_indiv_data %>%
           filter(B_COUNTRY_ALPHA %in% input$bar_countries) %>%
           select(country = B_COUNTRY, response = !!q_id) %>%
@@ -850,20 +882,30 @@ shinyServer(
           group_by(country) %>%
           mutate(percent = n / sum(n) * 100)
         
-        # Create plot based on selected type
         if (input$bar_type == "Percentage") {
           p <- ggplot(plot_data, aes(x = response, y = percent, fill = country)) +
             geom_bar(stat = "identity", position = position_dodge()) +
-            labs(y = "Percentage (%)", title = paste("Distribution of", input$bar_question))
-        } else {
+            labs(y = "Percentage (%)", title = paste("Distribution of", input$bar_question)) +
+            scale_fill_viridis_d()
+        } else if (input$bar_type == "Count") {
           p <- ggplot(plot_data, aes(x = response, y = n, fill = country)) +
             geom_bar(stat = "identity", position = position_dodge()) +
-            labs(y = "Count", title = paste("Distribution of", input$bar_question))
+            labs(y = "Count", title = paste("Distribution of", input$bar_question)) +
+            scale_fill_viridis_d()
+        } else if (input$bar_type == "stacked") {
+          
+        } else {
+          # Staggered view
+          p <- ggplot(plot_data, aes(x = response, y = n, fill = response)) +
+            geom_col() +
+            facet_wrap(~country, ncol = 1, scales = "free_y") +
+            labs(y = "Count", title = paste("Distribution of", input$bar_question)) +
+            scale_fill_viridis_d(option = "D") +
+            theme(legend.position = "none")
         }
         
-        p <- p +
-          labs(x = "Response", fill = "Country") +
-          scale_fill_viridis_d() +
+        # Remove x-axis title for ALL display types
+        p <- p + labs(x = NULL) +
           theme_minimal() +
           theme(axis.text.x = element_text(angle = 45, hjust = 1))
         
@@ -873,9 +915,11 @@ shinyServer(
     })
     
     
-    ########################
-    # Scatterplot
-    ########################
+    
+    
+    #####################-
+    #### Scatterplot ####
+    #####################-
     
     output$scatter_plot <- renderPlotly({
       input$scatter_update
@@ -916,49 +960,83 @@ shinyServer(
     })
     
     
-    ########################
-    # Corrplot
-    ########################
+    ##################-
+    #### Corrplot ####
+    ##################-
     
-    output$corr_plot <- renderPlot({
-      input$corr_update
+    # Reactive function to generate correlation plot
+    generate_corr_plot <- reactive({
+      req(input$corr_questions, length(input$corr_questions) > 1)
       
-      isolate({
-        req(input$corr_questions, length(input$corr_questions) > 1)
-        
-        # Get question IDs
-        var_info <- get_var_info()
-        q_ids <- sapply(input$corr_questions, function(q) {
-          var_info$Col_ID[var_info$ColLab == q]
-        })
-        
-        # Prepare data
-        plot_data <- orig_indiv_data
-        if (!is.null(input$corr_countries)) {
-          plot_data <- plot_data %>% 
-            filter(B_COUNTRY_ALPHA %in% input$corr_countries)
-        }
-        
-        plot_data <- plot_data %>%
-          select(all_of(q_ids)) %>%
-          mutate(across(everything(), as.numeric))  # Convert to numeric for correlation
-        
-        # Compute correlation matrix
-        cor_matrix <- cor(plot_data, 
-                          use = "pairwise.complete.obs",
-                          method = tolower(input$corr_method))
-        
-        # Create plot
-        corrplot(cor_matrix, method = "color", type = "upper", 
-                 tl.col = "black", tl.srt = 45, 
-                 addCoef.col = "black", number.cex = 0.7,
-                 title = "Correlation Matrix")
-      })
+      # Get question IDs
+      var_info <- get_var_info()
+      q_ids <- sapply(input$corr_questions, function(q) {
+        var_info$Col_ID[var_info$ColLab == q]
+      }, USE.NAMES = FALSE)
+      
+      # Prepare data
+      plot_data <- indiv_ordinal
+      if (!is.null(input$corr_countries)) {
+        plot_data <- plot_data %>% 
+          filter(B_COUNTRY_ALPHA %in% input$corr_countries)
+      }
+      
+      plot_data <- plot_data %>%
+        select(all_of(q_ids))
+      
+      # Compute correlation matrix
+      cor_matrix <- cor(plot_data, 
+                        use = "pairwise.complete.obs",
+                        method = tolower(input$corr_method))
+      
+      # Create color palette based on selection
+      if(input$corr_palette == "Viridis") {
+        col <- viridis::viridis(100)
+      } else {
+        # Red-to-blue gradient palette
+        col <- colorRampPalette(c("red", "white", "blue"))(100)
+      }
+      
+      # Create plot with advanced options
+      corrplot(cor_matrix, 
+               method = if(input$corr_method_type) "color" else "ellipse",
+               order = input$corr_order,
+               tl.cex = input$corr_tl_cex,
+               type = if(input$corr_type) "full" else "upper",
+               diag = input$corr_diag,
+               addCoef.col = if(input$corr_addCoef) tolower(input$corr_coef_color) else NULL,
+               tl.srt = input$corr_tl_srt,
+               col = col,
+               bg = if(input$corr_bg) "darkgrey" else "white")
     })
     
-    ########################
-    # Heatmap
-    ########################
+    # Render the correlation plot
+    output$corr_plot <- renderPlot({
+      input$corr_update
+      generate_corr_plot()
+    })
+    
+    # Download handler for correlation plot
+    output$corr_download <- downloadHandler(
+      filename = function() {
+        paste("correlation-plot-", Sys.Date(), ".png", sep = "")
+      },
+      content = function(file) {
+        # Set up PNG device with appropriate dimensions
+        png(file, width = 1200, height = 900, res = 300)
+        
+        # Generate the plot
+        generate_corr_plot()
+        
+        # Close the device
+        dev.off()
+      }
+    )
+    
+    
+    #################-
+    #### Heatmap ####
+    #################-
     
     # Reactive for map data
     map_data <- reactive({
@@ -1075,10 +1153,9 @@ shinyServer(
     }
     
     
-    
-    ########################
-    # Kendall
-    ########################
+    #################-
+    #### Kendall ####
+    #################-
     
     # Reactive data preparation for Kendall's analysis
     kendall_data <- eventReactive(input$kendall_run, {
@@ -1231,10 +1308,9 @@ shinyServer(
     })
     
     
-    
-    ########################
-    # ANOVA
-    ########################
+    ###############-
+    #### ANOVA ####
+    ###############-
     
     # Reactive data preparation for ANOVA
     anova_data <- eventReactive(input$anova_run, {
@@ -1389,10 +1465,9 @@ shinyServer(
     })
     
     
-    
-    ########################
-    # Linear Reg
-    ########################
+    ####################-
+    #### Linear Reg ####
+    ####################-
     
     # Reactive data preparation for regression
     regression_data <- eventReactive(input$regression_run, {
@@ -1586,11 +1661,10 @@ shinyServer(
       ggplotly(p)
     })
     
-    
 
-    ########################
-    # Map View
-    ########################
+    ##################-
+    #### Map View ####
+    ##################-
     
     # Load world map with ISO_A3 codes
     world <- ne_countries(scale = "medium", returnclass = "sf")
@@ -1679,10 +1753,11 @@ shinyServer(
           highlightOptions = highlightOptions(weight = 3, color = "#666", fillOpacity = 0.8)
         )
     })
-
-    ########################
-    # Corrplot chart
-    ########################
+    
+    
+    ######################################-
+    #### Corrplot chart - OLD VERSION ####
+    ######################################- NOT IN USE AT THE MOMENT
 
     output$menuCorrPlot <- renderUI({
       dropdownButton(
@@ -1843,9 +1918,9 @@ shinyServer(
     })
     
     
-    ########################
-    # ANOVA - OLD VERSION - NOT IN USE AT THE MOMENT
-    ########################
+    #############################-
+    #### ANOVA - OLD VERSION ####
+    #############################- - NOT IN USE AT THE MOMENT
     
     # anovaData <- reactive({
     #   d <- indiv_ordinal[indiv_ordinal$B_COUNTRY %in% input$pickRegion, c("B_COUNTRY", input$pickQuestion)]
@@ -1914,11 +1989,11 @@ shinyServer(
     #       legend.position = "bottom"  # Move legend to bottom
     #     )
     # }) # TODO include labeling with explanations about colouring and outliers
-
-
-    ########################
-    # Control Buttons
-    ########################
+    
+    
+    #########################-
+    #### Control Buttons ####
+    #########################- NOT IN USE AT THE MOMENT
     
     observeEvent(input$next1, {
       updateTabsetPanel(session, "map_viewTabs",
@@ -1941,9 +2016,9 @@ shinyServer(
     })
     
     
-    ########################
-    # Missing Data chart
-    ########################
+    ############################-
+    #### Missing Data chart ####
+    ############################-
     
     # TODO add vis_miss_ly code provided by Nick
     # vis_miss
@@ -2023,5 +2098,4 @@ shinyServer(
     
     # TODO add boxplot of variables (IQR range 0.5-5)
     
-  }) # end server
-#### server end ####
+  }) # end server logic

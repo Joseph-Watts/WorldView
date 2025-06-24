@@ -1,3 +1,4 @@
+<!---
 # Welcome to PSYC382 Cognition and Culture Course!
 
 In this app, we will explore psychological and cultural perspectives on values around the world, utilizing data from the World Values Survey (WVS).\
@@ -28,6 +29,72 @@ University of Canterbury, 2024
 
 
 
-<!---
+
 test comment
 --->
+
+
+# 🌍 World Values Survey Explorer  
+### PSYC382: Cognition and Culture  
+
+Welcome to the interactive exploration tool for the World Values Survey (WVS) - the largest global research project examining human values, beliefs, and cultural practices across societies.  
+
+---
+
+## 🔍 About the World Values Survey  
+The WVS is a pioneering global research project spanning over 100 countries that investigates:  
+- How values change over time  
+- Cultural differences in beliefs and practices  
+- Relationships between values and social/political development  
+- Impact of values on economic development and democracy  
+
+**Current Focus**: Wave 7 (2017-2022) - the most recent dataset capturing values during a period of significant global change.
+
+---
+
+## 🚀 What You Can Explore  
+1. **Variable Documentation**  
+   - Master questionnaires and codebooks  
+   - Detailed question explanations  
+   
+2. **Interactive Data Exploration**  
+   - Participant-level responses  
+   - Country-level aggregates  
+   - Missing data visualizations  
+
+3. **Statistical Insights**  
+   - Summary statistics by country  
+   - Correlation analyses  
+   - Comparative visualizations  
+
+4. **Advanced Modeling**  
+   - Kendall's rank correlations  
+   - ANOVA country comparisons  
+   - Regression models  
+
+---
+
+## 📊 Featured Visualizations  
+- **Geographical Heatmaps** - See how values vary across the world  
+- **Cultural Comparison Plots** - Compare countries side-by-side  
+- **Correlation Matrices** - Discover relationships between values  
+- **Statistical Models** - Test hypotheses about cultural differences  
+
+---
+
+## ⚠ Important Notes  
+**Data Usage**:  
+- Copyright © World Values Survey Association  
+- Used here strictly for **educational purposes** in PSYC382  
+- Not for redistribution or commercial use  
+
+**Application Status**:  
+- Developed by University of Canterbury  
+- This app is still **in development** - report issues to your TA
+- Built with [Shiny](https://shiny.rstudio.com/)  
+
+---
+
+**Department of Psychology**  
+**University of Canterbury**  
+**2024**  

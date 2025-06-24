@@ -1,10 +1,10 @@
-# ###############################################################
-# # WAVE 7 DATA WRANGLING CODE BLOCK                            #
+#################################################################-
+#### WAVE 7 DATA WRANGLING CODE BLOCK                        ####
 # #                                                             #
 # # Other waves may have different data wrangling requirements, #
 # # but as they are similar, just copy this block and change it #
 # # accordingly                                                 #
-# ###############################################################
+#################################################################-
 
 # load original data
 orig_indiv_data <- readRDS("WVS_Dataset/WVS7_Individual.rds")
@@ -298,7 +298,7 @@ picker_country_list <- WVS7_part_countries %>%
   ) %>%
   deframe()
 
-# #########################
-# # END OF WAVE 7         #
+###########################-
+#### END OF WAVE 7     ####
 # # DATA WRANGLING BLOCK  #
-# #########################
+###########################-

@@ -34,9 +34,9 @@
 #' - Perform more sophisticated statistical models
 #'      
 
-###########
-# LOAD UI #
-###########
+#################-
+#### LOAD UI ####
+#################-
 
 shinyUI(fluidPage(
   
@@ -51,49 +51,12 @@ shinyUI(fluidPage(
     type = "text/css",
     ".shiny-output-error { visibility: hidden; }", # remove shiny "red" warning messages on GUI
     ".shiny-output-error:before { visibility: hidden; }",
-    HTML(
-      "
-      .blue-button {
-                    background-color: #33aaff !important;
-                    color: white !important;
-                    border-color: #33aaff !important;
-      }
-      
-      .green-button {
-                    background-color: #00a65a !important;
-                    color: white !important;
-                    border-color: #00a65a !important;
-      }
-      
-      /* Inactive pills */
-      .nav-pills > li > a {
-        background-color: #f0f0f0;
-        color: #333;
-        border: 2px solid #ccc;
-        border-radius: 5px;
-        margin-right: 5px;
-      }
-
-      /* Active pill */
-      .nav-pills > li.active > a,
-      .nav-pills > li.active > a:focus,
-      .nav-pills > li.active > a:hover {
-        background-color: #00a65a; /* Green */
-        border-radius: 5px;
-        border: 2px solid #00a65a;
-        color: white;
-      }
-      
-      .dropdown-menu {
-        z-index: 1050 !important;  /* Higher than Leaflet controls */
-      }
-    "
-    )
+    HTML("")
   ),
   
   dashboardPage(
     
-    skin = "green",
+    skin = "green", # green palette for specific buttons -> #00a65a
     
     dashboardHeader(title = "World Values Survey", titleWidth = 300),
     
@@ -209,9 +172,10 @@ shinyUI(fluidPage(
                            tabName = "scatterParticipants",
                            icon = icon("equalizer", lib = "glyphicon")
                          ),
+                         
                          menuSubItem(
                            "Scatterplot - Countries",
-                           tabName = "scatterCountries",
+                           tabName = "dummy",
                            icon = icon("equalizer", lib = "glyphicon")
                          ),
                          
@@ -356,9 +320,14 @@ shinyUI(fluidPage(
                 ),
                 tags$br(),
                 tags$br(),
-                fluidRow(
-                  column(12, DT::dataTableOutput(outputId = "datatable_filtered_country"))
-                )
+                fluidRow(column(12,
+                         box(
+                          width = 12,
+                          title = "Individual Response List",
+                          status = "primary",
+                          DT::dataTableOutput(outputId = "datatable_filtered_country")
+                         )
+                ))
         ),
         
         tabItem(tabName ="withinCountry",
@@ -417,6 +386,7 @@ shinyUI(fluidPage(
         
         ################## VISUALISATIONS ##################
         tabItem(tabName = "barGraph",
+                includeMarkdown("www/instructions/bar_instruction.md"),
                 fluidRow(
                   box(width = 3, title = "Controls", status = "primary",
                       selectizeInput(
@@ -424,24 +394,21 @@ shinyUI(fluidPage(
                         label = "Select Question:",
                         choices = grouped_questions,
                         selected = grouped_questions[[1]][1],
-                        options = list(
-                          placeholder = 'Please select a question',
-                          onInitialize = I('function() { this.setValue(""); }')
-                        )
+                        size = 30
                       ),
                       pickerInput(
                         inputId = "bar_countries",
                         label = "Select Countries:",
                         choices = picker_country_list,
                         multiple = TRUE,
-                        options = list(`actions-box` = TRUE, `live-search` = TRUE),
-                        selected = c("NZL", "USA")
+                        options = list(`actions-box` = TRUE, `live-search` = TRUE, `size` = 30),
+                        selected = c("NZL", "GBR", "AUS")
                       ),
                       radioGroupButtons(
                         inputId = "bar_type",
                         label = "Display Type:",
-                        choices = c("Count", "Percentage"),
-                        selected = "Percentage",
+                        choices = c("Count", "Percentage", "Staggered", "Stacked"),
+                        selected = "Count",
                         status = "success"
                       ),
                       actionButton("bar_update", "Update Plot", class = "green-button")
@@ -453,6 +420,7 @@ shinyUI(fluidPage(
         ),
         
         tabItem(tabName = "scatterParticipants",
+                includeMarkdown("www/instructions/scatter_instruction.md"),
                 fluidRow(
                   box(width = 3, title = "Controls", status = "primary",
                       selectizeInput(
@@ -472,7 +440,7 @@ shinyUI(fluidPage(
                         label = "Select Countries:",
                         choices = picker_country_list,
                         multiple = TRUE,
-                        options = list(`actions-box` = TRUE, `live-search` = TRUE),
+                        options = list(`actions-box` = TRUE, `live-search` = TRUE, `size` = 30),
                         selected = c("NZL", "USA")
                       ),
                       sliderInput(
@@ -489,6 +457,7 @@ shinyUI(fluidPage(
         ),
         
         tabItem(tabName = "correlationView",
+                includeMarkdown("www/instructions/corr_instruction.md"),
                 fluidRow(
                   box(width = 3, title = "Controls", status = "primary",
                       pickerInput(
@@ -496,7 +465,9 @@ shinyUI(fluidPage(
                         label = "Select Questions:",
                         choices = grouped_questions,
                         multiple = TRUE,
-                        options = list(`actions-box` = TRUE, `live-search` = TRUE),
+                        options = list(`actions-box` = TRUE,
+                                       `live-search` = TRUE,
+                                       `max-options` = 8),
                         selected = grouped_questions[[1]][1:5]
                       ),
                       pickerInput(
@@ -504,8 +475,9 @@ shinyUI(fluidPage(
                         label = "Select Countries:",
                         choices = picker_country_list,
                         multiple = TRUE,
-                        options = list(`actions-box` = TRUE, `live-search` = TRUE),
-                        selected = names(picker_country_list) # All countries
+                        options = list(`actions-box` = TRUE, `live-search` = TRUE, `size` = 30),
+                        selected = c("NZL", "GBR", "AUS")
+                        # selected = names(picker_country_list)
                       ),
                       radioGroupButtons(
                         inputId = "corr_method",
@@ -514,8 +486,46 @@ shinyUI(fluidPage(
                         selected = "Pearson",
                         status = "success"
                       ),
-                      actionButton("corr_update", "Update Plot", class = "green-button")
+                      
+                      # Advanced controls
+                      dropdownButton(
+                        inputId = "corr_advanced",
+                        label = "Advanced Options",
+                        icon = icon("sliders"),
+                        status = "success",
+                        circle = FALSE,
+                        materialSwitch(inputId = "corr_method_type", label = "Ellipse / Color", status = "success"),
+                        prettyRadioButtons(inputId = "corr_order", label = "Order", 
+                                           choices = c("FPC", "alphabet", "AOE", "hclust"),
+                                           selected = "FPC"),
+                        noUiSliderInput(inputId = "corr_tl_cex", label = "Text Size", min = 0.5, max = 2, value = 1),
+                        materialSwitch(inputId = "corr_type", label = "Type", status = "success"),
+                        prettyCheckbox(inputId = "corr_diag", label = "Show Diagonal", value = FALSE),
+                        prettyCheckbox(inputId = "corr_addCoef", label = "Show Coefficients", value = TRUE),
+                        prettyRadioButtons(inputId = "corr_coef_color", label = "Coefficient Color", 
+                                           choices = c("Black", "Blue", "Red"), selected = "Black"),
+                        sliderInput("corr_tl_srt", "Text Rotation:", min = 0, max = 90, value = 45),
+                        materialSwitch(inputId = "corr_bg", label = "Background Color", status = "success"),
+                        
+                        # Color palette selector
+                        prettyRadioButtons(
+                          inputId = "corr_palette",
+                          label = "Color Palette:",
+                          choices = c("Red-Blue", "Viridis"),
+                          selected = "Red-Blue",
+                          status = "success"
+                        )
+                      ),
+                      
+                      # Download button
+                      div(
+                        style = "margin-top: 20px; display: flex; justify-content: space-between;",
+                        downloadButton("corr_download", "Download Plot", 
+                                       class = "btn btn-success",
+                                       style = "background-color: #4CAF50; color: white; border: none;")
+                      )
                   ),
+                  
                   box(width = 9, title = "Correlation Matrix", status = "primary",
                       shinycssloaders::withSpinner(plotOutput("corr_plot", height = "600px"))
                   )
@@ -523,6 +533,7 @@ shinyUI(fluidPage(
         ),
         
         tabItem(tabName = "map_view",
+                includeMarkdown("www/instructions/map_instruction.md"),
                 fluidRow(
                   column(12,
                          box(width = 3, title = "Controls", status = "primary",
@@ -547,34 +558,12 @@ shinyUI(fluidPage(
                   column(12, leafletOutput("map", height = "700px", width = "100%"))
                 )
         ),
-        
-        # tabItem(tabName = "barGraph", #placeholder
-        #         
-        # ),
-        # tabItem(tabName = "scatterParticipants",
-        #         # fluidRow(column(12, div(style = "float:right",
-        #         #                         actionButton("next1", "Next", class = "green-button"))))
-        # ),
-        # 
-        # tabItem(tabName = "scatterCountries",
-        #         # fluidRow(column(12, div(style = "float:right",
-        #         #                         actionButton("next1", "Next", class = "green-button"))))
-        # ),
-        # tabItem(tabName = "heatmap",
-        #         # fluidRow(column(12, div(style = "float:right",
-        #         #                         actionButton("next1", "Next", class = "green-button"))))
-        # ),
-        # tabItem(tabName = "map_view",
-        #         fluidRow(column(12, uiOutput("countrySelect"))),
-        #         fluidRow(column(12, leafletOutput("map", height = "60vh", width = "100%"))),
-        #         # fluidRow(column(12, div(style = "float:right",
-        #         #                         actionButton("next1", "Next", class = "green-button"))))
-        # ),
         ################## VISUALISATIONS ##################
         
         
         ###################### MODELS ######################
         tabItem(tabName = "kendallTab",
+                includeMarkdown("www/instructions/kendall_instruction.md"),
                 fluidRow(
                   box(width = 3, title = "Controls", status = "primary",
                       selectizeInput(
@@ -617,6 +606,7 @@ shinyUI(fluidPage(
         ),
         
         tabItem(tabName = "anovaTab",
+                includeMarkdown("www/instructions/anova_instruction.md"),
                 fluidRow(
                   box(width = 3, title = "Controls", status = "primary",
                       selectizeInput(
@@ -657,6 +647,7 @@ shinyUI(fluidPage(
         ),
         
         tabItem(tabName = "regressionTab",
+                includeMarkdown("www/instructions/linearreg_instruction.md"),
                 fluidRow(
                   box(width = 3, title = "Controls", status = "primary",
                       selectizeInput(
@@ -712,7 +703,81 @@ shinyUI(fluidPage(
         
         ###################### ABOUT #######################
         tabItem(tabName = "team",
-                includeMarkdown("www/team.md")
+                fluidRow(
+                  column(12, h1("Meet Our Team", style = "text-align: center; color: #2c3e50;"))
+                ),
+                # Team Leadership Section
+                fluidRow(
+                  column(12, h3("Team Leadership", style = "color: #2c3e50; border-bottom: 2px solid #00a65a; padding-bottom: 10px;"))
+                ),
+                fluidRow(
+                  column(4, 
+                         div(class = "team-card",
+                             img(src = "images/JW.png", style = "width: 150px; height: 150px; object-fit: cover; border-radius: 50%; border: 4px solid #f1f8ff; margin: 0 auto 20px; display: block;"),
+                             div(style = "text-align: center;",
+                                 h4("Joseph W. H. Watts", style = "color: #2c3e50; font-weight: 700; margin-top: 15px;"),
+                                 h5("Project Lead", style = "color: #3498db; font-weight: 600; margin-bottom: 15px;"),
+                                 p("Senior Lecturer Above the Bar, School of Psychology, Speech and Hearing", style = "color: #34495e; line-height: 1.6;"),
+                                 a(href = "https://profiles.canterbury.ac.nz/Joseph-William-Harry-Watts", 
+                                   target = "_blank", class = "btn btn-primary", 
+                                   style = "background-color: #00a65a; color: white; border: none; padding: 8px 16px; border-radius: 4px; text-decoration: none;",
+                                   "View Full Bio")
+                             )
+                         )
+                  )
+                ),
+                # Data Science Section
+                fluidRow(
+                  column(12, h3("Data Science", style = "color: #2c3e50; border-bottom: 2px solid #00a65a; padding-bottom: 10px; margin-top: 40px;"))
+                ),
+                fluidRow(
+                  column(4,
+                         div(class = "team-card",
+                             img(src = "images/AV.png", style = "width: 150px; height: 150px; object-fit: cover; border-radius: 50%; border: 4px solid #f1f8ff; margin: 0 auto 20px; display: block;"),
+                             div(style = "text-align: center;",
+                                 h4("André De Vito", style = "color: #2c3e50; font-weight: 700; margin-top: 15px;"),
+                                 h5("Lead Developer", style = "color: #3498db; font-weight: 600; margin-bottom: 15px;"),
+                                 p("Master in Applied Data Science, Data Visualization Specialist", style = "color: #34495e; line-height: 1.6;"),
+                                 a(href = "https://www.linkedin.com/in/andre-de-vito/", 
+                                   target = "_blank", class = "btn btn-primary", 
+                                   style = "background-color: #00a65a; color: white; border: none; padding: 8px 16px; border-radius: 4px; text-decoration: none;",
+                                   "LinkedIn Profile")
+                             )
+                         )
+                  )
+                ),
+                # Past Members Section
+                fluidRow(
+                  column(12, h3("Past Members", style = "color: #2c3e50; border-bottom: 2px solid #00a65a; padding-bottom: 10px; margin-top: 40px;"))
+                ),
+                fluidRow(
+                  column(4,
+                         div(class = "team-card", style = "background-color: #f8f9fa; border: 1px solid #eee;",
+                             img(src = "images/NC.png", style = "width: 150px; height: 150px; object-fit: cover; border-radius: 50%; border: 4px solid #f1f8ff; margin: 0 auto 20px; display: block;",
+                                 alt = "Nicki Cartlidge profile photo"),
+                             div(style = "text-align: center;",
+                                 h4("Nicki Cartlidge", style = "color: #2c3e50; font-weight: 700; margin-top: 15px;"),
+                                 h5("Past Developer", style = "color: #7f8c8d; font-weight: 600; margin-bottom: 15px;"),
+                                 p("Master in Applied Data Science, Survey Data Processing Specialist", style = "color: #34495e; line-height: 1.6;"),
+                                 a(href = "https://www.linkedin.com/in/nicki-cartlidge-571b3b51/", 
+                                   target = "_blank", class = "btn btn-primary", 
+                                   style = "background-color: #7f8c8d; color: white; border: none; padding: 8px 16px; border-radius: 4px; text-decoration: none;",
+                                   "LinkedIn Profile")
+                             )
+                         )
+                  )
+                ),
+                # Project Information
+                fluidRow(
+                  column(12,
+                         div(style = "margin-top: 40px; padding: 20px; background-color: #f8f9fa; border-radius: 8px;",
+                             h4("Project Information", style = "color: #2c3e50;"),
+                             p(HTML("<strong>World Values Survey Explorer</strong> Version 1.0.0")),
+                             p("Last Updated: June 2025"),
+                             p("This application was developed using R Shiny with support from the University of Canterbury Psychology Department.")
+                         )
+                  )
+                )
         )
         ###################### ABOUT #######################
 

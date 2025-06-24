@@ -1,3 +1,20 @@
+install.packages('rsconnect')
+
+
+rsconnect::setAccountInfo(name='andredevito',
+                          token='4D04EB145CFAEE43137141E57B1CF4A7',
+                          secret='kAQY9DjhgbkqemEz9F6q6I9ZaW+V3etzK/+/P4wj')
+
+library(rsconnect)
+rsconnect::deployApp('D:/Documents/GitHub/PSYC382_WVS7_Shiny')
+
+
+
+
+###################################################################################
+###################################################################################
+###################################################################################
+
 # library(shiny)
 # library(DT)
 # library(MASS)   # for cov.rob (robust covariance estimate)
@@ -244,19 +261,6 @@ shinyApp(ui, server)
 
 
 
-install.packages('rsconnect')
-
-
-rsconnect::setAccountInfo(name='andredevito',
-                          token='4D04EB145CFAEE43137141E57B1CF4A7',
-                          secret='kAQY9DjhgbkqemEz9F6q6I9ZaW+V3etzK/+/P4wj')
-
-library(rsconnect)
-rsconnect::deployApp('D:/Documents/GitHub/PSYC382_WVS7_Shiny')
-
-
-
-
 ###################################################################################
 ###################################################################################
 ###################################################################################
@@ -265,6 +269,7 @@ rsconnect::deployApp('D:/Documents/GitHub/PSYC382_WVS7_Shiny')
 d <- orig_codebook_data
 d$Variable_Display_Logical <- as.logical(d$Variable_Display_Logical)
 var_info <- d
+
 sections <- as.list(unique(var_info$Section))
 sections_ord <- factor(var_info$Section, ordered = TRUE, levels = sections)
 testDD <- data.frame(group = sections_ord,
@@ -476,5 +481,4 @@ indep_ids <- get_question_id(regression_indep)
 
 
 view(indep_ids)
-
 

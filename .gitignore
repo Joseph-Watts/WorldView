@@ -3,6 +3,7 @@
 .RData
 .Ruserdata
 .Rhistory
+.RDataTmp
 /Support Files
 Support_Files/test_area2.R
 Support_Files/test_area.R

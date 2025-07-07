@@ -2,24 +2,7 @@
 #' WVS data source: https://www.worldvaluessurvey.org/WVSDocumentationWV7.jsp
 
 #' Some things still needing done:
-#' - Add basic table where users can look through the participant and country
-#' level data
-#' 
 #' - Add world map plots for the country level data page
-#' 
-#' - Consider adding a section to the website where users can test whether
-#' two countries differ in respect to one variable
-#' 
-#' - More informative variable names needed. Probably need to add a column to
-#' "WVS_Dataset/Codebook manual coded index.xlsx" with display names?
-#' 
-#' - Also there needs to be more information on the variables on the website.
-#' Potentially a page with a list or something like that?
-#' 
-#' - Statistics and visualizations need to developed to matched the particular 
-#' kinds of variables being compared. 
-#' 
-#' - Make things look and work better
 #' 
 #' -----------
 #' Things that would be nice to add in the future:
@@ -32,7 +15,6 @@
 #' - Plot country level data on a language phylogeny
 #' 
 #' - Perform more sophisticated statistical models
-#'      
 
 #################-
 #### LOAD UI ####
@@ -45,7 +27,6 @@ shinyUI(fluidPage(
   
   # load google analytics script
   tags$head(includeScript("www/google-analytics.js")),
-  
   
   tags$style(
     type = "text/css",
@@ -134,22 +115,8 @@ shinyUI(fluidPage(
                        ################ SUMMARY STATISTICS ################
                        menuItem(
                          "Summary Statistics",
-                         tabName = "dummy",
-                         icon = icon('info-sign', lib = "glyphicon"),
-                         startExpanded = F,
-                         
-                         menuSubItem(
-                           "Individual-level",
-                           tabName = "individualStats",
-                           # tabName = "withinCountry",
-                           icon = icon("user", lib = "glyphicon")
-                         ),
-                         
-                         menuSubItem(
-                           "Country-level",
-                           tabName = "betweenCountries",
-                           icon = icon("globe", lib = "glyphicon")
-                         )
+                         tabName = "summaryStats",
+                         icon = icon('info-sign', lib = "glyphicon")
                        ),
                        ################ SUMMARY STATISTICS ################
                        
@@ -168,27 +135,15 @@ shinyUI(fluidPage(
                          ),
                          
                          menuSubItem(
-                           "Scatterplot - Participants",
+                           "Scatterplot",
                            tabName = "scatterParticipants",
-                           icon = icon("equalizer", lib = "glyphicon")
-                         ),
-                         
-                         menuSubItem(
-                           "Scatterplot - Countries",
-                           tabName = "dummy",
-                           icon = icon("equalizer", lib = "glyphicon")
+                           icon = icon("move", lib = "glyphicon")
                          ),
                          
                          menuSubItem(
                            "Correlation", 
                            tabName = "correlationView",
                            icon = icon("equalizer", lib = "glyphicon")
-                         ),
-                         
-                         menuSubItem(
-                           "Heatmap",
-                           tabName = "map_view",
-                           icon = icon("fire", lib = "glyphicon")
                          )
                        ),
                        ################## VISUALISATIONS ##################
@@ -202,8 +157,8 @@ shinyUI(fluidPage(
                          startExpanded = F,
                          
                          menuSubItem(
-                           "Kendall's Rank Correlations",
-                           tabName = "kendallTab",
+                           "Correlation Models",
+                           tabName = "corrModelTab",
                            icon = icon("sort-by-attributes-alt", lib = "glyphicon")
                          ),
                          
@@ -270,15 +225,16 @@ shinyUI(fluidPage(
         
         ################## RAW DATA TABLES #################
         tabItem(tabName = "EDA_indiv",
-                includeMarkdown("www/DTable.md"),
+                includeMarkdown("www/instructions/DTable.md"),
                 tags$style(type = "text/css", "#q1 {vertical-align: top;}"),
-                fluidRow(column(12, DT::dataTableOutput(outputId = "Table_indiv"))),
-
+                fluidRow(column(12, uiOutput("raw_selectCountry"))),
+                fluidRow(column(12, DTOutput("raw_filtered_country")))
         ),
+        
         tabItem(tabName = "EDA_country",
-                includeMarkdown("www/DTable.md"),
+                includeMarkdown("www/instructions/DTable.md"),
                 tags$style(type = "text/css", "#q1 {vertical-align: top;}"),
-                fluidRow(column(12, DT::dataTableOutput(outputId = "Table_country"))),
+                fluidRow(column(12, DTOutput("Table_country")))
         ),
         
         tabItem(tabName = "vis_miss",
@@ -291,16 +247,48 @@ shinyUI(fluidPage(
                             ),
                             
                             tabPanel("Missing data from Individual Responses", value = "indiv_miss",
-                                     checkboxInput(inputId = "cluster_indiv",
-                                                   label = "Cluster missingness",
-                                                   value = FALSE),
+                                     fluidRow(column(3,
+                                       dropdownButton(
+                                         inputId = "indiv_miss_adv",
+                                         label = "Advanced Options",
+                                         icon = icon("sliders"),
+                                         status = "success",
+                                         circle = FALSE,
+                                         materialSwitch(
+                                           inputId = "cluster_indiv",
+                                           label = "Cluster missingness",
+                                           status = "success"
+                                         ),
+                                         materialSwitch(
+                                           inputId = "sort_indiv",
+                                           label = "Sort columns by missingness",
+                                           status = "success"
+                                         )
+                                       )
+                                     )),
                                      fluidRow(column(12, shinycssloaders::withSpinner(plotOutput("Indiv_missing_with_ratio", height = "85vh"))))
                             ),
                             
                             tabPanel("Missing data from Countries responses", value = "countries_miss",
-                                     checkboxInput(inputId = "cluster_ctry",
-                                                   label = "Cluster missingness",
-                                                   value = FALSE),
+                                     fluidRow(column(3,
+                                       dropdownButton(
+                                         inputId = "ctry_miss_adv",
+                                         label = "Advanced Options",
+                                         icon = icon("sliders"),
+                                         status = "success",
+                                         circle = FALSE,
+                                         materialSwitch(
+                                           inputId = "cluster_ctry",
+                                           label = "Cluster missingness",
+                                           status = "success"
+                                         ),
+                                         materialSwitch(
+                                           inputId = "sort_ctry",
+                                           label = "Sort columns by missingness",
+                                           status = "success"
+                                         )
+                                       )
+                                     )),
                                      fluidRow(column(12, shinycssloaders::withSpinner(plotOutput("Missing", height = "85vh"))))
                             )
                 )
@@ -309,76 +297,32 @@ shinyUI(fluidPage(
         
         
         ################ SUMMARY STATISTICS ################
-        tabItem(tabName = "individualStats",
+        tabItem(tabName = "summaryStats",
                 fluidRow(
-                  column(4, uiOutput("individualStats_selectCountry")),
-                  column(8, uiOutput("individualStats_selectQuestion"))
-                ),
-                fluidRow(
-                  column(6, tableOutput("statsSelectedQuestion")),
-                  column(6, tableOutput("individualStats_totalObs"))
-                ),
-                tags$br(),
-                tags$br(),
-                fluidRow(column(12,
-                         box(
-                          width = 12,
-                          title = "Individual Response List",
-                          status = "primary",
-                          DT::dataTableOutput(outputId = "datatable_filtered_country")
-                         )
-                ))
-        ),
-        
-        tabItem(tabName ="withinCountry",
-                fluidRow(
-                  column(3, uiOutput("wc_country_sel")),
-                  column(9, shinycssloaders::withSpinner(tableOutput("c_total_obs")))
-                ),
-                tags$br(),
-                fluidRow(
-                  column(6, uiOutput("wc_qA")),
-                  column(6, uiOutput("wc_qB"))
-                ),
-                fluidRow(
-                  column(6, tableOutput("stats_wc_qA")),
-                  column(6, tableOutput("stats_wc_qB"))
-                ),
-                fluidRow( # frequency plots
-                  column(6, shinycssloaders::withSpinner(plotOutput("plot_wc_qA_levels"))),
-                  column(6, shinycssloaders::withSpinner(plotOutput("plot_wc_qB_levels")))
-                ),
-                tags$br(),
-                # fluidRow( # proportion plots
-                #   column(6, shinycssloaders::withSpinner(plotOutput("plot_wc_qA_prop"))),
-                #   column(6, shinycssloaders::withSpinner(plotOutput("plot_wc_qB_prop")))
-                # ),
-                tags$br(), # kendall test plots
-                fluidRow(column(12, shinycssloaders::withSpinner(plotOutput("test_output_plot")))),
-                fluidRow(column(12, shinycssloaders::withSpinner(tableOutput("test_output_table")))),
-                fluidRow(column(12, textOutput("test_output_stats")))
-        ),
-        
-        tabItem(tabName = "betweenCountries",
-                fluidRow(column(6, uiOutput("bc_question"))),
-                fluidRow(
-                  column(3, uiOutput("bc_countryA")),
-                  column(3, shinycssloaders::withSpinner(tableOutput("cA_total_obs"))),
-                  column(3, uiOutput("bc_countryB")),
-                  column(3, shinycssloaders::withSpinner(tableOutput("cB_total_obs")))
-                ),
-                fluidRow(
-                  column(6, shinycssloaders::withSpinner(tableOutput("stats_bc_cA"))),
-                  column(6, shinycssloaders::withSpinner(tableOutput("stats_bc_cB")))
-                ),
-                fluidRow(
-                  column(6, shinycssloaders::withSpinner(plotOutput("plot_bc_qcA_levels"))),
-                  column(6, shinycssloaders::withSpinner(plotOutput("plot_bc_qcB_levels")))
-                ),
-                tags$br(),
-                fluidRow(
-                  column(6, shinycssloaders::withSpinner(plotOutput("plot_bc_qA_prop"))),
-                  column(6, shinycssloaders::withSpinner(plotOutput("plot_bc_qB_prop")))
+                  shinydashboard::box(width = 4, title = "Controls", status = "primary",
+                      selectizeInput(
+                        inputId = "summ_question",
+                        label = "Select Question:",
+                        choices = grouped_minus_ignored,
+                        selected = grouped_minus_ignored[[1]][1]
+                      ),
+                      pickerInput(
+                        inputId = "summ_countries",
+                        label = "Select Countries:",
+                        choices = picker_country_list,
+                        multiple = TRUE,
+                        options = list(
+                          `actions-box` = TRUE,
+                          `live-search` = TRUE,
+                          `max-options` = 5
+                        ),
+                        selected = c("NZL", "AUS", "GBR")
+                      ),
+                      actionButton("summ_update", "Generate Summary", class = "green-button")
+                  ),
+                  shinydashboard::box(width = 8, title = "Summary Statistics", status = "primary",
+                      uiOutput("summ_results")
+                  )
                 )
         ),
         ################ SUMMARY STATISTICS ################
@@ -388,12 +332,12 @@ shinyUI(fluidPage(
         tabItem(tabName = "barGraph",
                 includeMarkdown("www/instructions/bar_instruction.md"),
                 fluidRow(
-                  box(width = 3, title = "Controls", status = "primary",
+                  shinydashboard::box(width = 3, title = "Controls", status = "primary",
                       selectizeInput(
                         inputId = "bar_question",
                         label = "Select Question:",
-                        choices = grouped_questions,
-                        selected = grouped_questions[[1]][1],
+                        choices = grouped_minus_ignored,
+                        selected = grouped_minus_ignored[[1]][1],
                         size = 30
                       ),
                       pickerInput(
@@ -401,19 +345,24 @@ shinyUI(fluidPage(
                         label = "Select Countries:",
                         choices = picker_country_list,
                         multiple = TRUE,
-                        options = list(`actions-box` = TRUE, `live-search` = TRUE, `size` = 30),
-                        selected = c("NZL", "GBR", "AUS")
+                        options = list(
+                          `actions-box` = TRUE,
+                          `live-search` = TRUE,
+                          `size` = 30,
+                          `max-options` = 5
+                        ),
+                        selected = c("NZL", "AUS", "GBR")
                       ),
                       radioGroupButtons(
                         inputId = "bar_type",
                         label = "Display Type:",
-                        choices = c("Count", "Percentage", "Staggered", "Stacked"),
+                        choices = c("Count", "Percentage", "Stacked", "Staggered"),
                         selected = "Count",
                         status = "success"
-                      ),
-                      actionButton("bar_update", "Update Plot", class = "green-button")
+                      )
+                      # actionButton("bar_update", "Update Plot", class = "green-button")
                   ),
-                  box(width = 9, title = "Response Distribution", status = "primary",
+                  shinydashboard::box(width = 9, title = "Response Distribution", status = "primary",
                       shinycssloaders::withSpinner(plotlyOutput("bar_plot", height = "600px"))
                   )
                 )
@@ -422,35 +371,40 @@ shinyUI(fluidPage(
         tabItem(tabName = "scatterParticipants",
                 includeMarkdown("www/instructions/scatter_instruction.md"),
                 fluidRow(
-                  box(width = 3, title = "Controls", status = "primary",
+                  shinydashboard::box(width = 3, title = "Controls", status = "primary",
                       selectizeInput(
                         inputId = "scatter_x",
                         label = "X-axis Question:",
-                        choices = grouped_questions,
-                        selected = grouped_questions[[1]][1]
+                        choices = grouped_minus_ignored,
+                        selected = grouped_minus_ignored[[1]][1]
                       ),
                       selectizeInput(
                         inputId = "scatter_y",
                         label = "Y-axis Question:",
-                        choices = grouped_questions,
-                        selected = grouped_questions[[1]][2]
+                        choices = grouped_minus_ignored,
+                        selected = grouped_minus_ignored[[1]][2]
                       ),
                       pickerInput(
                         inputId = "scatter_countries",
                         label = "Select Countries:",
                         choices = picker_country_list,
                         multiple = TRUE,
-                        options = list(`actions-box` = TRUE, `live-search` = TRUE, `size` = 30),
-                        selected = c("NZL", "USA")
+                        options = list(
+                          `actions-box` = TRUE,
+                          `live-search` = TRUE,
+                          `size` = 30,
+                          `max-options` = 5
+                        ),
+                        selected = c("NZL", "AUS", "GBR")
                       ),
                       sliderInput(
                         "scatter_sample",
-                        "Sample Size:",
-                        min = 100, max = 5000, value = 1000, step = 100
+                        "Sample Size (as % of data):",
+                        min = 10, max = 100, value = 25, step = 1
                       ),
                       actionButton("scatter_update", "Update Plot", class = "green-button")
                   ),
-                  box(width = 9, title = "Participant Scatterplot", status = "primary",
+                  shinydashboard::box(width = 9, title = "Participant Scatterplot", status = "primary",
                       shinycssloaders::withSpinner(plotlyOutput("scatter_plot", height = "600px"))
                   )
                 )
@@ -459,30 +413,34 @@ shinyUI(fluidPage(
         tabItem(tabName = "correlationView",
                 includeMarkdown("www/instructions/corr_instruction.md"),
                 fluidRow(
-                  box(width = 3, title = "Controls", status = "primary",
+                  shinydashboard::box(width = 3, title = "Controls", status = "primary",
                       pickerInput(
                         inputId = "corr_questions",
                         label = "Select Questions:",
-                        choices = grouped_questions,
+                        choices = grouped_minus_ignored,
                         multiple = TRUE,
                         options = list(`actions-box` = TRUE,
                                        `live-search` = TRUE,
                                        `max-options` = 8),
-                        selected = grouped_questions[[1]][1:5]
+                        selected = grouped_minus_ignored[[1]][1:5]
                       ),
                       pickerInput(
                         inputId = "corr_countries",
                         label = "Select Countries:",
                         choices = picker_country_list,
                         multiple = TRUE,
-                        options = list(`actions-box` = TRUE, `live-search` = TRUE, `size` = 30),
-                        selected = c("NZL", "GBR", "AUS")
-                        # selected = names(picker_country_list)
+                        options = list(
+                          `actions-box` = TRUE,
+                          `live-search` = TRUE,
+                          `size` = 30,
+                          `max-options` = 5
+                        ),
+                        selected = c("NZL", "AUS", "GBR")
                       ),
                       radioGroupButtons(
                         inputId = "corr_method",
                         label = "Correlation Method:",
-                        choices = c("Pearson", "Spearman"),
+                        choices = c("Pearson", "Spearman", "Kendall"),
                         selected = "Pearson",
                         status = "success"
                       ),
@@ -526,74 +484,58 @@ shinyUI(fluidPage(
                       )
                   ),
                   
-                  box(width = 9, title = "Correlation Matrix", status = "primary",
+                  shinydashboard::box(width = 9, title = "Correlation Matrix", status = "primary",
                       shinycssloaders::withSpinner(plotOutput("corr_plot", height = "600px"))
                   )
-                )
-        ),
-        
-        tabItem(tabName = "map_view",
-                includeMarkdown("www/instructions/map_instruction.md"),
-                fluidRow(
-                  column(12,
-                         box(width = 3, title = "Controls", status = "primary",
-                             selectizeInput(
-                               inputId = "map_question",
-                               label = "Select Question:",
-                               choices = grouped_questions,
-                               selected = grouped_questions[[1]][1]
-                             ),
-                             radioGroupButtons(
-                               inputId = "map_metric",
-                               label = "Display Metric:",
-                               choices = c("Mean", "Median", "Mode"),
-                               selected = "Mean",
-                               status = "success"
-                             ),
-                             actionButton("map_update", "Update Map", class = "green-button")
-                         )
-                  )
-                ),
-                fluidRow(
-                  column(12, leafletOutput("map", height = "700px", width = "100%"))
                 )
         ),
         ################## VISUALISATIONS ##################
         
         
         ###################### MODELS ######################
-        tabItem(tabName = "kendallTab",
-                includeMarkdown("www/instructions/kendall_instruction.md"),
+        tabItem(tabName = "corrModelTab",
+                includeMarkdown("www/instructions/corrModel_instruction.md"),
                 fluidRow(
-                  box(width = 3, title = "Controls", status = "primary",
+                  shinydashboard::box(width = 3, title = "Controls", status = "primary",
                       selectizeInput(
                         inputId = "kendall_var1",
                         label = "Select Variable 1:",
-                        choices = grouped_questions,
-                        selected = grouped_questions[[1]][1]
+                        choices = grouped_minus_ignored,
+                        selected = grouped_minus_ignored[[1]][1]
                       ),
                       selectizeInput(
                         inputId = "kendall_var2",
                         label = "Select Variable 2:",
-                        choices = grouped_questions,
-                        selected = grouped_questions[[1]][2]
+                        choices = grouped_minus_ignored,
+                        selected = grouped_minus_ignored[[1]][2]
                       ),
                       pickerInput(
                         inputId = "kendall_countries",
                         label = "Select Countries:",
                         choices = picker_country_list,
                         multiple = TRUE,
-                        options = list(`actions-box` = TRUE, `live-search` = TRUE),
-                        selected = c("NZL", "USA")
+                        options = list(
+                          `actions-box` = TRUE,
+                          `live-search` = TRUE,
+                          `max-options` = 5
+                        ),
+                        selected = c("NZL", "AUS")
                       ),
-                      sliderInput(
-                        "kendall_sample",
-                        "Sample Size:",
-                        min = 100, max = 5000, value = 1000, step = 100
+                      radioGroupButtons(
+                        inputId = "corr_choice",
+                        label = "Correlation Method:",
+                        choices = c("Pearson", "Spearman", "Kendall"),
+                        selected = "Pearson",
+                        status = "success"
                       ),
+                      # sliderInput(
+                      #   "kendall_sample",
+                      #   "Sample Size:",
+                      #   min = 100, max = 5000, value = 1000, step = 100
+                      # ),
                       actionButton("kendall_run", "Run Analysis", class = "green-button")
                   ),
-                  box(width = 9, title = "Kendall's Rank Correlation", status = "primary",
+                  shinydashboard::box(width = 9, title = "Correlation", status = "primary",
                       tabsetPanel(
                         tabPanel("Results",
                                  verbatimTextOutput("kendall_results"),
@@ -608,29 +550,33 @@ shinyUI(fluidPage(
         tabItem(tabName = "anovaTab",
                 includeMarkdown("www/instructions/anova_instruction.md"),
                 fluidRow(
-                  box(width = 3, title = "Controls", status = "primary",
+                  shinydashboard::box(width = 3, title = "Controls", status = "primary",
                       selectizeInput(
                         inputId = "anova_var",
                         label = "Select Variable:",
-                        choices = grouped_questions,
-                        selected = grouped_questions[[1]][1]
+                        choices = grouped_minus_ignored,
+                        selected = grouped_minus_ignored[[1]][1]
                       ),
                       pickerInput(
                         inputId = "anova_countries",
                         label = "Select Countries:",
                         choices = picker_country_list,
                         multiple = TRUE,
-                        options = list(`actions-box` = TRUE, `live-search` = TRUE),
-                        selected = c("NZL", "USA", "GBR", "AUS")
+                        options = list(
+                          `actions-box` = TRUE,
+                          `live-search` = TRUE,
+                          `max-options` = 5
+                        ),
+                        selected = c("NZL", "AUS")
                       ),
-                      sliderInput(
-                        "anova_sample",
-                        "Sample Size:",
-                        min = 100, max = 5000, value = 1000, step = 100
-                      ),
+                      # sliderInput(
+                      #   "anova_sample",
+                      #   "Sample Size:",
+                      #   min = 100, max = 5000, value = 1000, step = 100
+                      # ),
                       actionButton("anova_run", "Run Analysis", class = "green-button")
                   ),
-                  box(width = 9, title = "ANOVA Results", status = "primary",
+                  shinydashboard::box(width = 9, title = "ANOVA Results", status = "primary",
                       tabsetPanel(
                         tabPanel("ANOVA Table",
                                  verbatimTextOutput("anova_results")),
@@ -649,19 +595,21 @@ shinyUI(fluidPage(
         tabItem(tabName = "regressionTab",
                 includeMarkdown("www/instructions/linearreg_instruction.md"),
                 fluidRow(
-                  box(width = 3, title = "Controls", status = "primary",
+                  shinydashboard::box(width = 3, title = "Controls", status = "primary",
                       selectizeInput(
                         inputId = "regression_dep",
                         label = "Dependent Variable:",
-                        choices = grouped_questions,
-                        selected = grouped_questions[[1]][1]
+                        choices = grouped_minus_ignored,
+                        selected = grouped_minus_ignored[[1]][1]
                       ),
                       selectizeInput(
                         inputId = "regression_indep",
                         label = "Independent Variables:",
-                        choices = grouped_questions,
+                        choices = grouped_minus_ignored,
                         multiple = TRUE,
-                        selected = grouped_questions[[1]][2:3]
+                        selected = grouped_minus_ignored[[1]][2:3],
+                        options = list(`live-search` = TRUE,
+                              maxItems = 5)
                       ),
                       pickerInput(
                         inputId = "regression_country",
@@ -670,21 +618,21 @@ shinyUI(fluidPage(
                         multiple = FALSE,
                         selected = "NZL"
                       ),
-                      sliderInput(
-                        "regression_sample",
-                        "Sample Size:",
-                        min = 100, max = 5000, value = 1000, step = 100
-                      ),
+                      # sliderInput(
+                      #   "regression_sample",
+                      #   "Sample Size:",
+                      #   min = 100, max = 5000, value = 1000, step = 100
+                      # ),
                       actionButton("regression_run", "Run Regression", class = "green-button")
                   ),
-                  box(width = 9, title = "Regression Analysis", status = "primary",
+                  shinydashboard::box(width = 9, title = "Regression Analysis", status = "primary",
                       tabsetPanel(
                         tabPanel("Model Summary",
                                  verbatimTextOutput("regression_summary")),
                         tabPanel("Diagnostics",
                                  plotOutput("regression_diag")),
-                        tabPanel("Coefficients",
-                                 DTOutput("regression_coef")),
+                        # tabPanel("Coefficients",
+                        #          DTOutput("regression_coef")),
                         tabPanel("Prediction",
                                  plotlyOutput("regression_prediction"))
                       )
@@ -706,6 +654,7 @@ shinyUI(fluidPage(
                 fluidRow(
                   column(12, h1("Meet Our Team", style = "text-align: center; color: #2c3e50;"))
                 ),
+                
                 # Team Leadership Section
                 fluidRow(
                   column(12, h3("Team Leadership", style = "color: #2c3e50; border-bottom: 2px solid #00a65a; padding-bottom: 10px;"))
@@ -726,12 +675,13 @@ shinyUI(fluidPage(
                          )
                   )
                 ),
+                
                 # Data Science Section
                 fluidRow(
                   column(12, h3("Data Science", style = "color: #2c3e50; border-bottom: 2px solid #00a65a; padding-bottom: 10px; margin-top: 40px;"))
                 ),
                 fluidRow(
-                  column(4,
+                  column(4, #copy this entire column to add another member
                          div(class = "team-card",
                              img(src = "images/AV.png", style = "width: 150px; height: 150px; object-fit: cover; border-radius: 50%; border: 4px solid #f1f8ff; margin: 0 auto 20px; display: block;"),
                              div(style = "text-align: center;",
@@ -746,6 +696,7 @@ shinyUI(fluidPage(
                          )
                   )
                 ),
+                
                 # Past Members Section
                 fluidRow(
                   column(12, h3("Past Members", style = "color: #2c3e50; border-bottom: 2px solid #00a65a; padding-bottom: 10px; margin-top: 40px;"))
@@ -767,6 +718,7 @@ shinyUI(fluidPage(
                          )
                   )
                 ),
+                
                 # Project Information
                 fluidRow(
                   column(12,
@@ -783,7 +735,7 @@ shinyUI(fluidPage(
 
         
       ) #end tabItems
-    ) # end dashboardBody
+    ) #end dashboardBody
     
   ) #end dashboardPage
   

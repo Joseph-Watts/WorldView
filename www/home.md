@@ -54,24 +54,25 @@ The WVS is a pioneering global research project spanning over 100 countries that
 
 ## 🚀 What You Can Explore  
 1. **Variable Documentation**  
-   - Master questionnaires and codebooks  
-   - Detailed question explanations  
+  - Master questionnaires and codebooks  
+  - Detailed question explanations  
    
 2. **Interactive Data Exploration**  
-   - Participant-level responses  
-   - Country-level aggregates  
-   - Missing data visualizations  
-
+  - Participant-level responses  
+  - Country-level aggregates  
+  - Missing data visualizations  
+   
 3. **Statistical Insights**  
-   - Summary statistics by country  
-   - Correlation analyses  
-   - Comparative visualizations  
-
+  - Summary statistics by country  
+  - Correlation analyses  
+  - Comparative visualizations  
+   
 4. **Advanced Modeling**  
-   - Kendall's rank correlations  
-   - ANOVA country comparisons  
-   - Regression models  
-
+  - Kendall's rank correlations  
+  - ANOVA country comparisons  
+  - Regression models  
+   
+   
 ---
 
 ## 📊 Featured Visualizations  

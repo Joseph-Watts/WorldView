@@ -9,13 +9,13 @@
 # load original data
 orig_indiv_data <- readRDS("WVS_Dataset/WVS7_Individual.rds")
 orig_country_data <- readRDS("WVS_Dataset/WVS7_Country.rds")
-orig_codebook_data <- read_xlsx("WVS_Dataset/WVS7_Codebook_updated_labels.xlsx")
-orig_UNSD_data <- read_excel("WVS_Dataset/UNSD — Methodology.xlsx")
+orig_codebook_data <- readxl::read_xlsx("WVS_Dataset/WVS7_Codebook_updated_labels.xlsx")
+orig_UNSD_data <- readxl::read_excel("WVS_Dataset/UNSD — Methodology.xlsx")
 
 
 # load intermediaries
 WVS7_part_countries <- orig_country_data[c(1:2)]
-UNSD_countries_list <- orig_UNSD_data[c(3:12)]
+UNSD_countries_list <- orig_UNSD_data[,c(4,6,8,12)]
 
 # countries and questions simple lists
 WVS7_countries_list <- levels(orig_country_data$B_COUNTRY)
@@ -32,18 +32,21 @@ indiv_ordinal <- as.data.frame(lapply(orig_indiv_data, function(col) {
 }))
 
 
-
 # Ignored questions (given the number of factors they have or any other condition)
-ignored_questions <- c("Q223", "Q266", "Q267", "Q268", "Q272", "Q290")
+ignored_questions <- c("Q223", # political parties for each country - almost 1000 different factors
+                       "Q266", # birth place - basically all countries ~ 200 factors
+                       "Q267", # birth place - basically all countries ~ 200 factors
+                       "Q268", # birth place - basically all countries ~ 200 factors
+                       "Q272", # language groupings - # different factors
+                       "Q290") # ethnic groupings - # different factors
 
 # Questions that doesn't fit the translation between nominal to numeric
 # TBD
 
-
 # transformation of non-ordinal data into numerical
-indiv_ordinal <- indiv_ordinal[, setdiff(names(indiv_ordinal), ignored_questions)] %>%
+indiv_ordinal <- indiv_ordinal[, lubridate::setdiff(names(indiv_ordinal), ignored_questions)] %>%
   dplyr::mutate(
-    Q56 = case_when(
+    Q56 = dplyr::case_when(
       Q56 == "Better off" ~ 1,
       Q56 == "Worse off" ~ -1,
       Q56 == "Or about the same" ~ 0,
@@ -51,35 +54,35 @@ indiv_ordinal <- indiv_ordinal[, setdiff(names(indiv_ordinal), ignored_questions
     )
   ) %>% ######################################  ######################################
 dplyr::mutate(
-  Q57 = case_when(
+  Q57 = dplyr::case_when(
     Q57 == "Most people can be trusted" ~ 1,
     Q57 == "Need to be very careful" ~ 0,
     TRUE ~ NA_real_
   )
 ) %>% ######################################  ######################################
-dplyr::mutate(Q91 = case_when(
+dplyr::mutate(Q91 = dplyr::case_when(
   Q91 == "France" ~ 2,
   Q91 == "China" ~ 1,
   Q91 == "India" ~ 0,
   TRUE ~ NA_real_
 )) %>% ######################################  ######################################
-dplyr::mutate(Q92 = case_when(
+dplyr::mutate(Q92 = dplyr::case_when(
   Q92 == "Washington DC" ~ 2,
   Q92 == "London" ~ 1,
   Q92 == "Geneva" ~ 0,
   TRUE ~ NA_real_
 )) %>% ######################################  ######################################
 dplyr::mutate(
-  Q93 = case_when(
+  Q93 = dplyr::case_when(
     Q93 == "Climate change" ~ 2,
     Q93 == "Human rights" ~ 1,
     Q93 == "Destruction of historic monuments" ~ 0,
     TRUE ~ NA_real_
   )
 ) %>% ######################################  ######################################
-dplyr::mutate(across(
+dplyr::mutate(dplyr::across(
   c(Q94, Q95, Q96, Q97, Q98, Q99, Q100, Q101, Q102, Q103, Q104, Q105),
-  ~ case_when(
+  ~ dplyr::case_when(
     . == "Active member" ~ 1,
     . == "Inactive member" ~ -1,
     . == "Don't belong" | . == "Not a member" ~ 0,
@@ -87,26 +90,26 @@ dplyr::mutate(across(
   )
 )) %>% ######################################  ######################################
 dplyr::mutate(
-  Q111 = case_when(
+  Q111 = dplyr::case_when(
     Q111 == "Protecting environment" ~ 2,
     Q111 == "Economy growth and creating jobs" ~ 1,
     Q111 == "Other answer" ~ 0,
     TRUE ~ NA_real_
   )
 ) %>% ######################################  ######################################
-dplyr::mutate(across(
+dplyr::mutate(dplyr::across(
   c(Q139, Q140, Q141, Q144, Q145, Q151, Q165, Q166, Q167, Q168, Q269, Q285),
-  ~ case_when(. == "Yes" ~ 1, . == "No" ~ 0, TRUE ~ NA_real_)
+  ~ dplyr::case_when(. == "Yes" ~ 1, . == "No" ~ 0, TRUE ~ NA_real_)
 )) %>% ######################################  ######################################
-dplyr::mutate(across(
+dplyr::mutate(dplyr::across(
   c(Q149, Q150),
-  ~ case_when(. == "Freedom" ~ 1,
+  ~ dplyr::case_when(. == "Freedom" ~ 1,
               . == "Equality" | . == "Security" ~ 0, 
               TRUE ~ NA_real_)
 )) %>% ######################################  ######################################
-dplyr::mutate(across(
+dplyr::mutate(dplyr::across(
   c(Q152, Q153),
-  ~ case_when(
+  ~ dplyr::case_when(
     . == "A high level of economic growth" ~ 3,
     . == "Making sure this country has strong defence forces" ~ 2,
     . == "Seeing that people have more say about how  are done at their jobs and in their communities" ~ 1,
@@ -114,9 +117,9 @@ dplyr::mutate(across(
     TRUE ~ NA_real_
   )
 )) %>% ######################################  ######################################
-dplyr::mutate(across(
+dplyr::mutate(dplyr::across(
   c(Q154, Q155),
-  ~ case_when(
+  ~ dplyr::case_when(
     . == "Maintaining order in the nation" ~ 3,
     . == "Giving people more say in important government decisions" ~ 2,
     . == "Fighting rising prices" ~ 1,
@@ -124,9 +127,9 @@ dplyr::mutate(across(
     TRUE ~ NA_real_
   )
 )) %>% ######################################  ######################################
-dplyr::mutate(across(
+dplyr::mutate(dplyr::across(
   c(Q156, Q157),
-  ~ case_when(
+  ~ dplyr::case_when(
     . == "A stable economy" ~ 3,
     . == "Progress toward a less impersonal and more humane society" ~ 2,
     . == "Progress toward a society in which Ideas count more than money" ~ 1,
@@ -135,7 +138,7 @@ dplyr::mutate(across(
   )
 )) %>% ######################################  ######################################
 dplyr::mutate(
-  Q173 = case_when(
+  Q173 = dplyr::case_when(
     Q173 == "A religious person" ~ 1,
     Q173 == "Not a religious person" ~ 0,
     Q173 == "An atheist" ~ -1,
@@ -143,38 +146,38 @@ dplyr::mutate(
   )
 ) %>% ######################################  ######################################
 dplyr::mutate(
-  Q174 = case_when(
+  Q174 = dplyr::case_when(
     Q174 == "Follow religious norms and ceremonies" ~ 1,
     Q174 == "Do good to other people" ~ 0,
     TRUE ~ NA_real_
   )
 ) %>% ######################################  ######################################
 dplyr::mutate(
-  Q175 = case_when(
+  Q175 = dplyr::case_when(
     Q175 == "Make sense of life after death" ~ 1,
     Q175 == "Make sense of life in this world" ~ 0,
     TRUE ~ NA_real_
   )
 ) %>% ######################################  ######################################
 dplyr::mutate(
-  Q260 = case_when(
+  Q260 = dplyr::case_when(
     Q260 == "Male" ~ 1,
     Q260 == "Female" ~ 0,
     TRUE ~ NA_real_
   )) %>% ######################################  ######################################
 dplyr::mutate(
-  Q263 = case_when(
+  Q263 = dplyr::case_when(
     Q263 == "I am born in this country" ~ 1,
     Q263 == "I am an immigrant to this country (born outside this country)" ~ 0,
     TRUE ~ NA_real_
   )
 ) %>% ######################################  ######################################
-dplyr::mutate(across(
+dplyr::mutate(dplyr::across(
   c(Q264, Q265),
-  ~ case_when(. == "Immigrant" ~ 1, . == "Not an immigrant" ~ 0, TRUE ~ NA_real_)
+  ~ dplyr::case_when(. == "Immigrant" ~ 1, . == "Not an immigrant" ~ 0, TRUE ~ NA_real_)
 )) %>% ######################################  ######################################
 dplyr::mutate(
-  Q271 = case_when(
+  Q271 = dplyr::case_when(
     Q271 == "Yes, both own parent(s) and parent(s) in law" ~ 3,
     Q271 == "Yes, own parent(s)" ~ 2,
     Q271 == "Yes, parent(s) in law" ~ 1,
@@ -183,7 +186,7 @@ dplyr::mutate(
   )
 ) %>% ######################################  ######################################
 dplyr::mutate(
-  Q273 = case_when(
+  Q273 = dplyr::case_when(
     Q273 == "Married" ~ 5,
     Q273 == "Living together as married" ~ 4,
     Q273 == "Divorced" ~ 3,
@@ -193,9 +196,9 @@ dplyr::mutate(
     TRUE ~ NA_real_
   )
 ) %>% ######################################  ######################################
-dplyr::mutate(across(
+dplyr::mutate(dplyr::across(
   c(Q279, Q280),
-  ~ case_when(
+  ~ dplyr::case_when(
     . == "Full time (30 hours a week or more)" ~ 9,
     . == "Part time (less than 30 hours a week)" ~ 8,
     . == "Self employed" ~ 7,
@@ -209,9 +212,9 @@ dplyr::mutate(across(
     TRUE ~ NA_real_
   )
 )) %>% ######################################  ######################################
-dplyr::mutate(across(
+dplyr::mutate(dplyr::across(
   c(Q281, Q282, Q283),
-  ~ case_when(
+  ~ dplyr::case_when(
     . == "Higher administrative (for example: banker, executive in big business, high government official, union official)" ~ 11,
     . == "Professional and technical (for example: doctor, teacher, engineer, artist, accountant, nurse)" ~ 10,
     . == "Skilled worker (for example: foreman, motor mechanic, printer, seamstress, tool and die maker, electrician)" ~ 9,
@@ -228,7 +231,7 @@ dplyr::mutate(across(
   )
 )) %>% ######################################  ######################################
 dplyr::mutate(
-  Q284 = case_when(
+  Q284 = dplyr::case_when(
     Q284 == "Private business or industry" ~ 2,
     Q284 == "Private non-profit organization" ~ 1,
     Q284 == "Government or public institution" ~ 0,
@@ -236,7 +239,7 @@ dplyr::mutate(
   )
 ) %>% ######################################  ######################################
 dplyr::mutate(
-  Q289 = case_when(
+  Q289 = dplyr::case_when(
     Q289 == "Do not belong to a denomination" ~ 9,
     Q289 == "Catholic (Roman/Greek/etc)" ~ 8,
     Q289 == "Protestant" ~ 7,
@@ -251,21 +254,21 @@ dplyr::mutate(
   )
 ) %>% ######################################  ######################################
 dplyr::mutate(
-  E1_LITERACY = case_when(
+  E1_LITERACY = dplyr::case_when(
     E1_LITERACY == "Literate" ~ 1,
     E1_LITERACY == "Illiterate" ~ 0,
     TRUE ~ NA_real_
   )
 ) %>% ######################################  ######################################
 dplyr::mutate(
-  F_INTPRIVACY = case_when(
+  F_INTPRIVACY = dplyr::case_when(
     F_INTPRIVACY == "There were other people around who could follow the interview" ~ 1,
     F_INTPRIVACY == "There were no other people around who could follow the interview" ~ 0,
     TRUE ~ NA_real_
   )
 ) %>% ######################################  ######################################
 dplyr::mutate(
-  H_SETTLEMENT = case_when(
+  H_SETTLEMENT = dplyr::case_when(
     H_SETTLEMENT == "Capital city" ~ 4,
     H_SETTLEMENT == "Regional center" ~ 3,
     H_SETTLEMENT == "District center" ~ 2,
@@ -274,7 +277,7 @@ dplyr::mutate(
     TRUE ~ NA_real_
   )
 ) %>% ######################################  ######################################
-dplyr::mutate(H_URBRURAL = case_when(H_URBRURAL == "Urban" ~ 1, H_URBRURAL == "Rural" ~ 0, TRUE ~ NA_real_))
+dplyr::mutate(H_URBRURAL = dplyr::case_when(H_URBRURAL == "Urban" ~ 1, H_URBRURAL == "Rural" ~ 0, TRUE ~ NA_real_))
 
 
 
@@ -282,21 +285,19 @@ dplyr::mutate(H_URBRURAL = case_when(H_URBRURAL == "Urban" ~ 1, H_URBRURAL == "R
 
 # picker lists
 WVS7_part_countries <- WVS7_part_countries %>%
-  left_join(
-    UNSD_countries_list %>%
-      select('ISO-alpha3 Code', 'Region Name'),
+  dplyr::left_join(
+    UNSD_countries_list %>% 
+      dplyr::select(`ISO-alpha3 Code`, `Region Name`),
     by = c("B_COUNTRY_ALPHA" = "ISO-alpha3 Code")
   ) %>%
-  mutate('Region Name' = ifelse(is.na('Region Name'), "Not defined", 'Region Name'))
+  dplyr::mutate(`Region Name` = coalesce(`Region Name`, "Not defined"))
 
-picker_country_list <- WVS7_part_countries %>%
-  arrange('Region Name', 'B_COUNTRY') %>%
-  group_by('Region Name') %>%
-  summarise(
-    Countries = list(setNames(B_COUNTRY_ALPHA, B_COUNTRY)),
-    .groups = "drop"
-  ) %>%
-  deframe()
+
+picker_country_list <- WVS7_part_countries %>% dplyr::arrange('Region Name', 'B_COUNTRY') %>%
+  dplyr::group_by('Region Name') %>%
+  dplyr::summarise(Countries = list(stats::setNames(B_COUNTRY_ALPHA, B_COUNTRY)), .groups = "drop") %>%
+  tibble::deframe()
+
 
 ###########################-
 #### END OF WAVE 7     ####

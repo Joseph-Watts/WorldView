@@ -284,186 +284,6 @@ choicesgrpQ
 ###################################################################################
 ###################################################################################
 ###################################################################################
-###################################################################################
-###################################################################################
-###################################################################################
-###################################################################################
-###################################################################################
-###################################################################################
-
-# # ######################
-# # # PACKAGE COLLECTION #
-# # ######################
-# library(shiny)
-# 
-# required_packages <- c('collapsibleTree', 'DT', 'ggplot2', 'gt', 'gtsummary', 'leaflet', 'leaflet.extras', 'naniar',
-#                        'readxl', 'rnaturalearth', 'rnaturalearthdata', 'rvest', 'sf', 'shinyBS', 'shinycssloaders', 'shinydashboard',
-#                        'shinyWidgets', 'tidyverse', 'tigris', 'vcd', 'dplyr', 'recipes', 'GGally', 'corrgram', 'corrplot',
-#                        'ggpubr', 'rstatix', 'broom', 'AICcmodavg', 'viridis', 'scales', 'colorspace', 'plotly')
-# 
-# for (packageName in required_packages) {
-#   if (!requireNamespace(packageName, quietly = TRUE)) {
-#     install.packages(packageName)
-#   }
-# }
-# 
-# library(collapsibleTree)
-# library(DT)
-# library(ggplot2)
-# library(gt)
-# library(gtsummary)
-# library(leaflet)
-# library(leaflet.extras)
-# library(naniar)
-# library(readxl)
-# library(rnaturalearth)
-# library(rvest)
-# library(sf)
-# library(shinyBS)
-# library(shinycssloaders)
-# library(shinydashboard)
-# library(shinyWidgets)
-# library(tidyverse)
-# library(tigris)
-# library(vcd)
-# library(dplyr)
-# library(recipes)
-# library(GGally)
-# library(corrgram)
-# library(corrplot)
-# library(ggpubr)
-# library(rstatix)
-# library(broom)
-# library(AICcmodavg)
-# library(viridis)
-# library(scales)
-# library(colorspace)
-# library(plotly)
-# 
-# # ####################################
-# # # SETTING SEED FOR REPRODUCIBILITY #
-# # ####################################
-# set.seed(20241211)
-# 
-# # #############################################
-# # # RUN THIS LINE ON THE VERY FIRST EXECUTION #
-# # #############################################
-# # source(file.path("Support_Files/WVS_Wave7_Setup.R"), local = TRUE)
-# 
-# # ###########################
-# # # wave 7 - DATA WRANGLING #
-# # ###########################
-# source(file.path("Support_Files/WVS_Wave7_Wrangling.R"), local = TRUE)
-# 
-# # #####################
-# # # SUPPORT FUNCTIONS #
-# # #####################
-# source(file.path("Support_Files/functions.R"), local = TRUE)
-# 
-# # ########################################
-# # # GLOBAL VARIABLES AND HELPER FUNCTIONS #
-# # ########################################
-# 
-# # Question ID mapping function
-# get_question_id <- function(label) {
-#   # Access the global codebook data
-#   var_info <- orig_codebook_data
-#   # Handle case where label might not be found
-#   if (!label %in% var_info$ColLab) {
-#     warning(paste("Label not found in codebook:", label))
-#     return(NULL)
-#   }
-#   var_info$Col_ID[var_info$ColLab == label]
-# }
-# 
-# # Function to get grouped questions
-# get_groupedQs_I <- function() {
-#   var_info <- orig_codebook_data
-#   sections <- as.list(unique(var_info$Section))
-#   sections_ord <- factor(var_info$Section, ordered = TRUE, levels = sections)
-#   testDD <- data.frame(group = sections_ord,
-#                        qvar = var_info$ColLab)
-#   choicesgrpQ <- split(testDD$qvar, testDD$group, lex.order = FALSE)
-#   choicesgrpQ <- choicesgrpQ[-1] # remove IDs and sequencing
-#   choicesgrpQ <- head(choicesgrpQ, -1) # remove interviewer obs
-#   choicesgrpQ
-# }
-# 
-# # Create global grouped_questions variable
-# grouped_questions <- get_groupedQs_I()
-# 
-# # Function to create country picker list
-# get_country_picker_list <- function() {
-#   countries <- unique(orig_indiv_data$B_COUNTRY_ALPHA)
-#   country_names <- unique(orig_indiv_data$B_COUNTRY)
-#   setNames(as.list(countries), country_names)
-# }
-# 
-# # Initialize picker_country_list
-# picker_country_list <- get_country_picker_list()
-# 
-# # Load world map with ISO_A3 codes
-# world <- ne_countries(scale = "medium", returnclass = "sf")
-# 
-# # Define dynamic list of available ISO-A3 countries
-# available_iso <- unique(orig_indiv_data$B_COUNTRY_ALPHA)
-# 
-# # Filter map to show only available countries
-# world_available <- world %>% filter(iso_a3 %in% available_iso)
-# 
-# # ########################################
-# # # DATA VALIDATION CHECKS               #
-# # ########################################
-# 
-# # Verify all required datasets are loaded
-# required_datasets <- c("orig_indiv_data", "orig_country_data", "orig_codebook_data", "indiv_ordinal")
-# missing_datasets <- setdiff(required_datasets, ls())
-# 
-# if (length(missing_datasets) > 0) {
-#   stop(paste("The following required datasets are missing:", 
-#              paste(missing_datasets, collapse = ", ")))
-# }
-# 
-# # Verify critical columns exist
-# if (!"B_COUNTRY_ALPHA" %in% names(orig_indiv_data)) {
-#   stop("B_COUNTRY_ALPHA column missing from orig_indiv_data")
-# }
-# 
-# if (!"ColLab" %in% names(orig_codebook_data)) {
-#   stop("ColLab column missing from orig_codebook_data")
-# }
-# 
-# # ########################################
-# # # DEBUGGING HELPERS                    #
-# # ########################################
-# 
-# # Print loaded datasets
-# cat("Loaded datasets:\n")
-# print(ls(pattern = "orig_|indiv_"))
-# 
-# # Print sample of question labels
-# if (exists("grouped_questions") && length(grouped_questions) > 0) {
-#   cat("\nSample question groups:\n")
-#   print(names(grouped_questions)[1:min(3, length(grouped_questions))])
-#   
-#   cat("\nSample questions from first group:\n")
-#   print(grouped_questions[[1]][1:min(3, length(grouped_questions[[1]]))])
-# } else {
-#   warning("grouped_questions not created successfully")
-# }
-# 
-# # Print country list sample
-# if (exists("picker_country_list") && length(picker_country_list) > 0) {
-#   cat("\nSample countries:\n")
-#   print(picker_country_list[1:min(5, length(picker_country_list))])
-# } else {
-#   warning("picker_country_list not created successfully")
-# }
-
-
-###################################################################################
-###################################################################################
-###################################################################################
 
 
 
@@ -481,4 +301,156 @@ indep_ids <- get_question_id(regression_indep)
 
 
 view(indep_ids)
+
+
+
+###################################################################################
+###################################################################################
+###################################################################################
+
+# # summary(orig_indiv_data[,4:6])
+# 
+# test_cty <- c("NZL", "GBR", "USA", "BRA", "IND")
+# test_q <- "Q112"
+# 
+# x <- orig_indiv_data |>
+#   filter(B_COUNTRY_ALPHA == test_cty) |>
+#   select(all_of(test_q))
+# 
+# # summary(orig_indiv_data[,4:6])
+# 
+# summary(x)
+# 
+# skimr::skim(x)
+# Hmisc::describe(x)
+# psych::describe(x)
+# 
+# 
+# 
+# 
+# orig_indiv_data %>%
+#   filter(B_COUNTRY_ALPHA %in% test_cty) %>%
+#   select(country = B_COUNTRY, response = !!test_q)
+
+
+###################################################################################
+###################################################################################
+###################################################################################
+
+# # Install packages if needed
+# if (!require("visdat")) install.packages("visdat")
+# if (!require("ggplot2")) install.packages("ggplot2")
+# if (!require("dplyr")) install.packages("dplyr")
+# if (!require("tidyr")) install.packages("tidyr")
+# 
+# library(visdat)
+# library(ggplot2)
+# library(dplyr)
+# library(tidyr)
+# 
+# # Create the plot
+# vis_miss_type(mixed_data)
+# 
+# 
+# # Visualize variable types with vis_dat
+# vis_dat(orig_country_data) +
+#   theme(axis.text.x = element_blank()) +
+#   scale_fill_manual(values = c(
+#     "numeric" = "#00C1DD",
+#     "factor" = "#D90000",
+#     "NA" = "#00FF00"
+#   ))
+# 
+
+
+
+###################################################################################
+###################################################################################
+###################################################################################
+
+
+
+
+for (packageName in required_packages) {
+  print(packageName)
+  # if (!requireNamespace(packageName)) {
+  #   install.packages(packageName)
+  # }
+}
+
+
+
+###################################################################################
+###################################################################################
+###################################################################################
+
+
+DT::datatable(data = orig_country_data %>%
+                mutate(across(where(is.numeric), ~ round(., 2))),
+              options = list(scrollX = TRUE))
+
+
+
+
+str(orig_country_data, list.len = ncol(orig_country_data))
+
+
+
+
+
+TC <- orig_country_data
+TV <- var_info
+
+for (i in 3:421) { # from Q1 to Q290
+  names(TC) <- sapply(names(TC), function(name) {
+    if (name %in% names(TV$ColLab[i+1]) && !grepl("\\.", name)) {
+      title_lookup[name]
+    } else {
+      name
+    }
+  })
+}
+
+TC
+
+names(TC[,3:421])
+
+TV$ColLab[5]
+
+
+str(TC, list.len = ncol(TC))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

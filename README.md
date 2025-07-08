@@ -1,4 +1,4 @@
-# World View Project
+# WorldView Project
 
 ## Description & Objective
 

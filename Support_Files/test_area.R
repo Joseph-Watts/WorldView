@@ -6,10 +6,25 @@ rsconnect::setAccountInfo(name='andredevito',
                           secret='kAQY9DjhgbkqemEz9F6q6I9ZaW+V3etzK/+/P4wj')
 
 library(rsconnect)
-rsconnect::deployApp('D:/Documents/GitHub/PSYC382_WVS7_Shiny')
+rsconnect::deployApp('D:/Documents/GitHub/WorldView')
 
 
 
+rsconnect::accountInfo()
+
+
+
+rsconnect::setAccountInfo(name='ucspsh',
+                          token='4CE7881367D5B8DD661F05F00FB78F22',
+                          secret='6DuQQ+k2tMurvv9xxo6YRMJRmlqgnINyOV3FV6IT')
+
+rsconnect::deployApp('D:/Documents/GitHub/WorldView')
+
+
+rsconnect::accounts()
+rsconnect::removeAccount()
+
+renv::refresh()
 
 ###################################################################################
 ###################################################################################

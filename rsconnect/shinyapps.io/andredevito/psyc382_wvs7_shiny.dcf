@@ -5,6 +5,6 @@ account: andredevito
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 14969906
-bundleId: 10575381
+bundleId:
 url: https://andredevito.shinyapps.io/psyc382_wvs7_shiny/
 version: 1

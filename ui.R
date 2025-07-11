@@ -729,8 +729,12 @@ shinyUI(fluidPage(
                         inputId = "regression_country",
                         label = "Select Country:",
                         choices = picker_country_list,
-                        multiple = FALSE,
-                        selected = "NZL"
+                        multiple = TRUE,
+                        selected = "NZL",
+                        options = list(
+                          `actions-box` = TRUE,
+                          `live-search` = TRUE
+                        ),
                       ),
                       # sliderInput(
                       #   "regression_sample",

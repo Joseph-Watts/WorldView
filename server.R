@@ -1115,7 +1115,7 @@ shinyServer(
       # Apply country filter if selected
       if (!is.null(input$regression_country)) {
         data <- data %>%
-          dplyr::filter(B_COUNTRY_ALPHA == input$regression_country)
+          dplyr::filter(B_COUNTRY_ALPHA %in% input$regression_country)
       }
 
       # # Apply sampling for performance - MOMENTARILY DISABLED

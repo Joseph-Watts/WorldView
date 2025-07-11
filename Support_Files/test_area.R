@@ -370,21 +370,6 @@ view(indep_ids)
 
 
 
-
-for (packageName in required_packages) {
-  print(packageName)
-  # if (!requireNamespace(packageName)) {
-  #   install.packages(packageName)
-  # }
-}
-
-
-
-###################################################################################
-###################################################################################
-###################################################################################
-
-
 DT::datatable(data = orig_country_data %>%
                 mutate(across(where(is.numeric), ~ round(., 2))),
               options = list(scrollX = TRUE))
@@ -419,27 +404,6 @@ TV$ColLab[5]
 
 
 str(TC, list.len = ncol(TC))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

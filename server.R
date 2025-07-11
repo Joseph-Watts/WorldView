@@ -3,7 +3,6 @@
 #' Code based on: https://shiny.posit.co/r/gallery/life-sciences/biodiversity-national-parks/
 #' WVS data source: https://www.worldvaluessurvey.org/WVSDocumentationWV7.jsp
 
-
 #######################-
 #### SERVER LOGIC #####
 #######################-
@@ -14,6 +13,7 @@ shinyServer(
     session$onSessionEnded(function() {
       stopApp()
     })
+    
     
     ############################-
     #### Read in data files ####
@@ -100,12 +100,6 @@ shinyServer(
       sections_ord
     })
     
-    # Helper function to get question ID from label
-    get_question_id <- function(label) {
-      var_info <- get_var_info()
-      var_info$Col_ID[var_info$ColLab == label]
-    }
-    
     
     #############################-
     #### PDF & CODEBOOK VIEW ####
@@ -145,23 +139,26 @@ shinyServer(
     
     raw_filtering <- reactive({
         if(is.null(input$raw_country)) {
-          get_I_longID()
+          get_I_longID() |> dplyr::select(-S007)
         } else {
           get_I_longID() |>
-            dplyr::filter(B_COUNTRY_ALPHA == input$raw_country)
+            dplyr::filter(B_COUNTRY_ALPHA == input$raw_country) |>
+            dplyr::select(-S007)
           # currently, filtering does not work for multiples countries as expected, reverted back to single country selection
         }
     })
     
     output$raw_filtered_country <- DT::renderDataTable({
-      DT::datatable(data = raw_filtering(),
+      DT::datatable(data = raw_filtering()|>
+                      dplyr::rename(Country = B_COUNTRY, `Country ISO` = B_COUNTRY_ALPHA),
                     options = list(pageLength = 10, scrollX = TRUE))
     })
     
     # Data table - Country aggregate responses
     output$Table_country <- DT::renderDataTable({
-      DT::datatable(data = get_C_data() %>%
-                      mutate(across(where(is.numeric), ~ round(., 2))),
+      DT::datatable(data = get_C_data() |>
+                      dplyr::mutate(across(where(is.numeric), ~ round(., 2))) |>
+                      dplyr::rename(Country = B_COUNTRY, `Country ISO` = B_COUNTRY_ALPHA),
                     options = list(scrollX = TRUE))
     })
     
@@ -248,24 +245,24 @@ shinyServer(
     })
     
     
-    ##########################-
-    #### Summary Stats ####
-    ##########################-
+    ####################-
+    #### Univariate ####
+    ####################-
     
-    summ_data <- eventReactive(input$summ_update, {
-      req(input$summ_question, input$summ_countries)
+    univariate_data <- reactive({
+      req(input$univar_question, input$univar_countries)
       
       # Get question ID
-      q_id <- get_question_id(input$summ_question)
+      q_id <- get_question_id(input$univar_question)
       
       # Prepare data - convert country to character
       orig_data <- get_I_data() %>%
-        dplyr::filter(B_COUNTRY_ALPHA %in% input$summ_countries) %>%
+        dplyr::filter(B_COUNTRY_ALPHA %in% input$univar_countries) %>%
         dplyr::select(country = B_COUNTRY, response = all_of(q_id)) %>%
         dplyr::mutate(country = as.character(country))
       
       num_data <- indiv_ordinal %>%
-        dplyr::filter(B_COUNTRY_ALPHA %in% input$summ_countries) %>% 
+        dplyr::filter(B_COUNTRY_ALPHA %in% input$univar_countries) %>% 
         dplyr::select(country = B_COUNTRY, response = all_of(q_id)) %>%
         dplyr::mutate(
           country = as.character(country),
@@ -286,8 +283,8 @@ shinyServer(
       )
     })
     
-    output$summ_results <- renderUI({
-      data <- summ_data()
+    output$univariate_results <- renderUI({
+      data <- univariate_data()
       if(is.null(data)) return("No data available")
       req(data)
       
@@ -295,8 +292,8 @@ shinyServer(
       country_names <- unique(data$orig$country)
       
       # Generate summary for each country and overall - with Overall first
-      tabs <- lapply(c("Overall", country_names), function(ctry_name) {
-        if (ctry_name == "Overall") {
+      tabs <- lapply(c("Selected Sample", country_names), function(ctry_name) {
+        if (ctry_name == "Selected Sample") {
           orig_sub <- data$orig
           num_sub <- data$num
         } else {
@@ -348,10 +345,82 @@ shinyServer(
       # Create tabset with Overall first, then the countries
       do.call(tabsetPanel, c(
         id = "countryTabs",
-        lapply(c("Overall", country_names), function(name) {
-          tabPanel(title = name, tabs[[which(c("Overall", country_names) == name)]])
+        lapply(c("Selected Sample", country_names), function(name) {
+          tabPanel(title = name, tabs[[which(c("Selected Sample", country_names) == name)]])
         })
       ))
+    })
+    
+    
+    ####################-
+    #### BIVARIATE #####
+    ####################-
+    
+    # Reactive data preparation for bivariate summary
+    bivariate_data <- reactive({
+      req(input$bivariate_var1, input$bivariate_var2)
+      
+      # Get question IDs
+      var1_id <- get_question_id(input$bivariate_var1)
+      var2_id <- get_question_id(input$bivariate_var2)
+      
+      # Prepare data
+      data <- orig_indiv_data
+      if (!is.null(input$bivariate_countries)) {
+        data <- data %>% 
+          dplyr::filter(B_COUNTRY_ALPHA %in% input$bivariate_countries)
+      }
+      
+      # Select relevant columns
+      data %>%
+        dplyr::select(var1 = !!var1_id, var2 = !!var2_id) %>%
+        dplyr::mutate(
+          var1 = sjlabelled::as_label(var1),
+          var2 = sjlabelled::as_label(var2)
+        ) %>%
+        stats::na.omit()
+    })
+    
+    # Render bivariate table
+    output$bivariate_table <- renderDT({
+      data <- bivariate_data()
+      if (is.null(data) || nrow(data) == 0) return(NULL)
+      
+      # Create contingency table
+      tab <- table(data$var1, data$var2)
+      
+      # Apply percentages if requested
+      if (input$bivariate_type == "Row Percentages") {
+        tab <- prop.table(tab, 1) * 100
+      } else if (input$bivariate_type == "Column Percentages") {
+        tab <- prop.table(tab, 2) * 100
+      }
+      
+      # Convert to data frame for nice display
+      df <- as.data.frame.matrix(tab)
+      df <- cbind(`Var1 v /Var2 >` = rownames(df), df)
+      rownames(df) <- NULL
+      
+      # Create datatable
+      DT::datatable(
+        df,
+        extensions = 'Buttons',
+        options = list(
+          pageLength = 10,
+          scrollX = TRUE,
+          dom = 'Bfrtip',
+          buttons = c('copy', 'csv', 'excel'),
+          columnDefs = list(
+            list(className = 'dt-center', targets = "_all")
+          )
+        ),
+        rownames = FALSE,
+        caption = paste("Cross-tabulation of", input$bivariate_var1, "and", input$bivariate_var2)
+      ) %>%
+        DT::formatRound(
+          columns = 2:ncol(df), 
+          digits = ifelse(input$bivariate_type == "Counts", 0, 1)
+        )
     })
     
     
@@ -418,50 +487,47 @@ shinyServer(
     #####################-
     
     output$scatter_plot <- renderPlotly({
-      input$scatter_update
       req(input$scatter_x, input$scatter_y, input$scatter_countries)
       
-      isolate({
-        req(input$scatter_x, input$scatter_y)
-        
-        # Get question IDs
-        var_info <- get_var_info()
-        x_id <- var_info$Col_ID[var_info$ColLab == input$scatter_x]
-        y_id <- var_info$Col_ID[var_info$ColLab == input$scatter_y]
-        
-        # Prepare data
-        plot_data <- get_I_data()
-        if (!is.null(input$scatter_countries)) {
-          plot_data <- plot_data %>%
-            dplyr::filter(B_COUNTRY_ALPHA %in% input$scatter_countries)
-        }
-        
-        # Sample data for performance
-        if (nrow(plot_data) > input$scatter_sample) {
-          plot_data <- plot_data %>% dplyr::sample_frac((input$scatter_sample) / 100)
-        }
-        
+      req(input$scatter_x, input$scatter_y)
+      
+      # Get question IDs
+      var_info <- get_var_info()
+      x_id <- var_info$Col_ID[var_info$ColLab == input$scatter_x]
+      y_id <- var_info$Col_ID[var_info$ColLab == input$scatter_y]
+      
+      # Prepare data
+      plot_data <- get_I_data()
+      if (!is.null(input$scatter_countries)) {
         plot_data <- plot_data %>%
-          dplyr::select(x = !!x_id,
-                        y = !!y_id,
-                        country = B_COUNTRY_ALPHA)
-        
-        # Create plot
-        p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = x, y = y, color = country)) +
-          ggplot2::geom_point(alpha = 0.6) +
-          ggplot2::geom_jitter(width = 0.2,
-                      alpha = 0.3,
-                      size = 1.5) +
-          ggplot2::geom_smooth(method = "lm", se = FALSE) +
-          ggplot2::labs(
-            title = paste(input$scatter_x, "vs", input$scatter_y),
-            x = input$scatter_x,
-            y = input$scatter_y
-          ) +
-          ggplot2::theme_minimal()
-        
-        plotly::ggplotly(p)
-      })
+          dplyr::filter(B_COUNTRY_ALPHA %in% input$scatter_countries)
+      }
+      
+      # Sample data for performance
+      if (nrow(plot_data) > input$scatter_sample) {
+        plot_data <- plot_data %>% dplyr::sample_frac((input$scatter_sample) / 100)
+      }
+      
+      plot_data <- plot_data %>%
+        dplyr::select(x = !!x_id,
+                      y = !!y_id,
+                      country = B_COUNTRY_ALPHA)
+      
+      # Create plot
+      p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = x, y = y, color = country)) +
+        ggplot2::geom_point(alpha = 0.6) +
+        ggplot2::geom_jitter(width = 0.2,
+                             alpha = 0.3,
+                             size = 1.5) +
+        ggplot2::geom_smooth(method = "lm", se = FALSE) +
+        ggplot2::labs(
+          title = paste(input$scatter_x, "vs", input$scatter_y),
+          x = input$scatter_x,
+          y = input$scatter_y
+        ) +
+        ggplot2::theme_minimal()
+      
+      plotly::ggplotly(p)
     })
     
     
@@ -554,34 +620,175 @@ shinyServer(
     )
     
     
-    #################-
-    #### Kendall ####
-    #################-
+    ###################-
+    #### HISTOGRAM ####
+    ###################-
+
+    # Reactive data preparation for histogram
+    hist_data <- reactive({
+      req(input$hist_question, input$hist_countries)
+
+      # Get question ID
+      q_id <- get_question_id(input$hist_question)
+
+      # Prepare data
+      plot_data <- orig_indiv_data %>%
+        dplyr::filter(B_COUNTRY_ALPHA %in% input$hist_countries) %>%
+        dplyr::select(country = B_COUNTRY, response = !!q_id) %>%
+        dplyr::mutate(
+          country = as.character(country),
+          response = as.numeric(response)  # Ensure numeric for histogram
+        ) %>%
+        stats::na.omit()
+
+      # Add metadata
+      list(data = plot_data, question = input$hist_question)
+    })
+
+    # Render histogram plot
+    output$hist_plot <- renderPlotly({
+      data <- hist_data()
+      plot_data <- data$data
+      if (is.null(plot_data) || nrow(plot_data) == 0) return(NULL)
+
+      # Calculate mean for each country
+      mean_data <- plot_data %>%
+        dplyr::group_by(country) %>%
+        dplyr::summarise(mean = mean(response, na.rm = TRUE))
+
+      # Create base plot
+      if (input$hist_facet) {
+        # Faceted view
+        p <- ggplot2::ggplot(plot_data, aes(x = response, fill = country)) +
+          {if (input$hist_type == "Stacked")
+            ggplot2::geom_histogram(position = "stack",
+                                    bins = input$hist_bins,
+                                    alpha = 0.8)
+            else
+              ggplot2::geom_histogram(position = "identity",
+                                      bins = input$hist_bins,
+                                      alpha = 0.6
+              )} +
+          ggplot2::geom_vline(
+            data = mean_data,
+            ggplot2::aes(xintercept = mean, color = country),
+            linetype = "dashed",
+            linewidth = 1
+          ) +
+          ggplot2::facet_wrap( ~ country, scales = "free") +
+          ggplot2::labs(
+            title = paste("Distribution of", data$question),
+            x = "Response Value",
+            y = if (input$hist_type == "Density")
+              "Density"
+            else
+              "Count"
+          ) +
+          ggplot2::theme_minimal() +
+          ggplot2::theme(
+            legend.position = "none",
+            strip.text = ggplot2::element_text(size = 12, face = "bold")
+          )
+      } else {
+        # Overlaid view
+        p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = response, fill = country)) +
+          {if (input$hist_type == "Frequency")
+            ggplot2::geom_histogram(position = "identity",
+                                    bins = input$hist_bins,
+                                    alpha = 0.5)
+            else if (input$hist_type == "Density")
+              ggplot2::geom_density(alpha = 0.4, adjust = 1.5)
+            else
+              ggplot2::geom_histogram(position = "stack",
+                                      bins = input$hist_bins,
+                                      alpha = 0.8
+              )} +
+          ggplot2::geom_vline(
+            data = mean_data,
+            ggplot2::aes(xintercept = mean, color = country),
+            linetype = "dashed",
+            size = 1
+          ) +
+          ggplot2::labs(
+            title = paste("Distribution of", data$question),
+            x = "Response Value",
+            y = if (input$hist_type == "Density")
+              "Density"
+            else
+              "Count",
+            fill = "Country"
+          ) +
+          ggplot2::theme_minimal()
+      }
+
+      # Add normal curve if requested
+      if (input$hist_curve && input$hist_type != "Stacked") {
+        # Calculate parameters outside stat_function
+        x_range <- range(plot_data$response, na.rm = TRUE)
+        bin_width <- diff(x_range) / input$hist_bins
+        n_total <- nrow(plot_data)
+        mean_val <- mean(plot_data$response, na.rm = TRUE)
+        sd_val <- stats::sd(plot_data$response, na.rm = TRUE)
+        
+        if (input$hist_type == "Frequency") {
+          p <- p +
+            ggplot2::stat_function(
+              fun = function(x) {
+                stats::dnorm(x, mean = mean_val, sd = sd_val) * n_total * bin_width
+              },
+              color = "black",
+              size = 1,
+              linetype = "dotted"
+            )
+        } else if (input$hist_type == "Density") {
+          p <- p +
+            ggplot2::stat_function(
+              fun = function(x) {
+                stats::dnorm(x, mean = mean_val, sd = sd_val)
+              },
+              color = "black",
+              size = 1,
+              linetype = "dotted"
+            )
+        }
+      }
+
+      # Convert to plotly
+      plotly::ggplotly(p) %>%
+        plotly::layout(
+          legend = list(orientation = "h", y = -0.2),
+          hoverlabel = list(bgcolor = "white")
+        )
+    })
     
-    # Reactive data preparation for Kendall's analysis
-    kendall_data <- eventReactive(input$kendall_run, {
+    
+    ###########################-
+    #### CORRELATION MODEL ####
+    ###########################-
+    
+    corr_model_data <- eventReactive(input$corr_model_run, {
       # Require both variables to be selected
-      req(input$kendall_var1, input$kendall_var2)
+      req(input$corr_model_var1, input$corr_model_var2)
       
       # Get variable information
       var_info <- get_var_info()
       
       # Get question IDs from labels
-      var1_id <- get_question_id(input$kendall_var1)
-      var2_id <- get_question_id(input$kendall_var2)
+      var1_id <- get_question_id(input$corr_model_var1)
+      var2_id <- get_question_id(input$corr_model_var2)
       
       # Prepare data from preprocessed numeric dataset
       data <- indiv_ordinal
       
       # Apply country filter if selected
-      if (!is.null(input$kendall_countries)) {
+      if (!is.null(input$corr_model_countries)) {
         data <- data %>%
-          filter(B_COUNTRY_ALPHA %in% input$kendall_countries)
+          filter(B_COUNTRY_ALPHA %in% input$corr_model_countries)
       }
       
       # # Apply sampling for performance - MOMENTARILY DISABLED
-      # if (nrow(data) > input$kendall_sample) {
-      #   data <- data %>% sample_n(input$kendall_sample)
+      # if (nrow(data) > input$corr_model_sample) {
+      #   data <- data %>% sample_n(input$corr_model_sample)
       # }
       
       # Select relevant columns and omit missing values
@@ -593,9 +800,9 @@ shinyServer(
     })
 
     # Render correlation results
-    output$kendall_results <- renderPrint({
+    output$corr_mod_results <- renderPrint({
       # Get the prepared data
-      data <- kendall_data()
+      data <- corr_model_data()
       
       # Check for sufficient data
       if (nrow(data) < 3) {
@@ -611,9 +818,9 @@ shinyServer(
       # Format and display results
       cat(input$corr_choice, "'s Rank Correlation Analysis\n")
       cat("===================================\n")
-      cat("Variable 1: ", input$kendall_var1, "\n")
-      cat("Variable 2: ", input$kendall_var2, "\n")
-      cat("Countries: ", paste(input$kendall_countries, collapse = ", "), "\n")
+      cat("Variable 1: ", input$corr_model_var1, "\n")
+      cat("Variable 2: ", input$corr_model_var2, "\n")
+      cat("Countries: ", paste(input$corr_model_countries, collapse = ", "), "\n")
       cat("Number of complete observations: ", nrow(data), "\n\n")
       
       cat("Correlation coefficient (tau): ", 
@@ -645,9 +852,9 @@ shinyServer(
     })
     
     # Render the scatter plot
-    output$kendall_plot <- renderPlotly({
+    output$corr_mod_plot <- renderPlotly({
       # Get the prepared data
-      data <- kendall_data()
+      data <- corr_model_data()
       
       # Check for sufficient data
       if (nrow(data) < 3) {
@@ -678,12 +885,12 @@ shinyServer(
         ggplot2::labs(
           title = paste(
             "Relationship between",
-            input$kendall_var1,
+            input$corr_model_var1,
             "and",
-            input$kendall_var2
+            input$corr_model_var2
           ),
-          x = input$kendall_var1,
-          y = input$kendall_var2,
+          x = input$corr_model_var1,
+          y = input$corr_model_var2,
           color = "Country"
         ) +
         ggplot2::scale_color_viridis_d(option = "plasma") +
@@ -699,12 +906,12 @@ shinyServer(
     })
     
     # Render data table
-    output$kendall_data <- renderDT({
+    output$corr_mod_data <- renderDT({
       # Get the prepared data
-      data <- kendall_data()
+      data <- corr_model_data()
       
       # Rename columns for display
-      names(data) <- c(input$kendall_var1, input$kendall_var2, "Country")
+      names(data) <- c(input$corr_model_var1, input$corr_model_var2, "Country")
       
       # Create datatable
       DT::datatable(
@@ -891,36 +1098,36 @@ shinyServer(
     # Reactive data preparation for regression
     regression_data <- eventReactive(input$regression_run, {
       req(input$regression_dep, input$regression_indep)
-      
+
       # Get question IDs
       dep_id <- get_question_id(input$regression_dep)
       indep_ids <- sapply(input$regression_indep, get_question_id, USE.NAMES = FALSE)
-      
-      
+
+
       if(!all(c(dep_id, indep_ids) %in% names(indiv_ordinal))) {
         showNotification("Selected variables not in dataset", type = "error")
         return(NULL)
       }
-      
+
       # Prepare data from preprocessed numeric dataset
       data <- indiv_ordinal
-      
+
       # Apply country filter if selected
       if (!is.null(input$regression_country)) {
         data <- data %>%
           dplyr::filter(B_COUNTRY_ALPHA == input$regression_country)
       }
-      
+
       # # Apply sampling for performance - MOMENTARILY DISABLED
       # if (nrow(data) > input$regression_sample) {
       #   data <- data %>% sample_n(input$regression_sample)
       # }
-      
+
       # Select relevant columns and omit missing values
       data <- data %>%
         dplyr::select(all_of(c(dep_id, indep_ids))) %>%
         stats::na.omit()
-      
+
       # Store labels for display
       list(
         data = data,
@@ -930,27 +1137,27 @@ shinyServer(
         indep_ids = indep_ids
       )
     })
-    
+
     # Render model summary
     output$regression_summary <- renderPrint({
       result <- regression_data()
       data <- result$data
-      
+
       # Check for sufficient data
       if (nrow(data) < 10) {
         return("Insufficient data: Need at least 10 complete observations.")
       }
-      
+
       if (ncol(data) < 2) {
         return("Insufficient variables: Need at least one independent variable.")
       }
-      
+
       # Build formula using IDs
       formula <- stats::as.formula(paste(names(data)[1], "~", paste(names(data)[-1], collapse = " + ")))
-      
+
       # Run regression
       model <- stats::lm(formula, data = data)
-      
+
       # Display results with labels
       cat("Linear Regression Model Summary\n")
       cat("==============================\n")
@@ -958,24 +1165,24 @@ shinyServer(
       cat("Dependent variable: ", result$dep_label, "\n")
       cat("Independent variables: ", paste(result$indep_labels, collapse = ", "), "\n")
       cat("Number of complete observations: ", nrow(data), "\n\n")
-      
+
       summary(model)
     })
-    
+
     # Render coefficient table
     output$regression_coef <- renderDT({
       result <- regression_data()
       data <- result$data
-      
+
       # Check for sufficient data
       if (nrow(data) < 10 || ncol(data) < 2) {
         return(NULL)
       }
-      
+
       # Build formula using IDs
       formula <- stats::as.formula(paste(names(data)[1], "~", paste(names(data)[-1], collapse = " + ")))
       model <- stats::lm(formula, data = data)
-      
+
       # Create coefficient table with labels
       coef_table <- broom::tidy(model) %>%
         dplyr::mutate(
@@ -998,7 +1205,7 @@ shinyServer(
           ),
           p.value = ifelse(p.value < 0.001, "<0.001", round(p.value, 3))
         )
-      
+
       # Create datatable
       DT::datatable(
         coef_table,
@@ -1015,60 +1222,60 @@ shinyServer(
         DT::formatRound(columns = c("estimate", "std.error", "statistic"),
                         digits = 4)
     })
-    
+
     # Render diagnostic plots
     output$regression_diag <- renderPlot({
       result <- regression_data()
       data <- result$data
-      
+
       # Check for sufficient data
       if (nrow(data) < 10 || ncol(data) < 2) {
         return(NULL)
       }
-      
+
       # Build formula using IDs
       formula <- stats::as.formula(paste(names(data)[1], "~", paste(names(data)[-1], collapse = " + ")))
       model <- stats::lm(formula, data = data)
-      
+
       # Set up 2x2 grid
       par(mfrow = c(2, 2))
       plot(model, ask = FALSE)
     })
-    
+
     # Render prediction plot
     output$regression_prediction <- renderPlotly({
       result <- regression_data()
       data <- result$data
-      
+
       # Check for sufficient data and variables
       if (nrow(data) < 10 || ncol(data) < 2) {
         return(NULL)
       }
-      
+
       # Use first independent variable for bivariate plot
       x_var_id <- names(data)[2]
       y_var_id <- names(data)[1]
-      
+
       # Get corresponding labels
       x_label <- result$indep_labels[1]
       y_label <- result$dep_label
-      
+
       # Create model for bivariate relationship
       formula <- stats::as.formula(paste(y_var_id, "~", x_var_id))
       model <- stats::lm(formula, data = data)
-      
+
       # Generate prediction data
-      x_range <- seq(min(data[[x_var_id]], na.rm = TRUE), 
-                     max(data[[x_var_id]], na.rm = TRUE), 
+      x_range <- seq(min(data[[x_var_id]], na.rm = TRUE),
+                     max(data[[x_var_id]], na.rm = TRUE),
                      length.out = 100)
       pred_data <- data.frame(x = x_range)
       names(pred_data) <- x_var_id
       pred <- stats::predict(model, newdata = pred_data, interval = "confidence")
-      
+
       # Combine prediction data
       plot_data <- cbind(pred_data, pred) %>%
         dplyr::rename(fit = 2, lwr = 3, upr = 4)
-      
+
       # Create plot
       p <- ggplot2::ggplot() +
         ggplot2::geom_point(
@@ -1095,7 +1302,7 @@ shinyServer(
           y = y_label
         ) +
         ggplot2::theme_minimal()
-      
+
       plotly::ggplotly(p)
     })
     

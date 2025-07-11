@@ -93,8 +93,8 @@ body {
   border-radius: 4px !important;
   padding: 6px 12px !important;
 }
-.btn-success:selected {
-  background-color: #4C6F50 !important;
+.btn-success.active {
+  background-color: #2b492f !important;
 }
 .btn-success:hover {
   background-color: #3e8e41 !important;

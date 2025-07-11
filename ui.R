@@ -115,9 +115,22 @@ shinyUI(fluidPage(
                        ################ SUMMARY STATISTICS ################
                        menuItem(
                          "Summary Statistics",
-                         tabName = "summaryStats",
-                         icon = icon('info-sign', lib = "glyphicon")
-                       ),
+                         tabName = "dummy",
+                         icon = icon('info-sign', lib = "glyphicon"),
+                         startExpanded = F,
+                         
+                         menuSubItem(
+                           "Univariate Statistics",
+                           tabName = "univariateStats",
+                           icon = icon("chart-bar")
+                         ),
+                         
+                         menuSubItem(
+                           "Bivariate Statistics",
+                           tabName = "bivariateStats",
+                           icon = icon("project-diagram")
+                         )
+                       ), 
                        ################ SUMMARY STATISTICS ################
                        
                        
@@ -129,8 +142,8 @@ shinyUI(fluidPage(
                          startExpanded = F,
                          
                          menuSubItem(
-                           "Bar Graph",
-                           tabName = "barGraph",
+                           "Bar Chart",
+                           tabName = "barChart",
                            icon = icon("stats", lib = "glyphicon")
                          ),
                          
@@ -144,6 +157,13 @@ shinyUI(fluidPage(
                            "Correlation", 
                            tabName = "correlationView",
                            icon = icon("equalizer", lib = "glyphicon")
+                         ),
+                         
+                         menuSubItem(
+                           "Histogram",
+                           tabName = "histogramView",
+                           icon = icon("signal")
+                           # icon = icon("bi-soundwave", lib = "glyphicon")
                          )
                        ),
                        ################## VISUALISATIONS ##################
@@ -238,7 +258,7 @@ shinyUI(fluidPage(
         ),
         
         tabItem(tabName = "vis_miss",
-                includeMarkdown("www/miss_vars.md"),
+                includeMarkdown("www/instructions/miss_vars.md"),
                 
                 tabsetPanel(id = "MissingViews", type = "pills",
                             tabPanel("Top 15 Missing", value = "top_miss",
@@ -297,42 +317,78 @@ shinyUI(fluidPage(
         
         
         ################ SUMMARY STATISTICS ################
-        tabItem(tabName = "summaryStats",
-                fluidRow(
-                  shinydashboard::box(width = 4, title = "Controls", status = "primary",
-                      selectizeInput(
-                        inputId = "summ_question",
-                        label = "Select Question:",
-                        choices = grouped_minus_ignored,
-                        selected = grouped_minus_ignored[[1]][1]
-                      ),
-                      pickerInput(
-                        inputId = "summ_countries",
-                        label = "Select Countries:",
-                        choices = picker_country_list,
-                        multiple = TRUE,
-                        options = list(
-                          `actions-box` = TRUE,
-                          `live-search` = TRUE,
-                          `max-options` = 5
-                        ),
-                        selected = c("NZL", "AUS", "GBR")
-                      ),
-                      actionButton("summ_update", "Generate Summary", class = "green-button")
-                  ),
-                  shinydashboard::box(width = 8, title = "Summary Statistics", status = "primary",
-                      uiOutput("summ_results")
-                  )
-                )
+        # Univariate Stats tab
+        tabItem(tabName = "univariateStats",
+                includeMarkdown("www/instructions/univariate_instruction.md"),
+                fluidRow(shinydashboard::box(width = 4, status = "primary",
+                                             selectizeInput(inputId = "univar_question",
+                                                            label = "Select Question:",
+                                                            choices = grouped_minus_ignored,
+                                                            selected = grouped_minus_ignored[[1]][1]),
+                                             pickerInput(inputId = "univar_countries",
+                                                         label = "Select Countries:",
+                                                         choices = picker_country_list,
+                                                         multiple = TRUE,
+                                                         options = list(
+                                                           `actions-box` = TRUE,
+                                                           `live-search` = TRUE
+                                                           ),
+                                                         selected = c("NZL", "AUS", "GBR")
+                                                         )
+                                             ),
+                         shinydashboard::box(width = 8, title = "Univariate Summary", status = "primary",
+                                             uiOutput("univariate_results")
+                                             )
+                         )
+        ),
+        
+        # Bivariate Stats tab
+        tabItem(tabName = "bivariateStats",
+                includeMarkdown("www/instructions/bivariate_instruction.md"),
+                fluidRow(shinydashboard::box(width = 4,
+                                             status = "primary",
+                                             selectizeInput(inputId = "bivariate_var1",
+                                                            label = "Select Variable 1:",
+                                                            choices = grouped_minus_ignored,
+                                                            selected = grouped_minus_ignored[[1]][1]
+                                                            ),
+                                             selectizeInput(inputId = "bivariate_var2",
+                                                            label = "Select Variable 2:",
+                                                            choices = grouped_minus_ignored,
+                                                            selected = grouped_minus_ignored[[1]][2]
+                                                            ),
+                                             pickerInput(inputId = "bivariate_countries",
+                                                         label = "Select Countries:",
+                                                         choices = picker_country_list,
+                                                         multiple = TRUE,
+                                                         options = list(`actions-box` = TRUE,
+                                                                        `live-search` = TRUE,
+                                                                        `max-options` = 5
+                                                                        ),
+                                                         selected = c("NZL", "AUS", "GBR")
+                                                         ),
+                                             radioGroupButtons(inputId = "bivariate_type",
+                                                               label = "Table Type:",
+                                                               choices = c("Counts", "Row Percentages", "Column Percentages"),
+                                                               selected = "Counts",
+                                                               status = "success"
+                                                               )
+                                             ),
+                         shinydashboard::box(width = 8,
+                                             title = "Bivariate Summary",
+                                             status = "primary",
+                                             shinycssloaders::withSpinner(DTOutput("bivariate_table"))
+                                             )
+                         )
         ),
         ################ SUMMARY STATISTICS ################
         
         
         ################## VISUALISATIONS ##################
-        tabItem(tabName = "barGraph",
+        tabItem(tabName = "barChart",
                 includeMarkdown("www/instructions/bar_instruction.md"),
                 fluidRow(
-                  shinydashboard::box(width = 3, title = "Controls", status = "primary",
+                  shinydashboard::box(width = 3, status = "primary",
                       selectizeInput(
                         inputId = "bar_question",
                         label = "Select Question:",
@@ -360,7 +416,6 @@ shinyUI(fluidPage(
                         selected = "Count",
                         status = "success"
                       )
-                      # actionButton("bar_update", "Update Plot", class = "green-button")
                   ),
                   shinydashboard::box(width = 9, title = "Response Distribution", status = "primary",
                       shinycssloaders::withSpinner(plotlyOutput("bar_plot", height = "600px"))
@@ -371,7 +426,7 @@ shinyUI(fluidPage(
         tabItem(tabName = "scatterParticipants",
                 includeMarkdown("www/instructions/scatter_instruction.md"),
                 fluidRow(
-                  shinydashboard::box(width = 3, title = "Controls", status = "primary",
+                  shinydashboard::box(width = 3, status = "primary",
                       selectizeInput(
                         inputId = "scatter_x",
                         label = "X-axis Question:",
@@ -401,8 +456,7 @@ shinyUI(fluidPage(
                         "scatter_sample",
                         "Sample Size (as % of data):",
                         min = 10, max = 100, value = 25, step = 1
-                      ),
-                      actionButton("scatter_update", "Update Plot", class = "green-button")
+                      )
                   ),
                   shinydashboard::box(width = 9, title = "Participant Scatterplot", status = "primary",
                       shinycssloaders::withSpinner(plotlyOutput("scatter_plot", height = "600px"))
@@ -413,7 +467,7 @@ shinyUI(fluidPage(
         tabItem(tabName = "correlationView",
                 includeMarkdown("www/instructions/corr_instruction.md"),
                 fluidRow(
-                  shinydashboard::box(width = 3, title = "Controls", status = "primary",
+                  shinydashboard::box(width = 3, status = "primary",
                       pickerInput(
                         inputId = "corr_questions",
                         label = "Select Questions:",
@@ -489,6 +543,69 @@ shinyUI(fluidPage(
                   )
                 )
         ),
+        
+        tabItem(tabName = "histogramView",
+                includeMarkdown("www/instructions/histogram_instruction.md"),
+                fluidRow(
+                  shinydashboard::box(
+                    width = 3,
+                    status = "primary",
+                    selectizeInput(
+                      inputId = "hist_question",
+                      label = "Select Question:",
+                      choices = grouped_minus_ignored,
+                      selected = grouped_minus_ignored[[1]][1],
+                      size = 30
+                    ),
+                    pickerInput(
+                      inputId = "hist_countries",
+                      label = "Select Countries:",
+                      choices = picker_country_list,
+                      multiple = TRUE,
+                      options = list(
+                        `actions-box` = TRUE,
+                        `live-search` = TRUE,
+                        `size` = 30,
+                        `max-options` = 5
+                      ),
+                      selected = c("NZL", "AUS", "GBR")
+                    ),
+                    sliderInput(
+                      "hist_bins",
+                      "Number of Bins:",
+                      min = 5,
+                      max = 50,
+                      value = 20
+                    ),
+                    radioGroupButtons(
+                      inputId = "hist_type",
+                      label = "Display Type:",
+                      choices = c("Density", "Frequency", "Stacked"),
+                      selected = "Density",
+                      status = "success"
+                    ),
+                    materialSwitch(
+                      inputId = "hist_facet",
+                      label = "Show Countries Separately",
+                      status = "success",
+                      value = FALSE
+                    ),
+                    materialSwitch(
+                      inputId = "hist_curve",
+                      label = "Show Normal Curve",
+                      status = "success",
+                      value = TRUE
+                    )
+                    # actionButton("hist_update", "Update Plot", class = "green-button")
+                  ),
+                  shinydashboard::box(
+                    width = 9,
+                    title = "Response Distribution",
+                    status = "primary",
+                    shinycssloaders::withSpinner(plotlyOutput("hist_plot", height = "600px"))
+                  )
+                )
+        ),
         ################## VISUALISATIONS ##################
         
         
@@ -496,28 +613,27 @@ shinyUI(fluidPage(
         tabItem(tabName = "corrModelTab",
                 includeMarkdown("www/instructions/corrModel_instruction.md"),
                 fluidRow(
-                  shinydashboard::box(width = 3, title = "Controls", status = "primary",
+                  shinydashboard::box(width = 3, status = "primary",
                       selectizeInput(
-                        inputId = "kendall_var1",
+                        inputId = "corr_model_var1",
                         label = "Select Variable 1:",
                         choices = grouped_minus_ignored,
                         selected = grouped_minus_ignored[[1]][1]
                       ),
                       selectizeInput(
-                        inputId = "kendall_var2",
+                        inputId = "corr_model_var2",
                         label = "Select Variable 2:",
                         choices = grouped_minus_ignored,
                         selected = grouped_minus_ignored[[1]][2]
                       ),
                       pickerInput(
-                        inputId = "kendall_countries",
+                        inputId = "corr_model_countries",
                         label = "Select Countries:",
                         choices = picker_country_list,
                         multiple = TRUE,
                         options = list(
                           `actions-box` = TRUE,
-                          `live-search` = TRUE,
-                          `max-options` = 5
+                          `live-search` = TRUE
                         ),
                         selected = c("NZL", "AUS")
                       ),
@@ -529,19 +645,19 @@ shinyUI(fluidPage(
                         status = "success"
                       ),
                       # sliderInput(
-                      #   "kendall_sample",
+                      #   "corr_model_sample",
                       #   "Sample Size:",
                       #   min = 100, max = 5000, value = 1000, step = 100
                       # ),
-                      actionButton("kendall_run", "Run Analysis", class = "green-button")
+                      actionButton("corr_model_run", "Run Analysis", class = "green-button")
                   ),
                   shinydashboard::box(width = 9, title = "Correlation", status = "primary",
                       tabsetPanel(
                         tabPanel("Results",
-                                 verbatimTextOutput("kendall_results"),
-                                 plotlyOutput("kendall_plot")),
+                                 verbatimTextOutput("corr_mod_results")),
+                                 # plotlyOutput("kendall_plot")),
                         tabPanel("Data",
-                                 DTOutput("kendall_data"))
+                                 DTOutput("corr_mod_data"))
                       )
                   )
                 )
@@ -550,7 +666,7 @@ shinyUI(fluidPage(
         tabItem(tabName = "anovaTab",
                 includeMarkdown("www/instructions/anova_instruction.md"),
                 fluidRow(
-                  shinydashboard::box(width = 3, title = "Controls", status = "primary",
+                  shinydashboard::box(width = 3, status = "primary",
                       selectizeInput(
                         inputId = "anova_var",
                         label = "Select Variable:",
@@ -564,8 +680,7 @@ shinyUI(fluidPage(
                         multiple = TRUE,
                         options = list(
                           `actions-box` = TRUE,
-                          `live-search` = TRUE,
-                          `max-options` = 5
+                          `live-search` = TRUE
                         ),
                         selected = c("NZL", "AUS")
                       ),
@@ -595,21 +710,20 @@ shinyUI(fluidPage(
         tabItem(tabName = "regressionTab",
                 includeMarkdown("www/instructions/linearreg_instruction.md"),
                 fluidRow(
-                  shinydashboard::box(width = 3, title = "Controls", status = "primary",
+                  shinydashboard::box(width = 3, status = "primary",
                       selectizeInput(
                         inputId = "regression_dep",
                         label = "Dependent Variable:",
                         choices = grouped_minus_ignored,
                         selected = grouped_minus_ignored[[1]][1]
                       ),
-                      selectizeInput(
+                      pickerInput(
                         inputId = "regression_indep",
                         label = "Independent Variables:",
                         choices = grouped_minus_ignored,
                         multiple = TRUE,
                         selected = grouped_minus_ignored[[1]][2:3],
-                        options = list(`live-search` = TRUE,
-                              maxItems = 5)
+                        options = list(`live-search` = TRUE)
                       ),
                       pickerInput(
                         inputId = "regression_country",
@@ -639,6 +753,8 @@ shinyUI(fluidPage(
                   )
                 )
         ),
+        
+        
         ###################### MODELS ######################
         
  

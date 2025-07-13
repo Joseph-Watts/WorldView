@@ -83,19 +83,13 @@ The WVS is a pioneering global research project spanning over 100 countries that
 
 ---
 
-## ⚠ Important Notes  
-**Data Usage**:  
+## ⚠ Important Notes
+**Data Usage**:
 - Copyright © World Values Survey Association  
 - Used here strictly for **educational purposes** in PSYC382  
 - Not for redistribution or commercial use  
 
-**Application Status**:  
-- Developed by University of Canterbury  
+**Application Status**:
 - This app is still **in development** - report issues to your TA
 - Built with [Shiny](https://shiny.rstudio.com/)  
 
----
-
-**Department of Psychology**  
-**University of Canterbury**  
-**2024**  

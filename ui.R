@@ -846,7 +846,7 @@ shinyUI(fluidPage(
                              h4("Project Information", style = "color: #2c3e50;"),
                              p(HTML("<strong>World Values Survey Explorer</strong> Version 1.0.0")),
                              p("Last Updated: June 2025"),
-                             p("This application was developed using R Shiny with support from the University of Canterbury Psychology Department.")
+                             p("This application was developed using R Shiny.")
                          )
                   )
                 )

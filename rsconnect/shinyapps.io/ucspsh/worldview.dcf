@@ -5,6 +5,6 @@ account: ucspsh
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 15062310
-bundleId: 10599186
+bundleId: 10610041
 url: https://ucspsh.shinyapps.io/worldview/
 version: 1

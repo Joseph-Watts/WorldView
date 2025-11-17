@@ -1,31 +1,34 @@
 install.packages('rsconnect')
+library(rsconnect)
 
 
+rsconnect::accountInfo()
+rsconnect::removeAccount()
+rsconnect::accounts()
+rsconnect::deployments()
+rsconnect::applications()
+renv::dependencies()
+
+
+
+
+###################################################################################
+# Deployment code for my own account
 rsconnect::setAccountInfo(name='andredevito',
                           token='4D04EB145CFAEE43137141E57B1CF4A7',
                           secret='kAQY9DjhgbkqemEz9F6q6I9ZaW+V3etzK/+/P4wj')
 
-library(rsconnect)
 rsconnect::deployApp('D:/Documents/GitHub/WorldView')
 
 
-
-rsconnect::accountInfo()
-
-
-
+###################################################################################
+# Deployment code for Psych Faculty account
 rsconnect::setAccountInfo(name='ucspsh',
                           token='4CE7881367D5B8DD661F05F00FB78F22',
                           secret='6DuQQ+k2tMurvv9xxo6YRMJRmlqgnINyOV3FV6IT')
 
 rsconnect::deployApp('D:/Documents/GitHub/WorldView')
 
-
-rsconnect::accounts()
-rsconnect::removeAccount()
-
-renv::refresh()
-renv::clean()
 ###################################################################################
 ###################################################################################
 ###################################################################################

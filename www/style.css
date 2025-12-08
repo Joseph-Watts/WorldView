@@ -149,5 +149,57 @@ body {
 
 
 
+/* ========================================================================== */
+/*                          Style for HDRs                                    */
+/* ========================================================================== */
+/* === This CSS style the content box for VARIABLE DEFINITIONS BOX === */
+.collapsible-content {
+  padding: 10px 15px;
+  border: 1px solid #ccc;
+  background: #fafafa;
+  border-radius: 6px;
+  margin-top: 10px;
+}
 
+/* === Style the checkbox === */
+#show_var_defs {
+  margin-bottom: 10px;
+}
+
+
+/* === HDR Definitions Table Layout === */
+
+.def-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.def-table th {
+  width: 25%;               /* Variable column width */
+  text-align: left;
+  vertical-align: top;
+  padding: 8px 12px;
+  font-weight: bold;
+  color: #333;
+}
+
+.def-table td {
+  width: 75%;
+  padding: 8px 12px;
+  text-align: left;
+  vertical-align: top;
+  color: #444;
+}
+
+.def-table tr:nth-child(even) {
+  background-color: #f5f5f5;   /* Light row striping */
+}
+
+.def-table tr:nth-child(odd) {
+  background-color: #ffffff;
+}
+
+.def-table tr {
+  border-bottom: 1px solid #ddd;
+}
 

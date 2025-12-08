@@ -1306,4 +1306,510 @@ shinyServer(
       plotly::ggplotly(p)
     })
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+###############################################################################
+###      HDR ADDITION START -  Server Logic
+###############################################################################
+#==========================#    
+#===                    ===#
+#=== HDR dataset tables ===#
+#===                    ===#
+#==========================#
+### ====== Update category menu when HDR table is selected ===== ###
+observeEvent(input$selected_HDR_table, {
+  updateSelectInput(
+    session,
+    "selected_category",
+    choices = names(HDR_DATA[[input$selected_HDR_table]])
+  )
+})
+
+# --- Dynamic title ---
+output$dynamic_title <- renderText({
+  req(input$selected_HDR_table)
+  req(input$selected_category)
+
+  category_title <- switch(
+    input$selected_category,
+    "groups"    = "Human Development Groups",
+    "regions"   = "Regions",
+    "special"   = "Special Countries/Territories",
+    "countries" = "Countries Only"
+  )
+  paste(input$selected_HDR_table, "—", category_title)
+})
+
+
+
+### ===== Show or hide variable definitions ===== ###
+output$variable_definitions <- renderUI({
+  req(input$selected_HDR_table)
+  
+  # Only show when checkbox is TRUE
+  if (!isTRUE(input$show_var_defs)) {
+    return(NULL)
+  }
+  
+  defs <- HDR_VARIABLE_DEFINITIONS[[input$selected_HDR_table]]
+  if (is.null(defs)) return(NULL)
+  
+  # Build table rows
+  table_rows <- ""
+  for (var in names(defs)) {
+    table_rows <- paste0(
+      table_rows,
+      "<tr>",
+      "<th>", var, "</th>",
+      "<td>", defs[[var]], "</td>",
+      "</tr>"
+    )
+  }
+  
+  # Build HTML box
+  HTML(paste0("
+    <div class='collapsible-content'>
+      <table class='def-table'>
+        ", table_rows, "
+      </table>
+    </div>
+  "))
+})
+
+
+
+
+### ===== Render selected HDR table dynamically ===== ###
+output$raw_table <- DT::renderDataTable({
+  req(input$selected_HDR_table)
+  req(input$selected_category)
+
+  df <- HDR_DATA[[input$selected_HDR_table]][[input$selected_category]]
+
+  numeric_cols <- sapply(df, is.numeric)
+  df[numeric_cols] <- round(df[numeric_cols], 3)
+
+  DT::datatable(df, rownames = FALSE, options = list(pageLength = 10, scrollX = TRUE))
+})
+
+
+### ===== Allow download of selected HDR dataset ===== ###
+output$download_raw <- downloadHandler(
+  filename = function() {
+    paste0(input$selected_HDR_table, "_", input$selected_category, ".csv")
+  },
+  content = function(file) {
+    df <- HDR_DATA[[input$selected_HDR_table]][[input$selected_category]]
+    write.csv(df, file, row.names = FALSE)
+  }
+)
+
+
+
+
+
+#=================================#    
+#===                           ===#
+#===  HDR WORLD MAP (Overview) ===#
+#===                           ===#
+#=================================#
+# === Reactive: filter HDR data by region ===
+filtered_data_area <- reactive({
+  
+  HDRs_master_clean %>%
+    left_join(HDR_AREA_LOOKUP, by = "iso3") %>%
+    rename(country = country.x) %>%
+    select(-country.y) %>%
+    {
+      if (input$filtered_area == "World") .
+      else filter(., area == input$filtered_area)
+    }
+})
+
+# === Render list of countries ===
+output$area_country_list <- renderUI({
+  req(input$show_country_list)
+  
+  countries <- filtered_data_area() %>%
+    pull(country) %>% sort()
+  
+  HTML(paste0(
+    "<b>Countries in ", input$filtered_area, ":</b><br>",
+    paste(countries, collapse = "<br>")
+  ))
+})
+
+# === Reactive: join HDR data to world polygons ===
+map_area <- reactive({
+  
+  df_unique <- filtered_data_area() %>%
+    group_by(iso3) %>%
+    slice(1) %>%
+    ungroup()
+  
+  world_shape %>%
+    left_join(df_unique, by = c("iso_a3" = "iso3"))
+})
+
+# === Render Leaflet map ===
+output$world_choropleth <- renderLeaflet({
+  
+  shp <- map_area()
+  indicator <- input$indicator
+  req(indicator)
+  
+  # Fix factors
+  if (is.factor(shp[[indicator]]))
+    shp[[indicator]] <- as.numeric(shp[[indicator]])
+  
+  valid_vals <- shp[[indicator]][!is.na(shp[[indicator]])]
+  
+  pal <- colorNumeric(
+    palette = "viridis",
+    domain = valid_vals,
+    na.color = "lightgray"
+  )
+  
+  leaflet(shp) %>%
+    addTiles() %>%
+    setView(lng = 0, lat = 20, zoom = 1.5) %>%
+    addPolygons(
+      fillColor = ~pal(get(indicator)),
+      fillOpacity = 0.8,
+      weight = 1, color = "white",
+      label = ~paste0(country, ": ", round(get(indicator), 2))
+    ) %>%
+    addLegend(
+      pal = pal, values = valid_vals,
+      title = indicator
+    )
+})
+
+
+
+
+#=================================#    
+#===                           ===#
+#===  COUNTRY PROFILE PLOT     ===#
+#===                           ===#
+#=================================#
+# === Function for lolliplots ========
+make_lollipop_plot <- function(country_name, indicators) {
+  
+  # === Extract the selected indicators for the chosen country ===
+  df <- HDRs_master_clean %>%
+    filter(country == country_name) %>%               # keep only chosen country
+    select(all_of(indicators)) %>%                    # keep only chosen indicators
+    
+    # Convert factor → numeric BEFORE pivot (avoids pivot_longer errors)
+    mutate(across(where(is.factor), ~ as.numeric(as.character(.))))
+  
+  # === Convert from wide format to long format (one row per indicator) ===
+  df <- df %>%
+    tidyr::pivot_longer(
+      cols = everything(),
+      names_to = "indicator",
+      values_to = "value"        # keep NAs for plotting “No data”
+    )
+  
+  # === Create helper columns for plotting ===
+  df <- df %>%
+    mutate(
+      # TRUE if number exists, FALSE if NA
+      has_data = !is.na(value),
+      
+      # Use 0 for missing values (only for placing the dot)
+      plot_value = ifelse(has_data, value, 0),
+      
+      # Categorise indicator type for dot color
+      value_type = case_when(
+        !has_data     ~ "missing",
+        value < 0     ~ "negative",
+        TRUE          ~ "positive"
+      )
+    )
+  
+  # Global offset so labels never overlap dots
+  offset <- 0.09 * max(abs(df$value), na.rm = TRUE)
+  
+  # === Build the lollipop plot ===
+  p <- ggplot(df, aes(x = plot_value, y = reorder(indicator, value))) +
+    
+    # Lollipop stems (only for indicators that have numeric data)
+    geom_segment(
+      data = df %>% filter(has_data),
+      aes(x = 0, xend = value, yend = indicator),
+      color = "gray50",
+      size = 1
+    ) +
+
+    geom_point(
+      aes(
+        color = value_type,
+        text = paste("Indicator:", indicator,
+                     "<br>Value:", value)
+      ),
+      size = 3       # your chosen size
+    ) +
+    
+    # === Labels (value or "No data") - shifted slightly left/right ===
+  geom_text(
+    aes(
+      label = ifelse(has_data, round(value, 3), "No data"),
+      
+      # Position the label so it NEVER overlaps the dot
+      x = case_when(
+        !has_data ~ offset,                    # Missing -> place label to the right of 0
+        value >= 0 ~ value + offset,           # Positive -> shift right
+        TRUE       ~ value - offset            # Negative -> shift left
+      )
+    ),
+    hjust = case_when(
+      !df$has_data ~ 0,                        # "No data" text left aligned
+      df$value >= 0 ~ 0,                       # Positive -> text left of dot
+      TRUE ~ 1                                 # Negative -> text right of dot
+    ),
+    size = 2.5    #change size of the label value on top of the lolly
+  ) +
+    
+    # Color scale with 3 categories
+    scale_color_manual(
+      values = c(
+        "positive" = "steelblue",
+        "negative" = "firebrick",
+        "missing"  = "grey60"
+      )
+    ) +
+    
+    labs(
+      title = paste("Indicators for", country_name),
+      x = "Value",
+      y = ""
+    ) +
+    
+    theme_minimal(base_size = 12) +
+    theme(
+      legend.position = "none",
+      axis.text.y = element_text(size = 8)   # REDUCE LABEL SIZE HERE
+    )
+  
+  # === Return interactive plot ===
+  plotly::ggplotly(p, tooltip = c("indicator", "value", "text"))
+}
+
+
+
+# === SERVER OUTPUT for Country Profile ========
+output$country_profile_plots <- plotly::renderPlotly({
+  req(input$sel_country_profil)
+  req(input$sel_indicators_profil)
+  
+  make_lollipop_plot(
+    input$sel_country_profil,
+    input$sel_indicators_profil
+  )
+})
+
+
+
+
+
+# === FILTER DATA BY USER-SELECTED AREA ========
+# ---------- PLOTS TABLE1 ----------------------------------------------
+tab1_filtered_data <- reactive({
+  req(input$hdr_tab1)
+
+  df <- tab1_Iso3
+  
+  # Extract countries belonging to selected area of Table1 and pull their iso3 codes
+  area_iso3 <- HDR_AREA_LOOKUP %>%
+    filter(area == input$hdr_tab1) %>%
+    pull(iso3)
+  
+  # Filter Table 1 to those countries only
+  df_area <- df %>%
+    filter(iso3 %in% area_iso3)
+  
+  return(df_area)
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# === FILTER DATA BY USER-SELECTED AREA ========
+output$hdr_tab1_plots <- renderPlotly({
+  req(input$hdr_tab1_indicators)     # user must choose at least 1 indicator
+  
+  df_area <- tab1_filtered_data()
+  
+  # DEBUG
+  print(unique(df_area$country))
+  print(length(unique(df_area$country)))
+  ## END DEBUG
+  
+  # ---------------------------------------------------------
+  # Create a single ordering column using the FIRST selected indicator
+  # This ensures country labels do NOT overlap across facets.
+  # ---------------------------------------------------------
+  main_var <- input$hdr_tab1_indicators[1]     # first selected indicator
+  df_area <- df_area %>%
+    mutate(order_var = .data[[main_var]])  # add ordering column
+  
+  # 4. Keep selected indicators + country + ordering variable
+  df_long <- df_area %>%
+    select(country, order_var, all_of(input$hdr_tab1_indicators)) %>%
+    tidyr::pivot_longer(
+      cols = -c(country, order_var),
+      names_to = "indicator",
+      values_to = "value"
+    )
+  
+  #compute a tiny offset to avoid Plotly clipping the text " No Data"
+  offset_x <- max(df_long$value, na.rm = TRUE) * 0.2   # 1% of max value
+  
+  
+  # 5. Lollipop plot (ggplot)
+  p <- ggplot(df_long,
+              aes(x = value,
+                  y = reorder(country, order_var)
+              )) +
+    
+    geom_segment(aes(x = 0, xend = value,
+                     y = country, yend = country),
+                 color = "grey70",
+                 size = 0.4) +
+    
+    geom_point(aes(color = indicator),
+               size = 2,
+               alpha = 0.9) +
+    
+    facet_wrap(~ indicator, scales = "free_x") +
+    
+    labs(
+      x = "Value",
+      y = "",
+      title = paste("Table 1 Indicators for", input$hdr_tab1_area)
+    ) +
+    
+    theme_minimal(base_size = 13) +
+    theme(
+      legend.position = "none",
+      strip.text = element_text(size = 12, face = "bold"),
+      axis.text.y = element_text(size = 9),      # smaller labels
+      plot.margin = margin(10, 120, 10, 10) #space for labels: TOP, RIGHT, BOTTOM, LEFT
+    ) +
+    coord_cartesian(clip = "off") +     # allow long labels
+    
+    geom_text(
+      data = df_long %>% dplyr::filter(is.na(value)),
+      aes(
+        x = offset_x,                 # place at x = 0 on the line
+        label = "No data"
+      ),
+      hjust = -0.2,            # small nudge to the right of y-axis
+      color = "grey30",
+      size = 3
+    )
+  
+  
+  # 6. Convert to interactive Plotly
+  plotly::ggplotly(
+    p,
+    tooltip = c("country", "indicator", "value")
+  )
+})
+
+
+
+
+
+
+
+
+
+
+
+
+###############################################################################
+###        HDR ADDITION END - Server Logic
+###############################################################################
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
   }) # end server logic

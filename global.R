@@ -92,3 +92,57 @@ grouped_questions <- get_groupedQs_I()
 # list of questions grouped by their category minus ignored questions
 grouped_minus_ignored <- lapply(grouped_questions, function(x)
   x[!grepl(paste0("\\b(", paste(ignored_questions, collapse = "|"), ")\\b"), x)])
+
+
+
+
+
+
+################################################################################
+                      ###   global.R for HDRs ### 
+################################################################################
+
+# Load libraries
+#library(shiny)
+#library(dplyr)     #data manipulation
+#library(readxl)
+#library(ggplot2)  
+#library(plotly)
+#library(DT)
+#install.packages("countrycode")  #add country code 
+#library(stringdist)   # for checking match
+library(openxlsx)
+library(janitor)
+library(sf)        # spatial data
+library(rnaturalearth)
+library(leaflet)
+library(countrycode)
+library(purrr)   # for map()
+library(tidyr)
+
+
+
+
+
+
+# ====================
+# Load HDR functionality
+# ====================
+source("HDR_files/clean_HDRs.R")
+source("HDR_files/build_HDR_tables.R")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

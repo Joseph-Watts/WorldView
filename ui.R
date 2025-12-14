@@ -196,6 +196,29 @@ shinyUI(fluidPage(
                        ),
                        ###################### MODELS ######################
                        
+                       ##################### PHYLOGENY ####################
+                       menuItem("Phylogeny", tabName = "phylogeny", 
+                                icon = icon("sitemap"),
+                                startExpanded = F,
+                                menuSubItem(
+                                  "Tree",
+                                  tabName = "phylo_tree",
+                                  icon = icon("tree-conifer", lib = "glyphicon")
+                                ),
+                                menuSubItem(
+                                  "Map",
+                                  tabName = "phylo_map",
+                                  icon = icon("map-marker", lib = "glyphicon")
+                                ),
+                                menuSubItem(
+                                  "Model",
+                                  tabName = "phylo_model",
+                                  icon = icon("random", lib = "glyphicon")
+                                )
+                                
+                                ),
+                       
+                       ##################### PHYLOGENY ####################
                        
                        ######################## FAQ #######################
                        menuItem(
@@ -761,6 +784,12 @@ shinyUI(fluidPage(
         
         ###################### MODELS ######################
         
+        ##################### PHYLOGENY ####################
+        
+        tabItem(tabName = "phylo_tree",phylo_tree_ui("phylo_tree")),
+        tabItem(tabName = "phylo_map",phylo_map_ui("phylo_map")),
+        tabItem(tabName = "phylo_model",phylo_models_ui("phylo_model")),
+        ##################### PHYLOGENY ####################
  
         ######################## FAQ #######################
         tabItem(tabName = "faq",

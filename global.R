@@ -92,3 +92,8 @@ grouped_questions <- get_groupedQs_I()
 # list of questions grouped by their category minus ignored questions
 grouped_minus_ignored <- lapply(grouped_questions, function(x)
   x[!grepl(paste0("\\b(", paste(ignored_questions, collapse = "|"), ")\\b"), x)])
+
+
+
+#### phylogeny module ####
+source("modules/phylogeny/phylogeny_global.R")

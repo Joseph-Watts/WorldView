@@ -1306,4 +1306,34 @@ shinyServer(
       plotly::ggplotly(p)
     })
     
+    ## phylogeny_server
+    # phylo_tree_server(
+    #   "phylo_tree",
+    #   wvs_country      = wvs_country_real,
+    #   lang_tree        = lang_tree_real,
+    #   lang_country_map = lang_country_map_real
+    # )
+    phylo_tree_server(
+      "phylo_tree",
+      wvs_data = orig_country_data,           
+      codebook_data = orig_codebook_data,     
+      lang_tree = country_phylogeny_tree,      
+      lang_country_map = country_phylogeny   
+    )
+    
+    phylo_map_server(
+      "phylo_map",
+      wvs_country = orig_country_data,
+      codebook_data = orig_codebook_data,
+      world_shape = world_shape
+    )
+    
+    phylo_models_server(
+      "phylo_model",
+      wvs_country = orig_country_data,
+      codebook_data = orig_codebook_data,
+      lang_tree = country_phylogeny_tree,
+      lang_country_map = country_phylogeny
+    )
+    
   }) # end server logic

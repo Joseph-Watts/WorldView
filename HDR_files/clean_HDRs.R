@@ -10,12 +10,10 @@ library(janitor)
 # 1. HARMONISE PLACEHOLDER FOR MISSING VALUE-----------------------------------
 fix_missing <- function(x) {
   x <- trimws(x)  # remove leading/trailing spaces
-
+  
   x[x %in% c("—", "-", "..", "...", "", "n/a", "N/A", "NA")] <- NA
   return(x)
 }
-
-
 
 
 #CLEAN COLUMN
@@ -95,16 +93,16 @@ drop_empty_rows <- function(df) df[rowSums(is.na(df)) != ncol(df), ]
 #Replace all missing values placeholders with NAs
 fix_miss_val <- function(x) {
   
-#Remove leading/trailing spaces so " .. " becomes ".."
-x <- trimws(x)
-
-#Replace known placeholders with NA. These values appear in HDR Excel files to mean "no data"
-missing_values <- c("—", "-", "..", "...", "", "n/a", "N/A", "NA")
-
-# Select elements of x that match the placeholders
-x[x %in% missing_values] <- NA
-
-return(x) #Return cleaned vector
+  #Remove leading/trailing spaces so " .. " becomes ".."
+  x <- trimws(x)
+  
+  #Replace known placeholders with NA. These values appear in HDR Excel files to mean "no data"
+  missing_values <- c("—", "-", "..", "...", "", "n/a", "N/A", "NA")
+  
+  # Select elements of x that match the placeholders
+  x[x %in% missing_values] <- NA
+  
+  return(x) #Return cleaned vector
 }
 
 
@@ -131,7 +129,7 @@ remove_rows_above_header <- function(df, header_keyword = "HDI", ignore_case = T
 
 
 
-  # 7. APPLY NEW COL NANES ----------------------------------------------------
+# 7. APPLY NEW COL NANES ----------------------------------------------------
 apply_new_colnames <- function(df, new_names, header_keyword = NULL) {
   
   #Assign new column names
@@ -170,14 +168,33 @@ section_headers <- c(
 )
 
 #---------- CATEGORY LABELS
-# Define HDI labels 
+# Define HDI labels
+# hdi_labels_hdr <- c(
+#   "Very High Human Development",
+#   "High Human Development",
+#   "Medium Human Development",
+#   "Low Human Development"
+# )
+
+#USED ONLY for grouping variables downstream
 hdi_labels <- c(
+  "Very High Human Development",
+  "High Human Development",
+  "Medium Human Development",
+  "Low Human Development"
+)
+
+
+#USED ONLY to extract HDR group rows
+# Define HDI labels 
+hdi_labels_hdr <- c(
   "Very high human development",
   "High human development",
   "Medium human development",
-  "Low human development",
-  "Developing countries"
+  "Low human development"
 )
+
+
 
 
 # Define Regions labels 
@@ -193,6 +210,7 @@ region_labels <- c(
 # Define Special groups labels
 specialgroup_labels <- c(
   "Least developed countries",
+  "Developing countries",
   "Small island developing states",
   "Organisation for Economic Co-operation and Development",
   "World")
@@ -202,10 +220,10 @@ specialgroup_labels <- c(
 # look up table for HUMAN DEVELOPMENT GROUPS
 hdi_group_lookup <- tibble::tribble(
   ~category_label,                    ~hdi_group,
-  "Very high human development",      "Very high",
-  "High human development",           "High",
-  "Medium human development",         "Medium",
-  "Low human development",            "Low"
+  "Very High human Development",      "Very high",
+  "High Human Development",           "High",
+  "Medium Human Development",         "Medium",
+  "Low Human Development",            "Low"
 )
 
 
@@ -268,16 +286,16 @@ table1_clean <- table1_clean[-c(1, 3), ]
 # --------------------- STANDARDISE COL NAMES ---------------------------------
 # list new col names
 new_colnames_tb1 <- c(
-    "hdi_rank",
-    "country",
-    "hdi_2023",
-    "life_expect_birth_2023",
-    "expected_yrs_schooling_2023",
-    "mean_yrs_schooling_2023",
-    "gni_per_capita_2023",
-    "gni_minus_hdi_rank_2023",
-    "hdi_rank_2022"
-  )
+  "hdi_rank",
+  "country",
+  "hdi_2023",
+  "life_expect_birth_2023",
+  "expected_yrs_schooling_2023",
+  "mean_yrs_schooling_2023",
+  "gni_per_capita_2023",
+  "gni_minus_hdi_rank_2023",
+  "hdi_rank_2022"
+)
 
 # Apply the new cleaned column names
 colnames(table1_clean) <- new_colnames_tb1
@@ -301,6 +319,17 @@ table1_clean <- table1_clean[1:(notes_row_tb1 - 1), ]
 
 
 
+
+
+# #Human development groups
+# ## OPTIONAL: explicitly remove HDI group rows from country table
+# hdi_groups_table1 <- table1_clean[
+#   table1_clean$country %in% hdi_labels_hdr,
+# ]
+
+
+
+
 # --------------------- CONVERT DATATYPES -------------------------------------
 # Convert to Numeric 
 #list cols to convert into numeric
@@ -316,7 +345,7 @@ table1_clean <- convert_types(
 )
 
 #check datatypes
-sapply(table1_clean, class)
+#sapply(table1_clean, class)
 
 
 # --------------------- REMOVE ALL CATEGORY HEADERS ROWS-----------------------
@@ -337,7 +366,7 @@ table1_clean <- table1_clean[
 # ------------- SPLIT `country` INTO CATEGORY TABLES & DROP EMPTY COLS --------
 #Human development groups
 hdi_groups_table1 <- table1_clean[
-  table1_clean$country %in% hdi_labels,
+  table1_clean$country %in% hdi_labels_hdr,
 ]
 
 #Regions
@@ -354,7 +383,7 @@ special_groups_table1 <- table1_clean[
 #Countries only
 countries_table1 <- table1_clean[
   !(table1_clean[[2]] %in% c(
-    hdi_labels,
+    hdi_labels_hdr,
     region_labels,
     specialgroup_labels,
     section_headers
@@ -376,6 +405,11 @@ countries_table1 <- table1_clean[
 # View(special_groups_table1)
 
 
+#Save each object as .rds
+saveRDS(countries_table1, "Support_Files/countries_table1.rds")
+saveRDS(hdi_groups_table1, "Support_Files/hdi_groups_table1.rds")
+saveRDS(regions_table1, "Support_Files/regions_table1.rds")
+saveRDS(special_groups_table1, "Support_Files/special_groups_table1.rds")
 
 
 
@@ -387,10 +421,10 @@ table2_raw<- readxl::read_excel("HDR_RawData/Table2_HDR25_Statistical_Annex_HDI_
 
 # --------------------- REMOVE FULLY EMPTY COLS ---------------------
 table2_clean <- table2_raw[
-  ( 
+  (
     # Keep columns that are not fully empty
     colSums(!is.na(table2_raw)) > 0  &
-      
+
       # Keep columns that contain at least one number
       sapply(table2_raw, function(col) any(grepl("[0-9]", col)))
   )
@@ -442,7 +476,7 @@ new_colnames_tb2 <- c(
   "avg_annual_hdi_growth_perct_2000_2010",
   "avg_annual_hdi_growth_perct_2010_2023",
   "avg_annual_hdi_growth_perct_1990_2023"
-  )  
+)
 
 
 # Apply the new cleaned column names
@@ -467,7 +501,7 @@ table2_clean <- table2_clean[1:(notes_row_tb2 - 1), ]
 
 
 # --------------------- CONVERT DATATYPES ---------------------
-# Convert to Numeric 
+# Convert to Numeric
 numeric_cols_tb2 <- setdiff(names(table2_clean), "country")
 str(table2_clean)
 
@@ -480,15 +514,15 @@ table2_clean <- convert_types(
 )
 
 #check datatypes
-sapply(table2_clean, class)
+#sapply(table2_clean, class)
 
 
 # --------------------- REMOVE ALL CATEGORY HEADERS ROWS-------------------------------
-# Remove rows where ALL columns (except the country column) are NA => it remove the header rows of 
+# Remove rows where ALL columns (except the country column) are NA => it remove the header rows of
 #the categories "very high human development", " High Human development", "Medium Human development",
 #"Low Human Development", Other countries or territories", ", Human development groups", "Regions"
 table2_clean <- table2_clean[
-  
+
   # keep rows where NOT all non-country columns are NA
   !apply(
     is.na(table2_clean[, -2]), 1, #select all columns except column 2 (the country name)
@@ -501,7 +535,7 @@ table2_clean <- table2_clean[
 # ------------- SPLIT `country` INTO CATEGORY TABLES & DROP EMPTY COLS ------
 #Human development groups
 hdi_groups_table2 <- table2_clean[
-  table2_clean$country %in% hdi_labels,
+  table2_clean$country %in% hdi_labels_hdr,
 ]
 
 #Regions
@@ -518,7 +552,7 @@ special_groups_table2 <- table2_clean[
 #Countries only
 countries_table2 <- table2_clean[
   !(table2_clean[[2]] %in% c(
-    hdi_labels,
+    hdi_labels_hdr,
     region_labels,
     specialgroup_labels,
     section_headers
@@ -540,18 +574,23 @@ countries_table2 <- table2_clean[
 # View(special_groups_table2)
 
 
+#Save each object as .rds
+saveRDS(countries_table2, "Support_Files/countries_table2.rds")
+saveRDS(hdi_groups_table2, "Support_Files/hdi_groups_table2.rds")
+saveRDS(regions_table2, "Support_Files/regions_table2.rds")
+saveRDS(special_groups_table2, "Support_Files/special_groups_table2.rds")
 
 
 #####################CLEANING HDRs_TABLE 3 ####################################
-#Read raw table
+# #Read raw table
 table3_raw<- readxl::read_excel("HDR_RawData/Table3_HDR25_Statistical_Annex_IHDI.xlsx", col_names = FALSE)
 
 # --------------------- REMOVE FULLY EMPTY COLS -------------------------------
 table3_clean <- table3_raw[
-  ( 
+  (
     # Keep columns that are not fully empty
     colSums(!is.na(table3_raw)) > 0  &
-      
+
       # Keep columns that contain at least one number
       sapply(table3_raw, function(col) any(grepl("[0-9]", col)))
   )
@@ -629,7 +668,7 @@ table3_clean <- table3_clean[1:(notes_row_tb3 - 1), ]
 
 
 # --------------------- CONVERT DATATYPES -------------------------------------
-# Convert to Numeric 
+# Convert to Numeric
 #list cols to convert into numeric
 numeric_cols_tb3 <- setdiff(names(table3_clean), "country")
 str(table3_clean)
@@ -647,11 +686,11 @@ sapply(table3_clean, class)
 
 
 # --------------------- REMOVE ALL CATEGORY HEADERS ROWS-----------------------
-# Remove rows where ALL columns (except the country column) are NA => it remove the header rows of 
+# Remove rows where ALL columns (except the country column) are NA => it remove the header rows of
 #the categories "very high human development", " High Human development", "Medium Human development",
 #"Low Human Development", Other countries or territories", ", Human development groups", "Regions"
 table3_clean <- table3_clean[
-  
+
   # keep rows where NOT all non-country columns are NA
   !apply(
     is.na(table3_clean[, -2]), 1, #select all columns except column 2 (the country name)
@@ -664,7 +703,7 @@ table3_clean <- table3_clean[
 # ------------- SPLIT `country` INTO CATEGORY TABLES & DROP EMPTY COLS --------
 #Human development groups
 hdi_groups_table3 <- table3_clean[
-  table3_clean$country %in% hdi_labels,
+  table3_clean$country %in% hdi_labels_hdr,
 ]
 
 #Regions
@@ -681,7 +720,7 @@ special_groups_table3 <- table3_clean[
 #Countries only
 countries_table3 <- table3_clean[
   !(table3_clean[[2]] %in% c(
-    hdi_labels,
+    hdi_labels_hdr,
     region_labels,
     specialgroup_labels,
     section_headers
@@ -697,10 +736,18 @@ countries_table3 <- table3_clean[
 
 
 #View category tables
- # View(countries_table3)
- # View(hdi_groups_table3)
- # View(regions_table3)
- # View(special_groups_table3)
+# View(countries_table3)
+# View(hdi_groups_table3)
+# View(regions_table3)
+# View(special_groups_table3)
+
+
+
+#Save each object as .rds
+saveRDS(countries_table3, "Support_Files/countries_table3.rds")
+saveRDS(hdi_groups_table3, "Support_Files/hdi_groups_table3.rds")
+saveRDS(regions_table3, "Support_Files/regions_table3.rds")
+saveRDS(special_groups_table3, "Support_Files/special_groups_table3.rds")
 
 
 
@@ -753,20 +800,20 @@ table4_clean <- table4_clean[-c(1, 2), ]
 # --------------------- STANDARDISE COL NAMES ---------------------------------
 # list new col names
 new_colnames_tb4 <- c(
-    "hdi_rank",
-    "country",
-    "gdi_2023",
-    "gdi_group_2023",
-    "hdi_female_2023",
-    "hdi_male_2023",
-    "life_expect_birth_female_2023",
-    "life_expect_birth_male_2023",
-    "expected_yrs_school_female_2023",
-    "expected_yrs_school_male_2023",
-    "mean_yrs_school_female_2023",
-    "mean_yrs_school_male_2023",
-    "gross_nat_inc_capita_female_2023",
-    "gross_nat_inc_capita_male_2023")
+  "hdi_rank",
+  "country",
+  "gdi_2023",
+  "gdi_group_2023",
+  "hdi_female_2023",
+  "hdi_male_2023",
+  "life_expect_birth_female_2023",
+  "life_expect_birth_male_2023",
+  "expected_yrs_school_female_2023",
+  "expected_yrs_school_male_2023",
+  "mean_yrs_school_female_2023",
+  "mean_yrs_school_male_2023",
+  "gross_nat_inc_capita_female_2023",
+  "gross_nat_inc_capita_male_2023")
 
 
 # Apply the new cleaned column names
@@ -821,13 +868,13 @@ table4_clean <- table4_clean[
     #apply the function row-by-row (1 = rows)
     all ),]                    #check if ALL values in the row are TRUE (i.e., all NA)
 
-#View(table5_clean)
+#View(table4_clean)
 
 
 # ------------- SPLIT `country` INTO CATEGORY TABLES & DROP EMPTY COLS --------
 #Human development groups
 hdi_groups_table4 <- table4_clean[
-  table4_clean$country %in% hdi_labels,
+  table4_clean$country %in% hdi_labels_hdr,
 ]
 
 #Regions
@@ -844,7 +891,7 @@ special_groups_table4 <- table4_clean[
 #Countries only
 countries_table4 <- table4_clean[
   !(table4_clean[[2]] %in% c(
-    hdi_labels,
+    hdi_labels_hdr,
     region_labels,
     specialgroup_labels,
     section_headers
@@ -860,14 +907,18 @@ countries_table4 <- table4_clean[
 
 
 #View category tables
- # View(countries_table4)
- # View(hdi_groups_table4)
- # View(regions_table4)
- # View(special_groups_table4)
+# View(countries_table4)
+# View(hdi_groups_table4)
+# View(regions_table4)
+# View(special_groups_table4)
 
 
 
-
+#Save each object as .rds
+saveRDS(countries_table4, "Support_Files/countries_table4.rds")
+saveRDS(hdi_groups_table4, "Support_Files/hdi_groups_table4.rds")
+saveRDS(regions_table4, "Support_Files/regions_table4.rds")
+saveRDS(special_groups_table4, "Support_Files/special_groups_table4.rds")
 
 #####################CLEANING HDRs_TABLE 5 ####################################
 #Read raw table
@@ -913,17 +964,17 @@ table5_clean <- table5_clean[-c(1, 2), ]
 # --------------------- STANDARDISE COL NAMES ---------------------------------
 # list new col names
 new_colnames_tb5 <- c(
-      "hdi_rank",
-      "country",
-      "gii_2023",
-      "gii_rank_2023",
-      "mater_mortal_ratio_2020",
-      "ado_birth_rate_2023",
-      "parliament_women_perct_2023",
-      "female_secondary_educ_perct_2023",
-      "male_secondary_educ_perct_2023",
-      "female_labourforce_rate_perct_2023",
-      "male_labourforce_rate_perct_2023")
+  "hdi_rank",
+  "country",
+  "gii_2023",
+  "gii_rank_2023",
+  "mater_mortal_ratio_2020",
+  "ado_birth_rate_2023",
+  "parliament_women_perct_2023",
+  "female_secondary_educ_perct_2023",
+  "male_secondary_educ_perct_2023",
+  "female_labourforce_rate_perct_2023",
+  "male_labourforce_rate_perct_2023")
 
 
 # Apply the new cleaned column names
@@ -963,7 +1014,7 @@ table5_clean <- convert_types(
 )
 
 #check datatypes
-sapply(table5_clean, class)
+#sapply(table5_clean, class)
 
 
 # --------------------- REMOVE ALL CATEGORY HEADERS ROWS-----------------------
@@ -984,7 +1035,7 @@ table5_clean <- table5_clean[
 # ------------- SPLIT `country` INTO CATEGORY TABLES & DROP EMPTY COLS --------
 #Human development groups
 hdi_groups_table5 <- table5_clean[
-  table5_clean$country %in% hdi_labels,
+  table5_clean$country %in% hdi_labels_hdr,
 ]
 
 #Regions
@@ -1001,7 +1052,7 @@ special_groups_table5 <- table5_clean[
 #Countries only
 countries_table5 <- table5_clean[
   !(table5_clean[[2]] %in% c(
-    hdi_labels,
+    hdi_labels_hdr,
     region_labels,
     specialgroup_labels,
     section_headers
@@ -1024,7 +1075,11 @@ countries_table5 <- table5_clean[
 
 
 
-
+#Save each object as .rds
+saveRDS(countries_table5, "Support_Files/countries_table5.rds")
+saveRDS(hdi_groups_table5, "Support_Files/hdi_groups_table5.rds")
+saveRDS(regions_table5, "Support_Files/regions_table5.rds")
+saveRDS(special_groups_table5, "Support_Files/special_groups_table5.rds")
 
 
 #####################CLEANING HDRs_TABLE 7 ####################################
@@ -1122,7 +1177,7 @@ table7_clean <- convert_types(
 )
 
 #check datatypes
-sapply(table7_clean, class)
+#sapply(table7_clean, class)
 
 
 # --------------------- REMOVE ALL CATEGORY HEADERS ROWS-----------------------
@@ -1143,7 +1198,7 @@ table7_clean <- table7_clean[
 # ------------- SPLIT `country` INTO CATEGORY TABLES & DROP EMPTY COLS --------
 #Human development groups
 hdi_groups_table7 <- table7_clean[
-  table7_clean$country %in% hdi_labels,
+  table7_clean$country %in% hdi_labels_hdr,
 ]
 
 #Regions
@@ -1160,7 +1215,7 @@ special_groups_table7 <- table7_clean[
 #Countries only
 countries_table7 <- table7_clean[
   !(table7_clean[[2]] %in% c(
-    hdi_labels,
+    hdi_labels_hdr,
     region_labels,
     specialgroup_labels,
     section_headers
@@ -1180,6 +1235,82 @@ countries_table7 <- table7_clean[
 # View(hdi_groups_table7)
 # View(regions_table7)
 # View(special_groups_table7)
+
+
+
+
+#Save each object as .rds
+saveRDS(countries_table7, "Support_Files/countries_table7.rds")
+saveRDS(hdi_groups_table7, "Support_Files/hdi_groups_table7.rds")
+saveRDS(regions_table7, "Support_Files/regions_table7.rds")
+saveRDS(special_groups_table7, "Support_Files/special_groups_table7.rds")
+
+
+
+
+
+
+
+
+###SAVE CLEAN HDRs TABLES
+saveRDS(table1_clean, "Support_Files/table1_clean.rds")
+saveRDS(table2_clean, "Support_Files/table2_clean.rds")
+saveRDS(table3_clean, "Support_Files/table3_clean.rds")
+saveRDS(table4_clean, "Support_Files/table4_clean.rds")
+saveRDS(table5_clean, "Support_Files/table5_clean.rds")
+saveRDS(table7_clean, "Support_Files/table7_clean.rds")
+
+
+
+
+###############################################################################
+##################### create ?????          ####################################
+########################################## ####################################
+#1. Official HDR aggregate labels (EXTRACTION ONLY)
+hdi_labels_extract <- c(
+  "Very High Human Development",
+  "High Human Development",
+  "Medium Human Development",
+  "Low Human Development"
+)
+
+
+#USED ONLY to extract HDR group rows
+# Define HDI labels 
+hdi_labels_hdr_extract <- c(
+  "Very high human development",
+  "High human development",
+  "Medium human development",
+  "Low human development"
+)
+
+
+
+
+# Define Regions labels 
+region_labels_extract <- c(
+  "Arab States",
+  "East Asia and the Pacific",
+  "Europe and Central Asia",
+  "Latin America and the Caribbean",
+  "South Asia",
+  "Sub-Saharan Africa"
+)
+
+# Define Special groups labels
+specialgroup_labels_extract <- c(
+  "Least developed countries",
+  "Developing countries",
+  "Small island developing states",
+  "Organisation for Economic Co-operation and Development",
+  "World")
+
+
+
+
+
+
+
 
 
 

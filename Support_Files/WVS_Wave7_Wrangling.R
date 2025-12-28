@@ -11,7 +11,8 @@ orig_indiv_data <- readRDS("WVS_Dataset/WVS7_Individual.rds")
 orig_country_data <- readRDS("WVS_Dataset/WVS7_Country.rds")
 orig_codebook_data <- readxl::read_xlsx("WVS_Dataset/WVS7_Codebook_updated_labels.xlsx")
 orig_UNSD_data <- readxl::read_excel("WVS_Dataset/UNSD — Methodology.xlsx")
-
+#View(orig_country_data)
+#View(orig_codebook_data)
 
 # load intermediaries
 WVS7_part_countries <- orig_country_data[c(1:2)]

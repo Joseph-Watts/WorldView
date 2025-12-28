@@ -6,11 +6,14 @@ required_packages <- c("shiny", "markdown", "haven", "here", "labelled", "sjlabe
                        "readxl", "writexl", "tm", "shinyBS", "shinycssloaders", "shinydashboard", "shinyWidgets",
                        "tidyverse", "corrplot", "broom", "viridis", "plotly", "psych", "car", "randomForest")
 
-for (packageName in required_packages) {
-  if (!requireNamespace(packageName)) {
-    install.packages(packageName)
-  }
-}
+# for (packageName in required_packages) {
+#   if (!requireNamespace(packageName)) {
+#     install.packages(packageName)
+#   }
+# }
+
+invisible(lapply(required_packages, require, character.only = TRUE))
+
 
 
 ###########################-
@@ -23,7 +26,7 @@ library(sjlabelled)
 library(readxl)
 library(writexl)
 library(tm)
-library(plyr)
+#library(plyr)
 
 
 ############################-
@@ -31,8 +34,8 @@ library(plyr)
 ############################-
 library(shiny)
 library(markdown)
-library(DT)
-library(ggplot2) #covered by tidyverse, remove later, maybe?
+library(DT)   #duplicate
+#library(ggplot2) #covered by tidyverse, remove later, maybe? #duplicate
 library(naniar)
 library(shinyBS)
 library(shinycssloaders)
@@ -42,7 +45,7 @@ library(tidyverse)
 library(corrplot)
 library(broom)
 library(viridis)
-library(plotly)
+library(plotly)    #duplicate
 library(psych)
 library(car)
 library(randomForest)
@@ -123,26 +126,172 @@ library(tidyr)
 
 
 
+# ============================================
+# Load MASTER dataset (HDR + WVS, classified)
+# Country-level dataset used by the Shiny app
+# ============================================
+MASTER_COUNTRY_DATA <- readRDS(
+  here::here("Support_Files/MASTER_HDR_WVS7_CLASSIFIED.rds"
+             )
+ )
 
 
-# ====================
-# Load HDR functionality
-# ====================
-source("HDR_files/clean_HDRs.R")
+#Load "MASTER_HDR_WVS7_CLASSIFIED""
+MASTER_HDR_WVS7_CLASSIFIED <- MASTER_COUNTRY_DATA
+
+
+# =============================
+# Load WVS7 country-level data
+# =============================
+wvs7_country <- readRDS(
+  here::here("WVS_Dataset", "WVS7_Country.rds")
+)
+
+
+
+# ================================
+# Load variable dictionary (HDR + WVS7)
+# ================================
+FULL_VARIABLE_DICTIONARY <- readRDS(
+  here::here("Support_Files", "FULL_VARIABLE_DICTIONARY.rds")
+)
+
+#View(FULL_VARIABLE_DICTIONARY)
+
+# ADD A COL FOR READABLE VARIABLES NAMES 
+FULL_VARIABLE_DICTIONARY <- FULL_VARIABLE_DICTIONARY %>%
+  dplyr::mutate(
+    # Short label: take text before " is "
+    short_label = stringr::str_trim(
+      stringr::str_remove(definition, " is .*")
+    )
+  )
+
+
+
+
+
+
+
+
+# ================================
+# Load HDR_GROUP_BENCHMARK
+# ================================
+HDR_GROUP_BENCHMARKS<- readRDS("Support_Files/HDR_GROUP_BENCHMARKS.rds")
+
+
+
+
+# ======================================
+# Load variables in build_HDR_tables.R
+# ======================================
 source("HDR_files/build_HDR_tables.R")
 
 
 
 
+# =========================================
+# Load variables in Build_master_dataset.R
+# =========================================
+MASTER_HDR_WVS7_CLASSIFIED <- MASTER_COUNTRY_DATA
+
+
+# ======================================
+# Load HDR_GROUP_LOOKUP 
+# ======================================
+HDR_GROUP_LOOKUP <- readRDS("Support_Files/HDR_GROUP_LOOKUP.rds")
+
+
+
+
+# ======================================
+# Load HDR_AREA_LOOKUP 
+# ======================================
+HDR_AREA_LOOKUP <- readRDS("Support_Files/HDR_AREA_LOOKUP.rds")
 
 
 
 
 
+# ==========================================================
+# HDR variable choices for GROUP-LEVEL scatter 
+# ==========================================================
+# Identify All numeric benchmark variables actually available for plotting
+HDR_BENCHMARK_VARS <- HDR_GROUP_BENCHMARKS %>%
+  dplyr::select(where(is.numeric)) %>%
+  names()
+
+
+# ==========================================================
+# HDR variable choices for GROUP-LEVEL scatter
+# ==========================================================
+# #join with FULL_VARIABLE_DICTIONARY for labels
+# HDR_GROUP_VAR_CHOICES <- FULL_VARIABLE_DICTIONARY %>%
+#   
+#   # Keep HDR variables only
+#   dplyr::filter(source == "HDR") %>%
+#   
+#   # Keep only variables that exist in group benchmarks
+#   dplyr::filter(var_code %in% unique(HDR_GROUP_BENCHMARKS$variable)) %>%
+#   
+#   dplyr::select(var_code, short_label) %>%
+#   dplyr::distinct() %>%
+#   
+#   # Clean labels (remove stray quotes)
+#   dplyr::mutate(
+#     short_label = stringr::str_remove_all(short_label, "^'|'$")
+#   ) %>%
+#   
+#   dplyr::arrange(short_label) %>%
+#   
+#   # Named vector for Shiny: label -> var_code
+#   {
+#     setNames(.$var_code, .$short_label)
+#   }
 
 
 
 
+# ======================================
+# Load HDR_AREA_LOOKUP 
+# ======================================
+
+HDR_LABELS <- readRDS("Support_Files/HDR_LABELS.rds")  
 
 
+
+# ==========================================================
+# HDR variable choices for GROUP-LEVEL scatter
+# ==========================================================
+HDR_GROUP_VAR_CHOICES <- HDR_GROUP_BENCHMARKS %>%
+  dplyr::distinct(variable) %>%
+  dplyr::filter(variable %in% names(HDR_LABELS)) %>%
+  dplyr::mutate(
+    label = HDR_LABELS[variable]
+  ) %>%
+  dplyr::arrange(label) %>%
+  {
+    setNames(.$variable, .$label)
+  }
+
+
+ 
+
+
+
+# ==================================================================
+# Load WVS7_country_variable_dictionary for WVS7 readable dropdwn
+# ==================================================================
+WVS7_COUNTRY_DICT <- readRDS(
+  "Support_Files/WVS7_COUNTRY_DICT.rds"
+)
+
+
+
+# ==========================================================================
+# Load FULL_COUNTRY_VAR_DICT which has readble var names for WVS7 and HDRs 
+# ==========================================================================
+FULL_COUNTRY_VAR_DICT <- readRDS(
+  "Support_Files/FULL_COUNTRY_VAR_DICT.rds"
+)
 

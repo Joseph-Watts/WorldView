@@ -36,6 +36,9 @@ shinyUI(fluidPage(
     HTML("")
   ),
   
+  
+  
+  
   dashboardPage(
     
     skin = "green", # green palette for specific buttons -> #00a65a
@@ -61,34 +64,7 @@ shinyUI(fluidPage(
                          icon = icon("home")
                        ),
                        ####################### HOME #######################
-                       
-                       
-                       
-                       ####################### HDRs #######################
-                       menuItem("Human Development Reports",
-                           tabName= "dummy",
-                           icon = icon("people-group"),
-                           startExpanded= F,
-                           
-                               menuSubItem("HDR datasets",
-                                           tabName= "hdr_rawdata",
-                                           icon= icon("database")
-                                          ),
-                               menuSubItem("Overview (Worldmap)",
-                                           tabName= "worldmap",
-                                           icon = icon("globe", lib = "glyphicon")
-                                           ),
-                               menuSubItem("Country Profile",
-                                           tabName= "countryProfile",
-                                           icon= icon("flag")
-                                           ),
-                               menuSubItem("Table in details",
-                                           tabName= "tableDetails",
-                                           icon= icon("magnifying-glass")
-                                           )
-                               ),
-                       ####################### HDRs #######################
-                       
+
                        
                        ############## VARIABLE DOCUMENTATION ##############
                        menuItem(
@@ -113,53 +89,44 @@ shinyUI(fluidPage(
                        
                        
                        ################## RAW DATA TABLES #################
+                       # Raw Data tab
                        menuItem(
                          "Raw Data Tables",
-                         tabName = "dummy",
-                         icon = icon('list', lib = "glyphicon"),
-                         startExpanded = F,
-                         
-                         menuSubItem(
-                           "Participant-level Data",
-                           tabName = "EDA_indiv",
-                           icon = icon("user", lib = "glyphicon")
-                         ),
-                         
-                         menuSubItem(
-                           "Country-level Data",
-                           tabName = "EDA_country",
-                           icon = icon("globe", lib = "glyphicon")
-                         ),
-                         
-                         menuSubItem(
-                           "Missing Data Visualizations",
-                           tabName = "vis_miss",
-                           icon = icon("warning-sign", lib = "glyphicon")
-                         )
+                         tabName = "RawData",    
+                         icon = icon("list", lib = "glyphicon"),
+                         startExpanded = FALSE
                        ),
-                       ################## RAW DATA TABLES #################
                        
-                       
-                       ################ SUMMARY STATISTICS ################
+                       #Missing data tab
                        menuItem(
-                         "Summary Statistics",
-                         tabName = "dummy",
+                         "Missing Data Visualizations",
+                         tabName = "vis_miss",
+                         icon = icon("warning-sign", lib = "glyphicon")
+                       ),
+                       #),
+                       ##################RAW DATA TABLES END #################
+                       
+                 
+                       ### NEW SUMMARY STATTISTICS START ######
+                       menuItem(
+                         "Summary Statistics NEW",
+                         #tabName = "summary_stats_NEW",
                          icon = icon('info-sign', lib = "glyphicon"),
-                         startExpanded = F,
                          
-                         menuSubItem(
-                           "Univariate Statistics",
-                           tabName = "univariateStats",
-                           icon = icon("chart-bar")
-                         ),
-                         
-                         menuSubItem(
-                           "Bivariate Statistics",
-                           tabName = "bivariateStats",
-                           icon = icon("project-diagram")
-                         )
-                       ), 
-                       ################ SUMMARY STATISTICS ################
+                       menuSubItem(
+                         "Univariate Statistics (NEW)",
+                         tabName = "univariateStats_new",
+                         icon = icon("chart-bar")
+                       ),
+                       
+                       menuSubItem(
+                         "Bivariate Statistics (NEW)",
+                         tabName = "bivariateStats_new",
+                         icon = icon("project-diagram")
+                       )
+                       ),
+                       
+                       ################ NEW SUMMARY STATISTICS END ################
                        
                        
                        ################## VISUALISATIONS ##################
@@ -176,12 +143,6 @@ shinyUI(fluidPage(
                          ),
                          
                          menuSubItem(
-                           "Scatterplot",
-                           tabName = "scatterParticipants",
-                           icon = icon("move", lib = "glyphicon")
-                         ),
-                         
-                         menuSubItem(
                            "Correlation", 
                            tabName = "correlationView",
                            icon = icon("equalizer", lib = "glyphicon")
@@ -195,6 +156,42 @@ shinyUI(fluidPage(
                          )
                        ),
                        ################## VISUALISATIONS ##################
+                       
+                       
+                       ################## VISUALISATIONS NEW START ##########
+                       menuItem(
+                         "Visualisations NEW",
+                         tabName = "scatterParticipants",
+                         icon = icon('move', lib = "glyphicon"),
+                         startExpanded = F,
+                         
+                         menuSubItem(
+                           "Bar Chart",
+                           tabName = "barChart",
+                           icon = icon("stats", lib = "glyphicon")
+                         ),
+                         
+                         menuSubItem(
+                           "Scatterplot",   #text
+                           tabName = "scatterParticipants",
+                           icon = icon("move", lib = "glyphicon")
+                         ),
+
+                         menuSubItem(
+                           "Correlation", 
+                           tabName = "correlationView",
+                           icon = icon("equalizer", lib = "glyphicon")
+                         ),
+                         
+                         menuSubItem(
+                           "Histogram",
+                           tabName = "histogramView",
+                           icon = icon("signal")
+                           # icon = icon("bi-soundwave", lib = "glyphicon")
+                         )
+                       ),
+                       
+                       ################## VISUALISATIONS NEW END ##################
                        
                        
                        ###################### MODELS ######################
@@ -241,10 +238,14 @@ shinyUI(fluidPage(
                          icon = icon("user", lib = "glyphicon")
                        )
                        ###################### ABOUT #######################
-                       
                      ) # end sidebarMenu
     ), # end dashboardSidebar
-    
+  
+      
+###DASHBOARDBODY#########    
+###DASHBOARDBODY#########    
+###DASHBOARDBODY#########    
+
     dashboardBody(
       
       tabItems(
@@ -258,217 +259,12 @@ shinyUI(fluidPage(
                 includeMarkdown("www/home.md")
         ),
         ####################### HOME #######################
-        
- 
-        #################################################################
-        #                     HDR ADDITION start
-        #################################################################
-        ### ======== HDR Raw datasets ======= ###
-        tabItem(
-          tabName = "hdr_rawdata",
-          
-          # --- Row 1: Dropdown menus ---
-          fluidRow(
-            column(
-              width = 6,
-              selectInput(
-                inputId = "selected_HDR_table",
-                label = "Select HDR Table:",
-                choices = names(HDR_DATA)
-              )
-            ),
-            column(
-              width = 6,
-              selectInput(
-                inputId = "selected_category",
-                label = "Select Category:",
-                choices = c("groups", "regions", "special", "countries")
-              )
-            )
-          ),
-          
-          # --- Dynamic Title ---
-          h3(textOutput("dynamic_title")),
-          
-          br(),
-          
-          # --- Checkbox to toggle variable definitions ---
-          checkboxInput(
-            inputId = "show_var_defs",
-            label = "👀 Show Variable Definitions",
-            value = FALSE
-          ),
-          
-          # --- Collapsible Variable definitions section ---
-          uiOutput("variable_definitions"),
-          
-          br(),
-          
-          # --- Dynamic table output ---
-          DTOutput("raw_table"),
-          
-          br(),
-          
-          # --- Download table button ---
-          downloadButton("download_raw", "Download Table")
-        ),
-    
-        
-
-        ### ======== HDR WORLD MAP (Overview) - START======= ###
-        tabItem(
-          tabName = "worldmap",
-          
-          h3("Global Development Map"),
-          
-          # --- Indicator Selector ---
-          selectInput(
-            inputId = "indicator",
-            label   = "Select an indicator",
-            choices = ALL_HDR_INDICATORS,
-            selected = "hdi_2023"
-          ),
-          
-          # --- Area Filter ---
-          selectInput(
-            inputId = "filtered_area",
-            label   = "Filter by area:",
-            choices = c("World", unique(HDR_AREA_LOOKUP$area)),
-            selected = "World"
-          ),
-          
-          # --- Leaflet Map ---
-          leafletOutput("world_choropleth", height = "600px"),
-          
-          br(),
-          
-          # --- Toggle Country List ---
-          checkboxInput(
-            inputId = "show_country_list",
-            label = "Show list of countries in selected area",
-            value = FALSE
-          ),
-          
-          # --- Render List ---
-          uiOutput("area_country_list")
-        ),
-        
-        
-        
-        
-        
-### ======== HDR COUNTRY PROFILE ======= ###
-        tabItem(
-          tabName = "countryProfile",
-          
-          h2("HDR Country Profile"),
-          
-          # --- COUNTRY DROPDOWN  ---
-          selectizeInput(
-            inputId = "sel_country_profil",
-            label   = "Select a country",
-            choices = ALL_HDR_COUNTRIES,    
-            selected = "New Zealand",
-            multiple = FALSE
-          ),
-          
-          br(),
-          
-          # --- INDICATOR SELECTOR ---
-          selectizeInput(
-            inputId = "sel_indicators_profil",
-            label   = "Choose the indicator(s) to visualise",
-            choices = ALL_HDR_INDICATORS,    
-            
-            selected = ALL_HDR_INDICATORS[1:4],
-            multiple = TRUE
-          ),
-          
-          br(),
-          
-          # --- PLOT OUTPUT ---
-          plotlyOutput("country_profile_plots", height = "650px")
-        ),
-        
-
-
-
-
-### ======== HDR - TABLE IN DETAILS ======= ###
-tabItem(
-  tabName = "hdr_tableDetails",    
-  
-  tabsetPanel(
-    id = "hdr_subtabs",            
-    
-    tabPanel(
-      title = "Table 1: Human Development Index and its components",
-      value = "hdr_tab1",          
-      
-      # --- Select AREA ---
-      selectInput(
-        inputId = "hdr_tab1_area",             
-        label   = "Select an area",
-        choices = unique(HDR_AREA_LOOKUP$area),
-        selected = "East Asia and the Pacific"
-      ),
-      
-      tags$hr(),
-      
-      # --- Select INDICATORS ---
-      selectizeInput(
-        inputId = "hdr_tab1_indicators",      
-        label   = "Select indicator(s)",
-        choices = TABLE1_INDICATORS,
-        selected = c("hdi_rank", "life_expect_birth_2023"),
-        multiple = TRUE
-      ),
-      
-      div(
-        style = "height: 700px; overflow-y: scroll;",
-        plotlyOutput("hdr_tab1_plots", height = "1200px")   
-      ),
-      
-      tags$hr()
-    ),
-    
-    # tabPanel("Table 2", value = "hdr_tab2"),
-    # tabPanel("Table 3", value = "hdr_tab3"),
-    # tabPanel("Table 4", value = "hdr_tab4"),
-    # tabPanel("Table 5", value = "hdr_tab5"),
-    # tabPanel("Table 7", value = "hdr_tab7")
-  )
-),
-
-
-
-
-
 
 
 
         #################################################################
         #                HDR WORLD MAP (Overview) - END
         #################################################################
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        #################################################################
-        #                    HDR ADDITION END 
-        #################################################################
-
-        
-        
-        
 
         
         ############## VARIABLE DOCUMENTATION ##############
@@ -483,19 +279,140 @@ tabItem(
         
         
         ################## RAW DATA TABLES #################
-        tabItem(tabName = "EDA_indiv",
-                includeMarkdown("www/instructions/DTable.md"),
-                tags$style(type = "text/css", "#q1 {vertical-align: top;}"),
-                fluidRow(column(12, uiOutput("raw_selectCountry"))),
-                fluidRow(column(12, DTOutput("raw_filtered_country")))
-        ),
-        
-        tabItem(tabName = "EDA_country",
-                includeMarkdown("www/instructions/DTable.md"),
-                tags$style(type = "text/css", "#q1 {vertical-align: top;}"),
-                fluidRow(column(12, DTOutput("Table_country")))
-        ),
-        
+ 
+       tabItem(
+         tabName = "RawData",
+         
+         h2("Raw Data"),
+         
+         tags$p(
+           "This section provides access to raw datasets at different levels of analysis. ",
+           "Use the tabs below to switch between participant-level and country-level data."
+         ),
+         
+         br(),
+         
+         tabsetPanel(
+           id = "raw_data_subtab",
+           
+           # =========================================================
+           # Participant-level raw data
+           # =========================================================
+           tabPanel(
+             title = "Participant-level",
+             includeMarkdown("www/instructions/DTable_ind.md"),
+             tags$style(type = "text/css", "#q1 {vertical-align: top;}"),
+             
+             fluidRow(
+               column(12, uiOutput("raw_selectCountry"))
+             ),
+             
+             fluidRow(
+               column(12, DTOutput("raw_filtered_country"))
+             )
+           ),
+           
+           # =========================================================
+           # Country-level raw data (HDR + WVS)
+           # =========================================================
+           tabPanel(
+             title = "Country-level",
+             includeMarkdown("www/instructions/DTable_ctry.md"),
+             # ----------------------------------------------------
+             # Country selection dropdown
+             # ----------------------------------------------------
+             fluidRow(
+               column(
+                 4,
+                 selectizeInput(
+                   inputId = "country_select",
+                   label   = "Select country:",
+                   choices = NULL,
+                   multiple = TRUE,
+                   options = list(
+                     placeholder = "Type to search countries...",
+                     maxItems = NULL,
+                     create = FALSE
+                   )
+                 )
+               )
+             ),
+             
+             br(),
+             
+             # ----------------------------------------------------
+             # Country-level data table
+             # ----------------------------------------------------
+             fluidRow(
+               column(12, DTOutput("Table_country"))
+             ),
+             
+             br(),
+             hr(),
+             br(),
+             
+             # ----------------------------------------------------
+             # Variable dictionary
+             # ----------------------------------------------------
+             h3("Variable dictionary"),
+             
+             tags$p(
+               "Use the controls below to search for variable definitions from the ",
+               "HDRs and WVS7 datasets."
+             ),
+             
+             fluidRow(
+               column(
+                 4,
+                 radioButtons(
+                   inputId = "var_source",
+                   label   = "Filter by source:",
+                   choices = c(
+                     "All sources" = "ALL",
+                     "Human Development Reports (HDR)" = "HDR",
+                     "World Values Survey Wave 7 (WVS7)" = "WVS7"
+                   ),
+                   selected = "ALL"
+                 )
+               )
+             ),
+             
+             br(),
+             
+             fluidRow(
+               column(4, uiOutput("source_refinement_ui"))
+             ),
+             
+             br(),
+             
+             fluidRow(
+               column(
+                 4,
+                 selectizeInput(
+                   inputId = "var_lookup",
+                   label   = "Select variable:",
+                   choices = NULL,
+                   multiple = FALSE,
+                   options = list(
+                     placeholder = "Type a variable name…",
+                     create = FALSE
+                   )
+                 )
+               )
+             ),
+             
+             br(),
+             
+             fluidRow(
+               column(12, uiOutput("var_definition"))
+             )
+           )
+         )
+       ),
+       
+       ################## RAW DATA TABLES #################
+       
+       ################## MISSING DATA  ###################
         tabItem(tabName = "vis_miss",
                 includeMarkdown("www/instructions/miss_vars.md"),
                 
@@ -552,77 +469,405 @@ tabItem(
                             )
                 )
         ),
-        ################## RAW DATA TABLES #################
-        
-        
-        ################ SUMMARY STATISTICS ################
-        # Univariate Stats tab
-        tabItem(tabName = "univariateStats",
-                includeMarkdown("www/instructions/univariate_instruction.md"),
-                fluidRow(shinydashboard::box(width = 4, status = "primary",
-                                             selectizeInput(inputId = "univar_question",
-                                                            label = "Select Question:",
-                                                            choices = grouped_minus_ignored,
-                                                            selected = grouped_minus_ignored[[1]][1]),
-                                             pickerInput(inputId = "univar_countries",
-                                                         label = "Select Countries:",
-                                                         choices = picker_country_list,
-                                                         multiple = TRUE,
-                                                         options = list(
-                                                           `actions-box` = TRUE,
-                                                           `live-search` = TRUE
-                                                           ),
-                                                         selected = c("NZL", "AUS", "GBR")
-                                                         )
-                                             ),
-                         shinydashboard::box(width = 8, title = "Univariate Summary", status = "primary",
-                                             uiOutput("univariate_results")
-                                             )
-                         )
-        ),
-        
-        # Bivariate Stats tab
-        tabItem(tabName = "bivariateStats",
-                includeMarkdown("www/instructions/bivariate_instruction.md"),
-                fluidRow(shinydashboard::box(width = 4,
-                                             status = "primary",
-                                             selectizeInput(inputId = "bivariate_var1",
-                                                            label = "Select Variable 1:",
-                                                            choices = grouped_minus_ignored,
-                                                            selected = grouped_minus_ignored[[1]][1]
-                                                            ),
-                                             selectizeInput(inputId = "bivariate_var2",
-                                                            label = "Select Variable 2:",
-                                                            choices = grouped_minus_ignored,
-                                                            selected = grouped_minus_ignored[[1]][2]
-                                                            ),
-                                             pickerInput(inputId = "bivariate_countries",
-                                                         label = "Select Countries:",
-                                                         choices = picker_country_list,
-                                                         multiple = TRUE,
-                                                         options = list(`actions-box` = TRUE,
-                                                                        `live-search` = TRUE,
-                                                                        `max-options` = 5
-                                                                        ),
-                                                         selected = c("NZL", "AUS", "GBR")
-                                                         ),
-                                             radioGroupButtons(inputId = "bivariate_type",
-                                                               label = "Table Type:",
-                                                               choices = c("Counts", "Row Percentages", "Column Percentages"),
-                                                               selected = "Counts",
-                                                               status = "success"
-                                                               )
-                                             ),
-                         shinydashboard::box(width = 8,
-                                             title = "Bivariate Summary",
-                                             status = "primary",
-                                             shinycssloaders::withSpinner(DTOutput("bivariate_table"))
-                                             )
-                         )
-        ),
-        ################ SUMMARY STATISTICS ################
-        
-        
+
+       
+        ################ SUMMARY STATISTICS NEW START ################
+        # ===========================================================
+        # UNIVARIATE STATS
+        # ===========================================================
+        tabItem(
+          tabName = "univariateStats_new",
+          
+          # ----------------------------------------------------
+          # Page header / instructions
+          # ----------------------------------------------------
+          #includeMarkdown("www/instructions/univariate_instruction_ind.md"),
+          
+          br(),
+          
+          # ----------------------------------------------------
+          # MAIN PANEL TABS 
+          # ----------------------------------------------------
+          tabsetPanel(
+            id = "univariate_level_tabs",
+            type = "tabs",
+            
+            # ==========================================
+            # Individual-level tab
+            # ==========================================
+            tabPanel(
+              title = "Individual-level",
+              includeMarkdown("www/instructions/univariate_instruction_ind.md"),
+              fluidRow(
+                column(
+                  4,
+                  h4("Select Question"),
+                  selectInput(
+                  inputId= "uni_question_indiv",
+                    label= NULL,
+                    choices = NULL
+                  ),
+                  br(),
+                  h4("Select Countries"),
+                  selectizeInput(
+                    inputId= "uni_countries_indiv",
+                    label= NULL,
+                    choices = NULL,
+                    multiple = TRUE
+                  )
+                ),
+                
+                column(
+                  8,
+                  h3("Individual-level Summary"),
+                  uiOutput("univariate_indiv_tabs")  # Selected sample + country tabs
+                )
+              )
+            ),
+            
+            # ==========================================
+            # Country-level tab
+            # ==========================================
+            tabPanel(
+              title = "Country-level",
+              includeMarkdown("www/instructions/univariate_instruction_ctry.md"),
+
+              fluidRow(
+                column(
+                  4,
+                  # -------------------------------
+                  # Variable dictionary controls
+                  # -------------------------------
+                  #h4("Select Variable"),
+                  radioButtons(
+                    inputId = "country_var_source_new",
+                    label   = "Filter by source:",
+                    choices = c(
+                      "All sources" = "ALL",
+                      "Human Development Reports (HDR)" = "HDR",
+                      "World Values Survey Wave 7 (WVS7)" = "WVS7"
+                    ),
+                    selected = "ALL"
+                  ),
+                  
+                  uiOutput("country_source_refinement_ui_new"),
+                  
+                  h4("Select Variable"),
+                  selectizeInput(
+                    inputId = "uni_question_country",
+                    label   = NULL,
+                    choices = NULL,
+                    multiple = FALSE
+                  ),
+                  
+                  h4("Select Countries"),
+                  selectizeInput(
+                    inputId = "uni_countries_country",
+                    label   = NULL,
+                    choices = NULL,
+                    multiple = TRUE
+                  )
+                ),
+                
+                column(
+                  8,
+                  h3("Country-level Summary"),
+                  #uiOutput("univariate_country_summary")
+                  uiOutput("univariate_country_tabs")
+                )
+              )
+            ),
+            
+
+            # ==========================================
+            # group -level tab
+            # ==========================================
+            tabPanel(
+              title = "Group-level",
+              includeMarkdown("www/instructions/univariate_instruction_grp.md"),
+              fluidRow(
+                
+                # ================= LEFT COLUMN: CONTROLS =================
+                column(
+                  4,
+                  
+                  h4("Select Group Type"),
+                  radioButtons(
+                    inputId = "group_type",
+                    label   = NULL,
+                    choices = c(
+                      "All groups"                = "all",
+                      "Human Development Groups" = "groups",
+                      "Regions"                  = "regions",
+                      "Special Groups"           = "special"
+                    ),
+                    selected = "all"
+                  ),
+                  
+                  br(),
+                  
+                  # ------------------------------------------
+                  # Select Group(s)  (HDI / Regions / Special)
+                  # ------------------------------------------
+                  # Select group(s) (depends on group type)
+                  uiOutput("group_selector_ui"),
+                  
+                  br(),
+                  
+                  # Select HDR table (always visible)
+                  uiOutput("group_table_ui"),
+                
+                  br(),
+                  
+                  #uiOutput("group_indicator_ui"),
+                  
+                  br(),
+                  
+                ),
+                
+                
+                # ================= RIGHT COLUMN: OUTPUT =================
+                column(
+                  8,
+                  h3("Group-level Summary"),
+                  DT::DTOutput("group_level_summary")
+                )
+              )
+            )  #end tabPanel group-level
+            
+          )    #end tabsetPanel
+        ),     #end tabItem "univariateStats_new"
+
+
+      # ===========================================================
+      # BIVARIATE STATS
+      # ===========================================================
+        tabItem(
+          tabName = "bivariateStats_new",
+          
+          # ----------------------------------------------------
+          # Page header / instructions
+          # ----------------------------------------------------
+          #includeMarkdown("www/instructions/bivariate_instruction.md"),
+          br(),
+          
+          # ----------------------------------------------------
+          # MAIN PANEL TABS
+          # ----------------------------------------------------
+          tabsetPanel(
+            id   = "bivariate_level_tabs",
+            type = "tabs",
+            
+            # ==========================================
+            # Individual-level tab
+            # ==========================================
+            tabPanel(
+              title = "Individual-level",
+              includeMarkdown("www/instructions/bivariate_instruction_ind.md"),
+              fluidRow(
+                shinydashboard::box(
+                  width = 4,
+                  status = "primary",
+
+                  selectizeInput(
+                    inputId = "bivariate_var1",
+                    label   = "Select Variable 1:",
+                    choices = grouped_minus_ignored,
+                    selected = grouped_minus_ignored[[1]][1]
+                  ),
+
+                  selectizeInput(
+                    inputId = "bivariate_var2",
+                    label   = "Select Variable 2:",
+                    choices = grouped_minus_ignored,
+                    selected = grouped_minus_ignored[[1]][2]
+                  ),
+
+                  pickerInput(
+                    inputId = "bivariate_countries",
+                    label   = "Select Countries:",
+                    choices = picker_country_list,
+                    multiple = TRUE,
+                    options = list(
+                      `actions-box` = TRUE,
+                      `live-search` = TRUE,
+                      `max-options` = 5
+                    ),
+                    selected = c("NZL", "AUS", "GBR")
+                  ),
+
+                  radioGroupButtons(
+                    inputId = "bivariate_type",
+                    label   = "Table Type:",
+                    choices = c("Counts", "Row Percentages", "Column Percentages"),
+                    selected = "Counts",
+                    status = "success"
+                  )
+                ),
+
+                shinydashboard::box(
+                  width = 8,
+                  title = "Bivariate Summary",
+                  status = "primary",
+                  shinycssloaders::withSpinner(
+                    DTOutput("bivariate_table")
+                  )
+                )
+              )
+            ),  #end tabPanel individual-level
+            
+            
+            
+            
+          
+            # ==========================================
+            # Country-level tab
+            # ==========================================
+            tabPanel(
+              title = "Country-level",
+              includeMarkdown("www/instructions/bivariate_instruction_ctry.md"),
+              fluidRow(
+                shinydashboard::box(
+                  width = 4,
+                  status = "primary",
+                  
+                  radioButtons(
+                    inputId = "bivar_country_source1",
+                    label   = "Variable 1 source:",
+                    choices = c("ALL", "HDR", "WVS7"),
+                    selected= "ALL",
+                    inline  = TRUE
+                  ),
+                  
+                  selectizeInput(
+                    inputId = "bivar_country_var1",
+                    label   = "Select Variable 1:",
+                    choices = NULL
+                  ),
+                  
+                  radioButtons(
+                    inputId = "bivar_country_source2",
+                    label   = "Variable 2 source:",
+                    choices = c("ALL", "HDR", "WVS7"),
+                    selected = "ALL",
+                    inline  = TRUE
+                  ),
+                  
+                  selectizeInput(
+                    inputId = "bivar_country_var2",
+                    label   = "Select Variable 2:",
+                    choices = NULL
+                  ),
+                  
+                  selectizeInput(
+                    inputId = "bivar_country_countries",
+                    label   = "Select Countries:",
+                    choices = NULL,
+                    multiple = TRUE
+                  )
+                ),
+                
+                shinydashboard::box(
+                  width = 8,
+                  title = "Country-level Bivariate Summary",
+                  status = "primary",
+                  DTOutput("bivar_country_table")
+                )
+              )
+            ),
+            
+            
+            # ==========================================
+            # Group-level tab (Bivariate-HDR)
+            # ==========================================
+            tabPanel(
+              title = "Group-level",
+              includeMarkdown("www/instructions/bivariate_instruction_grp.md"),
+              fluidRow(
+                # ================= LEFT COLUMN: USER CONTROLS =================
+                column(
+                  4,
+                  
+                  # Select how groups are defined (HDI / Region / Special)
+                  selectInput(
+                    inputId = "bivar_group_type",
+                    label   = "Group type",
+                    choices = NULL
+                  ),
+                  
+                  br(),
+                  
+                  # Select how groups are defined (e.g. HDI groups, Regions)
+                  h4("Select Group Definition"),
+                  selectInput(
+                    inputId = "bivar_groups",
+                    label   = NULL,
+                    choices = NULL,   # populated server-side from HDR_AREA_LOOKUP
+                    multiple = TRUE
+                  ),
+                  
+                  br(),
+                  
+                  # First HDR variable (X)
+                  h4("Select Variable 1"),
+                  selectizeInput(
+                    inputId = "bivar_group_var1",
+                    label   = NULL,
+                    choices = NULL,  # populated with HDR numeric variables
+                    multiple = FALSE
+                  ),
+                  
+                  br(),
+                  
+                  # Second HDR variable (Y)
+                  h4("Select Variable 2"),
+                  selectizeInput(
+                    inputId = "bivar_group_var2",
+                    label   = NULL,
+                    choices = NULL,  # same variable list as Variable 1
+                    multiple = FALSE
+                  ),
+                  
+                  br(),
+                  
+                ),
+                
+                # ================= RIGHT COLUMN: OUTPUT =================
+                column(
+                  8,
+                  
+                  # Output: bivariate summary across groups
+                  h3("Group-level Bivariate Summary"),
+                  
+                  # Short explanation to guide interpretation
+                  helpText(
+                    "This analysis compares two HDR indicators across all groups ",
+                    "defined by the selected grouping."
+                  ),
+                  
+                  shinycssloaders::withSpinner(
+                    DT::DTOutput("bivar_group_summary")
+                  )
+                )
+              )
+            )
+
+            
+            
+            
+            
+          )  # end tabsetPanel bivariate_level_tabs
+        ), #end tabItem bivariate stats
+
+
+
+
+      ################ SUMMARY STATISTICS NEW END ################
+
+
+
+
+
         ################## VISUALISATIONS ##################
         tabItem(tabName = "barChart",
                 includeMarkdown("www/instructions/bar_instruction.md"),
@@ -662,46 +907,46 @@ tabItem(
                 )
         ),
         
-        tabItem(tabName = "scatterParticipants",
-                includeMarkdown("www/instructions/scatter_instruction.md"),
-                fluidRow(
-                  shinydashboard::box(width = 3, status = "primary",
-                      selectizeInput(
-                        inputId = "scatter_x",
-                        label = "X-axis Question:",
-                        choices = grouped_minus_ignored,
-                        selected = grouped_minus_ignored[[1]][1]
-                      ),
-                      selectizeInput(
-                        inputId = "scatter_y",
-                        label = "Y-axis Question:",
-                        choices = grouped_minus_ignored,
-                        selected = grouped_minus_ignored[[1]][2]
-                      ),
-                      pickerInput(
-                        inputId = "scatter_countries",
-                        label = "Select Countries:",
-                        choices = picker_country_list,
-                        multiple = TRUE,
-                        options = list(
-                          `actions-box` = TRUE,
-                          `live-search` = TRUE,
-                          `size` = 30,
-                          `max-options` = 5
-                        ),
-                        selected = c("NZL", "AUS", "GBR")
-                      ),
-                      sliderInput(
-                        "scatter_sample",
-                        "Sample Size (as % of data):",
-                        min = 10, max = 100, value = 25, step = 1
-                      )
-                  ),
-                  shinydashboard::box(width = 9, title = "Participant Scatterplot", status = "primary",
-                      shinycssloaders::withSpinner(plotlyOutput("scatter_plot", height = "600px"))
-                  )
-                )
-        ),
+        # tabItem(tabName = "scatterParticipants",
+        #         includeMarkdown("www/instructions/scatter_instruction.md"),
+        #         fluidRow(
+        #           shinydashboard::box(width = 3, status = "primary",
+        #               selectizeInput(
+        #                 inputId = "scatter_x",
+        #                 label = "X-axis Question:",
+        #                 choices = grouped_minus_ignored,
+        #                 selected = grouped_minus_ignored[[1]][1]
+        #               ),
+        #               selectizeInput(
+        #                 inputId = "scatter_y",
+        #                 label = "Y-axis Question:",
+        #                 choices = grouped_minus_ignored,
+        #                 selected = grouped_minus_ignored[[1]][2]
+        #               ),
+        #               pickerInput(
+        #                 inputId = "scatter_countries",
+        #                 label = "Select Countries:",
+        #                 choices = picker_country_list,
+        #                 multiple = TRUE,
+        #                 options = list(
+        #                   `actions-box` = TRUE,
+        #                   `live-search` = TRUE,
+        #                   `size` = 30,
+        #                   `max-options` = 5
+        #                 ),
+        #                 selected = c("NZL", "AUS", "GBR")
+        #               ),
+        #               sliderInput(
+        #                 "scatter_sample",
+        #                 "Sample Size (as % of data):",
+        #                 min = 10, max = 100, value = 25, step = 1
+        #               )
+        #           ),
+        #           shinydashboard::box(width = 9, title = "Participant Scatterplot", status = "primary",
+        #               shinycssloaders::withSpinner(plotlyOutput("scatter_plot", height = "600px"))
+        #           )
+        #         )
+        # ),
         
         tabItem(tabName = "correlationView",
                 includeMarkdown("www/instructions/corr_instruction.md"),
@@ -846,6 +1091,475 @@ tabItem(
                 )
         ),
         ################## VISUALISATIONS ##################
+
+
+
+        ################## VISUALISATIONS NEW ##################
+        tabItem(
+          tabName= "scatterParticipants",
+
+          #includeMarkdown("www/instructions/scatter_instruction.md"),
+          br(),
+
+          tabsetPanel(
+            id = "scatterplot_tabs",
+            type= "tabs",
+
+        # ==========================================================
+        # Individual-level scatter tab
+        # ==========================================================
+        tabPanel(
+          title = "Individual-level",
+          
+          # Optional: instructions / help text
+          includeMarkdown("www/instructions/scatter_instruction_ind.md"),
+          
+          fluidRow(
+            
+            # --------------------------------------------------
+            # Left column: controls
+            # --------------------------------------------------
+            shinydashboard::box(
+              width  = 3,
+              status = "primary",
+              
+              h4("Select variables"),
+              
+              # --------------------------
+              # X-axis variable
+              # --------------------------
+              selectizeInput(
+                inputId  = "scatter_x",
+                label    = "X-axis Question",
+                choices  = grouped_minus_ignored,          
+                selected = grouped_minus_ignored[[1]][1]   # default selection
+              ),
+              
+              # --------------------------
+              # Y-axis variable
+              # --------------------------
+              selectizeInput(
+                inputId  = "scatter_y",
+                label    = "Y-axis Question",
+                choices  = grouped_minus_ignored,          
+                selected = grouped_minus_ignored[[1]][2]
+              ),
+              
+              # --------------------------
+              # Country selection
+              # --------------------------
+              pickerInput(
+                inputId  = "scatter_countries",
+                label    = "Select Countries",
+                choices  = picker_country_list,             
+                multiple = TRUE,
+                options  = list(
+                  `actions-box` = TRUE,
+                  `live-search` = TRUE,
+                  `size`        = 30,
+                  `max-options` = 5
+                ),
+                selected = c("NZL", "AUS", "GBR")
+              ),
+              
+              # --------------------------
+              # Optional: sample size
+              # --------------------------
+              sliderInput(
+                inputId = "scatter_sample",
+                label   = "Sample Size (as % of data)",
+                min     = 10,
+                max     = 100,
+                value   = 25,
+                step    = 1
+              )
+            ),
+            
+            # --------------------------------------------------
+            # Right column
+            # --------------------------------------------------
+            shinydashboard::box(
+              width  = 9,
+              title  = "Participant Scatterplot",
+              status = "primary",
+              
+              # IMPORTANT:
+              # Must match renderPlotly() in the server
+              shinycssloaders::withSpinner(
+                plotlyOutput("scatter_plot", height = "600px")
+              )
+            )
+          )
+        ),
+
+
+            # ==================================================
+            # Country-level tab 
+            # ==================================================
+            tabPanel(
+              title= "Country-level",
+              includeMarkdown("www/instructions/scatter_instruction_ctry.md"),
+              
+              fluidRow(
+                # ----------------------------------
+                # Left panel: User controls
+                # ----------------------------------
+                shinydashboard::box(
+                  width  = 4,
+                  status = "primary",
+              
+                  # Section title
+                  h4("Select variables"),
+              
+                  # --------------------------
+                  # X-axis variable selection
+                  # --------------------------
+                  # Choose the data source for the X variable
+                  # (ALL = combined dataset, HDR only, or WVS7 only)
+                  radioButtons(
+                    inputId = "scatter_country_source_x",
+                    label   = "X variable source",
+                    choices = c("ALL", "HDR", "WVS7"),
+                    selected = "ALL",
+                    inline  = TRUE
+                  ),
+              
+                  # Dropdown for selecting the X variable
+                  # Choices are populated dynamically in the server
+                  selectizeInput(
+                    inputId = "scatter_country_x",
+                    label   = "X variable",
+                    choices = NULL
+                  ),
+              
+                  br(),  # visual spacing between X and Y controls
+              
+                  # ---------------------------
+                  # Y-axis variable selection
+                  # ---------------------------
+              
+                  # Choose the data source for the Y variable
+                  radioButtons(
+                    inputId = "scatter_country_source_y",
+                    label   = "Y variable source",
+                    choices = c("ALL", "HDR", "WVS7"),
+                    selected = "ALL",
+                    inline  = TRUE
+                  ),
+              
+                  # Dropdown for selecting the Y variable
+                  selectizeInput(
+                    inputId = "scatter_country_y",
+                    label   = "Y variable",
+                    choices = NULL
+                  ),
+              
+                  # -------------------
+                  # Country selection
+                  # -------------------
+              
+                  h4("Select countries"),
+              
+                  # Multi-select dropdown for countries
+                  # Used to filter points shown in the scatter plot
+                  selectizeInput(
+                    inputId  = "scatter_country_countries",
+                    label    = NULL,
+                    choices  = NULL,
+                    multiple = TRUE
+                  ),
+                  
+                  
+                  br(),
+                  # --------------------------------------------------
+                  # Display options (group level)
+                  # --------------------------------------------------
+                  tags$div(
+                    style = "
+                    background-color: #f7f9fc;
+                    border-top: 3px solid #1f77b4;
+                    #border-right: 4px solid #1f77b4;
+                    padding: 8px 10px;
+                    margin-top: 10px;
+                  ",
+                    
+                  h4("Display options"),
+                  # Control point transparency
+                  sliderInput(
+                    inputId = "scatter_country_alpha",
+                    label   = "Point transparency",
+                    min     = 0.1,
+                    max     = 1,
+                    value   = 0.8,
+                    step    = 0.1
+                  ),
+                  
+                  # Toggle country labels on the plot
+                  checkboxInput(
+                    inputId = "scatter_country_show_labels",
+                    label   = "Show country labels",
+                    value   = FALSE
+                  ),
+                  
+                  
+                  # Log-scale display options
+                  checkboxInput(
+                    inputId = "scatter_country_log_x",
+                    label   = "Log-scale X axis",
+                    value   = FALSE
+                  ),
+                  checkboxInput(
+                    inputId = "scatter_country_log_y",
+                    label   = "Log-scale Y axis",
+                    value   = FALSE
+                  ),
+                  
+                  
+                  # Country point size
+                  sliderInput(
+                    inputId = "scatter_country_point_size",
+                    label   = "Point size",
+                    min     = 4,
+                    max     = 20,
+                    value   = 8,
+                    step    = 1
+                  ),
+                  
+                  
+                  # Select point colour
+                  radioButtons(
+                    inputId = "scatter_country_color",
+                    label   = "Point colour",
+                    choices = c(
+                      "Blue"   = "#1f77b4",
+                      "Red"    = "#d62728",
+                      "Green"  = "#2ca02c",
+                      "Purple" = "#9467bd",
+                      "Orange" = "#ff7f0e",
+                      "Black"  = "#000000"
+                    ),
+                    selected = "#1f77b4",
+                    inline   = TRUE
+                  ),
+                  
+                  
+                  # Select point shape
+                  radioButtons(
+                    inputId = "scatter_country_shape",
+                    label   = "Point shape",
+                    choices = c(
+                      "Circle"        = "circle",
+                      "Square"        = "square",
+                      "Diamond"       = "diamond",
+                      "Cross"         = "cross",
+                      "Star"          = "star",
+                      "Triangle up"   = "triangle-up",
+                      "Triangle down" = "triangle-down",
+                      "Hexagon"       = "hexagon2"
+                    ),
+                    selected = "circle",
+                    inline   = TRUE
+                  )
+                  
+                )
+                ),
+                
+                
+                # ----------------------------------
+                # Right panel: Scatter plot output
+                # ----------------------------------
+                shinydashboard::box(
+                  width  = 8,
+                  title  = "Country-level Scatter Plot",
+                  status = "primary",
+                  
+                  # Warning message (shown only if needed)
+                  uiOutput("scatter_country_warning"),
+              
+                  # Scatter plot with loading spinner while rendering
+                  shinycssloaders::withSpinner(
+                    plotlyOutput("scatter_country_plot", height = "600px")
+                  )
+                )
+              )
+
+              
+
+            ), #End tabPanel country-level 
+            
+            # ==========================================
+            # Group-level scatterplot tab
+            # ==========================================
+            tabPanel(
+              title= "Group-level",
+              includeMarkdown("www/instructions/scatter_instruction_grp.md"),
+              
+              fluidRow(
+                # --------------------------
+                # Left column: controls
+                # --------------------------
+                shinydashboard::box(
+                  width  = 4,
+                  status = "primary",
+                  
+                  # ---- Variable selection ----
+                  h4("Select source"),
+                  
+                  # Optional HDR table filter for SOURCE X
+                  selectInput(
+                    inputId = "scatter_group_source_x",
+                    label   = "Source variable X",
+                    choices = NULL    # populated in server
+                  ),
+                  
+                  # # Optional HDR table filter for  VARIABLE X
+                  selectizeInput(
+                    inputId = "scatter_group_x",
+                    label   = "X variable",
+                    choices = NULL
+                  ),
+                  br(),
+                  br(),
+
+                  # Optional HDR table filter for SOURCE y
+                  selectInput(
+                    inputId = "scatter_group_source_y",
+                    label   = "Source variable Y",
+                    choices = NULL    # populated in server
+                  ),
+                  
+                    # Optional HDR table filter for VARIABLE X
+                  selectizeInput(
+                    inputId = "scatter_group_y",
+                    label   = "Y variable",
+                    choices = NULL
+                  ),
+                  
+                  br(),
+
+                # --------------------------
+                # Display options (highlighted without changing layout)
+                # --------------------------
+                tags$div(
+                  style = "
+                    background-color: #f7f9fc;
+                    border-top: 3px solid #1f77b4;
+                    #border-right: 4px solid #1f77b4;
+                    padding: 8px 10px;
+                    margin-top: 10px;
+                  ",
+                
+                  h4("Display options", style = "margin-top:0;"),
+                   #Group point size
+                  radioButtons(
+                    inputId  = "scatter_group_size_mode",
+                    label    = "Point size",
+                    choices  = c(
+                      "Equal size"                    = "equal",
+                      "Scaled by number of countries" = "n_countries"
+                    ),
+                    selected = "equal"
+                  ),
+
+                  
+                  # Group labels (shown ONLY when point size = equal)
+                  conditionalPanel(
+                    condition = "input.scatter_group_size_mode != 'n_countries'",
+                    
+                    checkboxInput(
+                      inputId = "scatter_group_show_labels",
+                      label   = "Show group labels",
+                      value   = FALSE
+                    )
+                  ),
+                  
+                  
+                  # Color palette
+                  helpText("Choose a palette that is easiest for you to read."),
+                  radioButtons(
+                    inputId = "scatter_group_palette",
+                    label   = "Colour palette",
+                    choices = c(
+                      "Pastels "               = "default",
+                      "Colour-blind friendly"  = "cbf",
+                      "High contrast"          = "contrast",
+                      "Greyscale"              = "grey"
+                    ),
+                    selected = "default"
+                  ),
+                  
+                  
+                #Group point shape
+                  radioButtons(
+                    inputId  = "scatter_group_shape",
+                    label    = "Point shape",
+                    choices  = c(
+                      "Circle"        = "circle",
+                      "Square"        = "square",
+                      "Diamond"       = "diamond",
+                      "Cross"         = "cross",
+                      "Star"          = "star",
+                      "Triangle up"   = "triangle-up",
+                      "Triangle down" = "triangle-down",
+                      "Hexagon"       = "hexagon2"
+                      
+                    ),
+                    selected = "circle",
+                    inline   = TRUE
+                  )
+                )
+
+
+                ),
+                
+                # --------------------------
+                # Right column: plot
+                # --------------------------
+                shinydashboard::box(
+                  width  = 8,
+                  status = "primary",
+                  
+                  h3("Group-level comparison of country averages"),
+                  tags$p(
+                    style = "margin-top:-10px; color:#555;",
+                    "Each point represents one group; positions show average country values."
+                  ),
+                  
+                  
+                  # Warning message (shown only if needed)
+                  uiOutput("scatter_group_warning"),
+                  
+                  shinycssloaders::withSpinner(
+                    plotlyOutput("scatter_group_plot", height = "600px")
+                  ),
+                  
+                  tags$p(
+                    style = "font-size:12px; color:#777; margin-top:10px;",
+                    "Point size reflects the number of countries in each group. ",
+                    "Colours indicate group membership."
+                  )
+                )
+              )
+              
+            ), #Edn tabPanemt Group level
+            
+            
+          ) #end tabsetPanel scatterplot_tabs
+            
+          
+          
+          
+          
+          
+          
+          
+        ),
+
+
+
+
+
+################## VISUALISATIONS NEW END ##################
         
         
         ###################### MODELS ######################

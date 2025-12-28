@@ -282,3 +282,40 @@ prepare_analysis_data <- function(raw_data, var1_label, var2_label, countries, s
     stats::na.omit()
 }
 #####
+
+
+
+
+# ==========================================================
+# Helper: get readable label for a variable code
+# ==========================================================
+#This function allow to use human readable variable names in dropdown menus and plots
+get_var_label <- function(var_code_input) {
+  FULL_VARIABLE_DICTIONARY %>%
+    dplyr::filter(var_code == var_code_input) %>%
+    dplyr::pull(short_label) %>%
+    stringr::str_remove_all("^'|'$") %>%
+    dplyr::first()
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

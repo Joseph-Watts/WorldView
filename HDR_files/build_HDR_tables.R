@@ -1,3 +1,66 @@
+#build_HDR_tables.R
+#Purpose: create HDR master table
+
+
+
+
+#==============================================================================
+# READ ALL HDRs CLEAN TABLES
+#==============================================================================
+table1_clean <- readRDS("Support_Files/table1_clean.rds")
+table2_clean <- readRDS("Support_Files/table2_clean.rds")
+table3_clean <- readRDS("Support_Files/table3_clean.rds")
+table4_clean <- readRDS("Support_Files/table4_clean.rds")
+table5_clean <- readRDS("Support_Files/table5_clean.rds")
+table7_clean <- readRDS("Support_Files/table7_clean.rds")
+
+
+#==============================================================================
+# Recreate  groups table (needed downstream)
+#==============================================================================
+
+countries_table1<- readRDS("Support_Files/countries_table1.rds")
+hdi_groups_table1 <- readRDS("Support_Files/hdi_groups_table1.rds")
+regions_table1<-readRDS("Support_Files/regions_table1.rds")
+special_groups_table1 <- readRDS("Support_Files/special_groups_table1.rds")
+
+
+
+countries_table2<- readRDS("Support_Files/countries_table2.rds")
+hdi_groups_table2 <- readRDS("Support_Files/hdi_groups_table2.rds")
+regions_table2 <-readRDS("Support_Files/regions_table2.rds")
+special_groups_table2 <- readRDS("Support_Files/special_groups_table2.rds")
+
+
+countries_table3<- readRDS("Support_Files/countries_table3.rds")
+hdi_groups_table3 <- readRDS("Support_Files/hdi_groups_table3.rds")
+regions_table3<-readRDS("Support_Files/regions_table3.rds")
+special_groups_table3 <- readRDS("Support_Files/special_groups_table3.rds")
+
+
+
+countries_table4<- readRDS("Support_Files/countries_table4.rds")
+hdi_groups_table4 <- readRDS("Support_Files/hdi_groups_table4.rds")
+regions_table4<-readRDS("Support_Files/regions_table4.rds")
+special_groups_table4 <- readRDS("Support_Files/special_groups_table4.rds")
+
+
+countries_table5<- readRDS("Support_Files/countries_table5.rds")
+hdi_groups_table5 <- readRDS("Support_Files/hdi_groups_table5.rds")
+regions_table5<-readRDS("Support_Files/regions_table5.rds")
+special_groups_table5 <- readRDS("Support_Files/special_groups_table5.rds")
+
+
+
+
+hdi_groups_table7 <- readRDS("Support_Files/hdi_groups_table7.rds")
+regions_table7<- readRDS("Support_Files/regions_table7.rds")
+countries_table7<- readRDS("Support_Files/countries_table7.rds")
+special_groups_table7 <- readRDS("Support_Files/special_groups_table7.rds")
+
+
+
+
 
 
 
@@ -50,6 +113,129 @@ HDR_DATA <- list(
     countries = countries_table7
   )
 )
+
+
+
+
+
+
+###############################################################################
+#==============================================================================
+# Build the group-level master dataset
+#==============================================================================
+##############################################################################
+HDR_GROUP_BENCHMARKS <- purrr::map_dfr(
+  names(HDR_DATA),
+  function(table_name) {
+    
+    bind_rows(
+      # ------------------------------
+      # HDI groups
+      # ------------------------------
+      HDR_DATA[[table_name]]$groups %>%
+        dplyr::mutate(group_type = "HDI group"),
+      
+      # ------------------------------
+      # Regions
+      # ------------------------------
+      HDR_DATA[[table_name]]$regions %>%
+        dplyr::mutate(group_type = "Region"),
+      
+      # ------------------------------
+      # Special groups (OECD, SIDS…)
+      # ------------------------------
+      HDR_DATA[[table_name]]$special %>%
+        dplyr::mutate(group_type = "Special group")
+    ) %>%
+      # ------------------------------
+    # Clean + reshape
+    # ------------------------------
+    dplyr::select(
+      group_type,
+      country,
+      where(is.numeric),
+      -contains("rank")   #drop hdi_rank and "change in hdi rank" because type factor
+    ) %>%
+      dplyr::rename(group = country) %>%
+      tidyr::pivot_longer(
+        cols = -c(group, group_type),
+        names_to  = "variable",
+        values_to = "value"
+      ) %>%
+      dplyr::mutate(
+        table  = table_name,
+        source = "HDR"
+      )
+  }
+)
+
+
+saveRDS(HDR_GROUP_BENCHMARKS, "Support_Files/HDR_GROUP_BENCHMARKS.rds")
+
+
+
+
+# ==========================================================
+# BUILD STATIC HDR_GROUP_LOOKUP TABLE 
+# ==========================================================
+
+ref_table <- "Table 1 - HDI & Components"
+
+# ---- Sanity checks ----
+stopifnot(ref_table %in% names(HDR_DATA))
+stopifnot(all(c("groups", "regions", "special") %in% names(HDR_DATA[[ref_table]])))
+stopifnot("country" %in% names(HDR_DATA[[ref_table]]$groups))
+stopifnot("country" %in% names(HDR_DATA[[ref_table]]$regions))
+stopifnot("country" %in% names(HDR_DATA[[ref_table]]$special))
+
+
+# ---- Extract group names from "country" column ----
+HDR_GROUP_LOOKUP <- list(
+  
+  groups = sort(unique(
+    as.character(HDR_DATA[[ref_table]]$groups$country)
+  )),
+  
+  regions = sort(unique(
+    as.character(HDR_DATA[[ref_table]]$regions$country)
+  )),
+  
+  special = sort(unique(
+    as.character(HDR_DATA[[ref_table]]$special$country)
+  ))
+)
+
+# ---- Final validation ----
+stopifnot(length(HDR_GROUP_LOOKUP$groups)  > 0)
+stopifnot(length(HDR_GROUP_LOOKUP$regions) > 0)
+stopifnot(length(HDR_GROUP_LOOKUP$special) > 0)
+stopifnot(length(HDR_GROUP_LOOKUP$special) > 0)
+
+
+# ---- Save lookup ----
+saveRDS(
+  HDR_GROUP_LOOKUP,
+  "Support_Files/HDR_GROUP_LOOKUP.rds"
+)
+
+
+
+
+
+# =====================================================
+# DEFINE GROUP NAME VECTORS FROM HDR_GROUP_LOOKUP
+# =====================================================
+# Human Development Groups
+hdi_group_names <- HDR_GROUP_LOOKUP$groups
+ 
+# Regions
+region_names <- HDR_GROUP_LOOKUP$regions
+
+# Special Groups
+special_group_names <- HDR_GROUP_LOOKUP$special
+
+
+
 
 
 ###############################################################################
@@ -468,7 +654,7 @@ ALL_HDR_INDICATORS <- unique(unlist(
 # Remove the 'country' column because it's an ID, not an indicator
 ALL_HDR_INDICATORS <- setdiff(ALL_HDR_INDICATORS, "country")
 
-print(ALL_HDR_INDICATORS)
+#print(ALL_HDR_INDICATORS)
 
 
 
@@ -659,6 +845,11 @@ HDRs_master_clean <- HDRs_master %>%
 #View(HDRs_master_clean)
 
 
+#Move the col iso3 right after the col `country`
+HDRs_master_clean<- HDRs_master_clean%>%
+  relocate(iso3, .after=country)
+View(HDRs_master_clean)
+
 #CHECKPOINT: Check which HDR country did NOT match Natural Earth ISO3
 #is there  1 or more country in HDRs_master_clean that do not have iso3 code.
 # This test tells if a country was dropped during the joins that created HDRs_master_clean()
@@ -693,26 +884,6 @@ NaturalEarth_countries_missingIso3<- world_shape %>%
 
 
 
-#FIX ISO3 CODE FOR NORWAY AND FRANCE in world_shape
-# world_shape_fix <- world_shape %>%
-#    mutate(
-#      iso_a3 = case_when(
-#        grepl("France", name, ignore.case = TRUE) ~ "FRA",
-#        grepl("Norway", name, ignore.case = TRUE) ~ "NOR",
-#        TRUE ~ iso_a3
-#      )
-#  )
-# View(world_shape_fix)
-
-# world_shape <- world_shape %>%   # OVERWRITE world_shape
-#   mutate(
-#     iso_a3 = case_when(
-#       grepl("France", name, ignore.case = TRUE) ~ "FRA",
-#       grepl("Norway", name, ignore.case = TRUE) ~ "NOR",
-#       TRUE ~ iso_a3
-#     )
-#   )
-
 
 #FIX ISO3 CODE FOR NORWAY AND FRANCE in world_shape
 world_shape <- world_shape %>%
@@ -729,7 +900,7 @@ world_shape <- world_shape %>%
 
 
 #CHECKPOINT: if France and Norway have now an iso3 
-world_shape_fix %>%
+world_shape %>%
   filter(is.na(iso_a3) | iso_a3 == "-99") %>%
   select(name, iso_a3)    #Output does not show France and Norway anymore
 
@@ -742,7 +913,7 @@ world_shape_fix %>%
 # =============================================================================
 ###############################################################################
 # Path to the Excel file that contains an area per sheet
-path <- "HDR_RawData/Area country list.xlsx"
+path <- "HDR_files/Area country list.xlsx"
 
 # Names of the sheets to import from the file
 selected_sheets <- c("hdi_groups", "regions", "special_groups")
@@ -759,15 +930,15 @@ area_files <- selected_sheets %>%
 
 
 # Combine all area files into one unified look up table and clean it
-HDR_AREA_LOOKUP <- bind_rows(area_files) %>%     # bind all data frames vertically into on long dataframe  `area_files` 
+HDR_AREA_LOOKUP <- bind_rows(area_files) %>%     # bind all data frames vertically into on long dataframe  `area_files`
   mutate(
     country = trimws(as.character(country)), # ensure "country" is character and remove leading/trailing spaces
     area    = trimws(as.character(area)),   # ensure "area" is character and remove leading/trailing spaces
-    
+
     # Convert country names -> ISO3 codes using countrycode()
     iso3    = countrycode(country, "country.name", "iso3c")
   ) %>%
-  
+
   # --- FIX KNOWN ISO3 CODE ISSUES ---
   mutate(
     iso3 = case_when(
@@ -776,6 +947,117 @@ HDR_AREA_LOOKUP <- bind_rows(area_files) %>%     # bind all data frames vertical
     )
   )
 #View(HDR_AREA_LOOKUP)
+
+saveRDS(HDR_AREA_LOOKUP, "Support_Files/HDR_AREA_LOOKUP.rds")
+
+
+
+#HDI GROUP lookup (pure categorical, no thresholds)
+HDR_HDI_GROUP_LOOKUP <- area_files$hdi_groups %>%
+  mutate(
+    country = trimws(as.character(country)),
+    hdr_group = trimws(as.character(area)),
+    iso3 = countrycode(country, "country.name", "iso3c")
+  ) %>%
+  mutate(
+    iso3 = if_else(country == "Korea (Republic of)", "KOR", iso3)
+  ) %>%
+  select(iso3, hdr_group) %>%
+  distinct()
+
+#View(HDR_HDI_GROUP_LOOKUP)
+
+
+
+#REGION lookup (one-to-one, complete)
+HDR_REGION_LOOKUP <- area_files$regions %>%
+  mutate(
+    country = trimws(as.character(country)),
+    hdr_region = trimws(as.character(area)),
+    iso3 = countrycode(country, "country.name", "iso3c")
+  ) %>%
+  mutate(
+    iso3 = if_else(country == "Korea (Republic of)", "KOR", iso3)
+  ) %>%
+  select(iso3, hdr_region) %>%
+  distinct()
+
+
+
+
+#SPECIAL GROUPS lookup (membership-based)
+HDR_SPECIAL_LOOKUP <- area_files$special_groups %>%
+  mutate(
+    country = trimws(as.character(country)),
+    special_group = trimws(as.character(area)),
+    iso3 = countrycode(country, "country.name", "iso3c")
+  ) %>%
+  mutate(
+    iso3 = if_else(country == "Korea (Republic of)", "KOR", iso3)
+  ) %>%
+  select(iso3, special_group) %>%
+  distinct()
+
+
+
+
+# Reorder columns so that classification variables appear immediately after iso3
+# This improves readability and makes the dataset easier to inspect and use in Shiny
+MASTER_HDR_WVS7_CLASSIFIED <- MASTER_HDR_WVS7_CLASSIFIED %>%
+  relocate(
+    # Classification columns to move
+    hdr_group,
+    hdr_region,
+    is_oecd,
+    is_sids,
+    is_ldc,
+    
+    # Place them directly after the ISO3 country code
+    .after = iso3
+  )
+
+
+
+#View(MASTER_HDR_WVS7_CLASSIFIED)
+
+
+
+###############################################################################
+# =============================================================================
+#         CREATE A CANONICAL GROUP MAPPING TABLE
+# =============================================================================
+###############################################################################
+HDR_GROUP_NAME_MAP <- tibble::tribble(
+  ~benchmark_group,                                              ~lookup_group,
+  "very high human development",                                 "very high human development",
+  "high human development",                                      "high human development",
+  "medium human development",                                    "medium human development",
+  "low human development",                                       "low human development",
+  "arab states",                                                  "arab states",
+  "east asia and the pacific",                                    "east asia and the pacific",
+  "europe and central asia",                                      "europe and central asia",
+  "latin america and the caribbean",                              "latin america and the caribbean",
+  "south asia",                                                   "south asia",
+  "sub-saharan africa",                                           "sub-saharan africa",
+  
+  "least developed countries",                                   "lcds",
+  "organisation for economic co-operation and development",      "oecd",
+  
+  # Derived Aggregates
+  "developing countries",                                        "developing countries",
+  "world",                                                       "world"
+)
+
+
+#View(HDR_GROUP_NAME_MAP)
+
+
+
+
+
+
+
+
 
 
 

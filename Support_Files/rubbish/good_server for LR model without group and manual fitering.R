@@ -7,23 +7,15 @@
 #### SERVER LOGIC #####
 #######################-
 
-
-
 shinyServer(
 
 function(input, output, session) {
 session$onSessionEnded(function() {
   stopApp()
 })
-  
-  
+
 ##DEBUG####
-  observe({
-    print("DEBUG: uni_questions_ind exists?")
-    print(exists("uni_questions_ind"))
-  })
-  
-  
+options(shiny.error = recover)
 
 ############################-
 #### Read in data files ####
@@ -1181,6 +1173,121 @@ output$regression_prediction <- renderPlotly({
 #===                    ===#
 #==========================#   
 
+# # ============================================
+# # Reactive datasets
+# # ============================================
+# # Reactive dataset restricted to countries
+# # that have an official UNDP HDR region
+# # (countries without hdr_region are excluded)
+# data_with_region <- reactive({
+# 
+#   MASTER_HDR_WVS7_CLASSIFIED %>%
+#     filter(!is.na(hdr_region))
+# })    
+#     
+#     
+#  
+#  
+# # ==========================================================
+# # COUNTRY-LEVEL DATA (HDR + WVS MASTER DATASET)
+# # ==========================================================
+# 
+# # NOTE:
+# # `country_data` is defined in global.R as:
+# # country_data <- MASTER_HDR_WVS7_CLASSIFIED
+# 
+#        
+#     
+#     
+# # ==========================================================
+# # 1. Populate the country dropdown menu
+# # ==========================================================
+# # This observes the data and updates the dropdown choices
+# observe({
+#   
+#   updateSelectizeInput(
+#     session,
+#     inputId = "country_select",
+#     
+#     # Show country names, but use ISO3 codes internally
+#     choices = c(
+#       "All countries" = "ALL",
+#       setNames(MASTER_COUNTRY_DATA$iso3, MASTER_COUNTRY_DATA$country)
+#     ),
+#     
+#     # Default selection
+#     selected = "ALL",
+#     server = TRUE   # IMPORTANT for large lists
+#   )
+# })
+#     
+# 
+# 
+# # ==========================================================
+# # Populate the country dropdown ONCE
+# # ==========================================================
+# observeEvent(TRUE, {
+#   
+#   updateSelectizeInput(
+#     session,
+#     inputId = "country_select",
+#     choices = c(
+#       "All countries" = "ALL",
+#       setNames(MASTER_COUNTRY_DATA$iso3, MASTER_COUNTRY_DATA$country)
+#     ),
+#     selected = "ALL",
+#     server = TRUE
+#   )
+#   
+# }, once = TRUE)
+#     
+# 
+# 
+# # ==========================================================
+# # 2. Reactive dataset filtered by selected countries
+# # ==========================================================
+# filtered_country_data <- reactive({
+#   
+#   sel <- input$country_select
+#   
+#   # Defensive: if input temporarily empty, show full dataset
+#   if (is.null(sel) || length(sel) == 0 || "ALL" %in% sel) {
+#     return(MASTER_COUNTRY_DATA)
+#   }
+#   
+#   # Otherwise filter for selected countries
+#   MASTER_COUNTRY_DATA %>%
+#     dplyr::filter(iso3 %in% sel)
+#   
+# })
+#     
+#     
+#     
+# # ==========================================================
+# # 3. Render the filtered country-level raw data table
+# # ==========================================================
+# output$Table_country <- renderDT({
+#   
+#   # Render the integrated HDR + WVS country-level dataset
+#   datatable(
+#     filtered_country_data(),   # reactive dependency
+#     options = list(
+#       pageLength = 10,  # number of rows per page
+#       scrollX = TRUE    # enable horizontal scrolling (many columns)
+#     ),
+#     rownames = FALSE
+#   )%>%
+#     
+#     # Format ALL numeric columns to 2 decimal places
+#     formatRound(
+#       columns = names(MASTER_COUNTRY_DATA)[sapply(MASTER_COUNTRY_DATA, is.numeric)],
+#       digits = 2
+#     )
+#   
+# })
+
+
+
 # ============================================
 # Reactive datasets
 # ============================================
@@ -1449,12 +1556,12 @@ output$var_definition <- renderUI({
     
     tags$div(
       style = "
-background-color: #f8f9fa;
-padding: 12px;
-border-radius: 6px;
-max-height: 260px;
-overflow-y: auto;
-",
+    background-color: #f8f9fa;
+    padding: 12px;
+    border-radius: 6px;
+    max-height: 260px;
+    overflow-y: auto;
+  ",
       tags$p(
         ifelse(
           is.na(var_info$definition) || var_info$definition == "",
@@ -2193,6 +2300,58 @@ output$group_indicator_ui <- renderUI({
 
 
 
+# # --------------------------------------------------
+# # Group-level summary table
+# # --------------------------------------------------
+# output$group_level_summary <- DT::renderDT({
+#   
+#   req(input$group_type, input$group_table)
+#   
+#   # ---- Get group data ----
+#   if (input$group_type == "all") {
+#     df <- dplyr::bind_rows(
+#       HDR_DATA[[input$group_table]]$groups,
+#       HDR_DATA[[input$group_table]]$regions,
+#       HDR_DATA[[input$group_table]]$special
+#     )
+#   } else {
+#     df <- HDR_DATA[[input$group_table]][[input$group_type]] %>%
+#       dplyr::filter(country %in% input$group_names)
+#   }
+#   
+#   req(nrow(df) > 0)
+#   
+#   # ---- Keep numeric indicators only ----
+#   df_out <- df %>%
+#     dplyr::select(
+#       group = country,
+#       where(is.numeric),
+#       -contains("rank")
+#     )
+#   
+#   
+#   df_out <- df_out %>%
+#     dplyr::mutate(across(where(is.numeric), ~ round(.x, 2)))
+#   
+# 
+#   req(ncol(df_out) > 1)
+#   
+#   DT::datatable(
+#     df_out,
+#     rownames = FALSE,
+#     options = list(
+#       dom = "t",      # table only (no search, no length menu)
+#       scrollX = TRUE
+#     )
+#   )
+# })
+
+
+
+
+
+
+
 # =========================================================
 # Group-level summary table
 # =========================================================
@@ -2253,6 +2412,17 @@ output$group_level_summary <- DT::renderDT({
     
   )
 })
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2748,9 +2918,168 @@ output$bivar_country_table <- DT::renderDT({
 
 
 
+
+
 ################################################################################
-############# BIVARIATE GROUP-LEVEL   ##########################################
+############# GROUP-LEVEL   ####################################################  
 ################################################################################
+# # ==========================================================
+# # Populate group selector (multiple groups) with defaults
+# # ==========================================================
+# observe({
+#   # Ensure the HDR area lookup table is available
+#   req(HDR_AREA_LOOKUP)
+#   
+#   # Extract and sort unique group names
+#   groups <- sort(
+#     unique(HDR_AREA_LOOKUP$area)
+#   )
+#   
+#   # Update the group selection dropdown
+#   updateSelectizeInput(
+#     session,
+#     inputId  = "bivar_groups",
+#     choices  = groups,        # all available groups
+#     selected = groups[1:2],   # default: first two groups
+#     server   = TRUE           # server-side selectize for performance
+#   )
+#   
+# })
+# 
+# 
+# 
+# 
+# 
+# # ==========================================================
+# # Populate variable selectors for group-level bivariate
+# # ==========================================================
+# # ==========================================================
+# # Populate variable selectors for group-level bivariate
+# # ==========================================================
+# observeEvent(MASTER_COUNTRY_DATA, {
+#   
+#   hdr_vars <- MASTER_COUNTRY_DATA %>%
+#     dplyr::select(where(is.numeric)) %>%
+#     names()
+#   
+#   updateSelectizeInput(
+#     session,
+#     "bivar_group_var1",
+#     choices  = hdr_vars,
+#     selected = hdr_vars[1],
+#     server   = TRUE
+#   )
+#   
+#   updateSelectizeInput(
+#     session,
+#     "bivar_group_var2",
+#     choices  = hdr_vars,
+#     selected = hdr_vars[2],
+#     server   = TRUE
+#   )
+#   
+# }, once = TRUE)
+# 
+# 
+# 
+# 
+# # =================================================================
+# # Observer to prevent selecting the same variable twice (Optional)
+# # =================================================================
+# # ==========================================================
+# # Validation: prevent same variable twice
+# # ==========================================================
+# observeEvent(
+#   c(input$bivar_group_var1, input$bivar_group_var2),
+#   {
+#     
+#     if (!is.null(input$bivar_group_var1) &&
+#         !is.null(input$bivar_group_var2) &&
+#         input$bivar_group_var1 == input$bivar_group_var2) {
+#       
+#       output$bivar_group_warning <- renderUI({
+#         tags$p(
+#           style = "color: #d9534f; font-style: italic;",
+#           "Please select two different variables for a bivariate comparison."
+#         )
+#       })
+#       
+#     } else {
+#       output$bivar_group_warning <- renderUI(NULL)
+#     }
+#     
+#   }
+# )
+# 
+# 
+# 
+# 
+# # ==========================================================
+# # Build group-level bivariate dataset
+# # ==========================================================
+# bivar_group_data <- reactive({
+#   
+#   req(
+#     input$bivar_group_var1,
+#     input$bivar_group_var2,
+#     input$bivar_groups
+#   )
+#   
+#   validate(
+#     need(
+#       input$bivar_group_var1 != input$bivar_group_var2,
+#       "Please select two different variables."
+#     ),
+#     need(
+#       length(input$bivar_groups) >= 2,
+#       "Please select at least two groups to compare."
+#     )
+#   )
+#   
+#   MASTER_COUNTRY_DATA %>%
+#     dplyr::filter(country %in% input$bivar_groups) %>%
+#     dplyr::select(
+#       group = country,
+#       input$bivar_group_var1,
+#       input$bivar_group_var2
+#     )
+# })
+# 
+# 
+# 
+# 
+# 
+# # ==========================================================
+# # Render group-level bivariate summary table
+# # ==========================================================
+# output$bivar_group_summary <- renderUI({
+# 
+#   df <- bivar_group_data()
+#   req(nrow(df) >= 2)
+# 
+#   tags$table(
+#     class = "table table-striped table-bordered",
+#     tags$thead(
+#       tags$tr(
+#         lapply(names(df), tags$th)
+#       )
+#     ),
+#     tags$tbody(
+#       lapply(seq_len(nrow(df)), function(i) {
+#         tags$tr(
+#           lapply(df[i, ], function(x) {
+#             tags$td(ifelse(is.na(x), "NA", round(x, 3)))
+#           })
+#         )
+#       })
+#     )
+#   )
+# })
+
+
+
+
+
 # ===============================
 # GROUP TYPE selector
 # ===============================
@@ -2869,6 +3198,7 @@ bivar_group_data <- reactive({
 
 
 
+
 #========================================
 # 5. Group-level bivariate summary table
 #========================================
@@ -2955,6 +3285,7 @@ output$bivar_group_summary <- DT::renderDT({
 #1a. OBSERVER to Populate X-axis variable choices
 # ==========================================================
 observe({
+  
   # Get valid variable CODES
   valid_vars <- get_country_vars_by_source(
     input$scatter_country_source_x
@@ -2976,6 +3307,7 @@ observe({
     server   = TRUE
   )
 })
+
 
 
 
@@ -3139,6 +3471,83 @@ scatter_country_missing <- reactive({
 
 
 
+
+# ==========================================================
+# Country-level scatter plot
+# Add log-scale axis options
+# ==========================================================
+# output$scatter_country_plot <- plotly::renderPlotly({
+#   
+#   df <- scatter_country_data()
+#   req(nrow(df) > 0)
+#   
+#   show_labels <- isTRUE(input$scatter_country_show_labels)
+#   
+#   # Check whether log scaling is valid
+#   log_x_ok <- isTRUE(input$scatter_country_log_x) && all(df$x > 0)
+#   log_y_ok <- isTRUE(input$scatter_country_log_y) && all(df$y > 0)
+#   
+#   # Base plot (two branches to avoid Plotly text issues)
+#   p <- if (show_labels) {
+#     
+#     plotly::plot_ly(
+#       data = df,
+#       x    = ~x,
+#       y    = ~y,
+#       type = "scatter",
+#       mode = "markers+text",
+#       text = ~country,
+#       textposition = "top center",
+#       hovertext = ~paste(
+#         "Country:", country,
+#         "<br>X:", round(x, 2),
+#         "<br>Y:", round(y, 2)
+#       ),
+#       hoverinfo = "text",
+#       marker = list(
+#         size    = 9,
+#         opacity = input$scatter_country_alpha
+#       )
+#     )
+#     
+#   } else {
+#     
+#     plotly::plot_ly(
+#       data = df,
+#       x    = ~x,
+#       y    = ~y,
+#       type = "scatter",
+#       mode = "markers",
+#       hovertext = ~paste(
+#         "Country:", country,
+#         "<br>X:", round(x, 2),
+#         "<br>Y:", round(y, 2)
+#       ),
+#       hoverinfo = "text",
+#       marker = list(
+#         #size    = 9,
+#         size    = input$scatter_country_point_size,  # user-controlled size
+#         opacity = input$scatter_country_alpha,       # user-controlled opacity
+#         color   = input$scatter_country_color,       # user-controlled color
+#         symbol  = input$scatter_country_shape        # user-controlled shape
+#       )
+#     )
+#   }
+#   
+#   # Apply axis scaling
+#   p %>%
+#     plotly::layout(
+#       xaxis = list(
+#         title = input$scatter_country_x,
+#         type  = if (log_x_ok) "log" else "linear"
+#       ),
+#       yaxis = list(
+#         title = input$scatter_country_y,
+#         type  = if (log_y_ok) "log" else "linear"
+#       ),
+#       margin = list(l = 60, r = 20, b = 60, t = 30)
+#     )
+# })
 
 # ==========================================================
 # Country-level scatter plot
@@ -3636,6 +4045,8 @@ print(HDR_GROUP_COUNTS)
 
 
 
+
+
 # ==========================================================
 # DEFINE COLOR PALETTES LIST
 # ==========================================================
@@ -3874,8 +4285,8 @@ output$scatter_group_plot <- plotly::renderPlotly({
 ID_VARS <- c("country")
 
 AVAILABLE_COUNTRY_VARS <- setdiff(
-  names(MASTER_COUNTRY_DATA),
-  ID_VARS
+names(MASTER_COUNTRY_DATA),
+ID_VARS
 )
 
 
@@ -3884,7 +4295,7 @@ AVAILABLE_COUNTRY_VARS <- setdiff(
 #Prevents dropdowns from showing variables that don’t exist
 # Automatically stays in sync if data changes later
 COUNTRY_VAR_DICT <- FULL_COUNTRY_VAR_DICT %>%
-  dplyr::filter(var_code %in% AVAILABLE_COUNTRY_VARS)
+dplyr::filter(var_code %in% AVAILABLE_COUNTRY_VARS)
 
 
 
@@ -3892,30 +4303,31 @@ COUNTRY_VAR_DICT <- FULL_COUNTRY_VAR_DICT %>%
 # ----------------------------------------------
 ## Build named choices for HDR outcome variables
 HDR_OUTCOME_CHOICES <- COUNTRY_VAR_DICT %>%
-  dplyr::filter(source == "HDR") %>% # Keep only variables from HDR
-  dplyr::select(var_code, label) %>%
-  dplyr::arrange(label) %>%
-  { setNames(.$var_code, .$label) }
+dplyr::filter(source == "HDR") %>% # Keep only variables from HDR
+dplyr::select(var_code, label) %>%
+dplyr::arrange(label) %>%
+{ setNames(.$var_code, .$label) }
 
 
 
 # All outcomes (ADVANCED OPTIONS)
 # ----------------------------------------------------
+
 ALL_OUTCOME_CHOICES <- COUNTRY_VAR_DICT %>%
-  dplyr::filter(source %in% c("HDR", "WVS7")) %>%
-  dplyr::select(var_code, label) %>%
-  dplyr::arrange(label) %>%
-  { setNames(.$var_code, .$label) }
+dplyr::filter(source %in% c("HDR", "WVS7")) %>%
+dplyr::select(var_code, label) %>%
+dplyr::arrange(label) %>%
+{ setNames(.$var_code, .$label) }
 
 
 
 #    Explanatory variables
 # -----------------------------------------------------
 COUNTRY_EXPLANATORY_CHOICES <- COUNTRY_VAR_DICT %>%
-  dplyr::filter(source %in% c("HDR", "WVS7")) %>%
-  dplyr::select(var_code, label) %>%
-  dplyr::arrange(label) %>%
-  { setNames(.$var_code, .$label) }
+dplyr::filter(source %in% c("HDR", "WVS7")) %>%
+dplyr::select(var_code, label) %>%
+dplyr::arrange(label) %>%
+{ setNames(.$var_code, .$label) }
 
 
 
@@ -3925,29 +4337,29 @@ COUNTRY_EXPLANATORY_CHOICES <- COUNTRY_VAR_DICT %>%
 # ==========================================================
 # Observe changes to inputs used to control which outcomes are allowed
 observe({
-  
-  # If the user allows non-HDR outcomes,
-  # populate the dependent-variable dropdown with all available outcomes
-  if (isTRUE(input$allow_non_hdr_outcome)) {
-    
-    updateSelectInput(
-      session,
-      inputId = "country_reg_dep",
-      choices = ALL_OUTCOME_CHOICES
-    )
-    
-  } else {
-    
-    # Otherwise, restrict the dropdown to HDR outcomes only
-    # (this is the default and recommended option)
-    updateSelectInput(
-      session,
-      inputId = "country_reg_dep",
-      choices = HDR_OUTCOME_CHOICES
-    )
-    
-  }
-  
+
+# If the user allows non-HDR outcomes,
+# populate the dependent-variable dropdown with all available outcomes
+if (isTRUE(input$allow_non_hdr_outcome)) {
+
+updateSelectInput(
+  session,
+  inputId = "country_reg_dep",
+  choices = ALL_OUTCOME_CHOICES
+)
+
+} else {
+
+# Otherwise, restrict the dropdown to HDR outcomes only
+# (this is the default and recommended option)
+updateSelectInput(
+  session,
+  inputId = "country_reg_dep",
+  choices = HDR_OUTCOME_CHOICES
+)
+
+}
+
 })
 
 
@@ -3957,13 +4369,13 @@ observe({
 #  OBSERVER to select INdependent variable(s)
 # ==========================================================
 observe({
-  
-  updatePickerInput(
-    session,
-    inputId = "country_reg_indep",
-    choices = COUNTRY_EXPLANATORY_CHOICES
-  )
-  
+
+updatePickerInput(
+session,
+inputId = "country_reg_indep",
+choices = COUNTRY_EXPLANATORY_CHOICES
+)
+
 })
 
 
@@ -3973,41 +4385,54 @@ observe({
 # Triggered by Run Regression button
 # ==========================================================
 country_regression_data <- eventReactive(input$country_reg_run, {
-  
-  # ------------------------------------------
-  # Require minimal inputs
-  # ------------------------------------------
-  req(
-    input$country_reg_dep,
-    input$country_reg_indep
-  )
-  
-  # ------------------------------------------
-  # Extract variable names
-  # ------------------------------------------
-  dep_var     <- input$country_reg_dep
-  indep_vars  <- input$country_reg_indep
-  
-  # ------------------------------------------
-  # Safety: remove outcome from predictors
-  # ------------------------------------------
-  indep_vars <- setdiff(indep_vars, dep_var)
-  req(length(indep_vars) > 0)
-  
-  # ------------------------------------------
-  # Build dataset
-  # ------------------------------------------
-  data <- MASTER_COUNTRY_DATA %>%
-    dplyr::select(all_of(c(dep_var, indep_vars)))
-  
-  # ------------------------------------------
-  # Return structured object
-  # ------------------------------------------
-  list(
-    data       = data,
-    dep_var    = dep_var,
-    indep_vars = indep_vars
-  )
+
+# ------------------------------------------
+# Require minimal inputs
+# ------------------------------------------
+req(
+input$country_reg_dep,
+input$country_reg_indep
+)
+
+# ------------------------------------------
+# Extract variable names
+# ------------------------------------------
+dep_var     <- input$country_reg_dep
+indep_vars  <- input$country_reg_indep
+
+# ------------------------------------------
+# Safety: remove outcome from predictors
+# ------------------------------------------
+indep_vars <- setdiff(indep_vars, dep_var)
+req(length(indep_vars) > 0)
+
+# ------------------------------------------
+# Build dataset
+# ------------------------------------------
+data <- MASTER_COUNTRY_DATA %>%
+dplyr::select(all_of(c(dep_var, indep_vars)))
+
+# # ------------------------------------------
+# # DEBUG: Explicit confirmation that button fired
+# # ------------------------------------------
+# showNotification(
+#   paste(
+#     "Run Regression clicked.",
+#     "Outcome:", dep_var,
+#     "| Predictors:", paste(indep_vars, collapse = ", ")
+#   ),
+#   type = "message",
+#   duration = 4
+# )
+
+# ------------------------------------------
+# Return structured object
+# ------------------------------------------
+list(
+data       = data,
+dep_var    = dep_var,
+indep_vars = indep_vars
+)
 })
 
 
@@ -4019,18 +4444,18 @@ country_regression_data <- eventReactive(input$country_reg_run, {
 # Helper to convert variable codes to human-readable labels
 # ==========================================================
 get_var_label <- function(var_codes) {
-  
-  labels <- FULL_COUNTRY_VAR_DICT %>%
-    dplyr::filter(var_code %in% var_codes) %>%
-    dplyr::arrange(match(var_code, var_codes)) %>%  # preserve order
-    dplyr::pull(label)
-  
-  # Fallback if lookup fails
-  if (length(labels) == 0 || any(is.na(labels))) {
-    return(var_codes)
-  }
-  
-  labels
+
+labels <- FULL_COUNTRY_VAR_DICT %>%
+dplyr::filter(var_code %in% var_codes) %>%
+dplyr::arrange(match(var_code, var_codes)) %>%  # preserve order
+dplyr::pull(label)
+
+# Fallback if lookup fails
+if (length(labels) == 0 || any(is.na(labels))) {
+return(var_codes)
+}
+
+labels
 }
 
 
@@ -4040,27 +4465,33 @@ get_var_label <- function(var_codes) {
 #     Fit regression model
 # ==========================================================
 country_regression_model <- reactive({
-  reg <- country_regression_data()
-  req(reg)
-  
-  data <- reg$data
-  
-  # Drop incomplete cases
-  data <- stats::na.omit(data)
-  req(nrow(data) > 5)   # safety: avoid model built with tiny dataset n =< 5
-  
-  # Build formula programmatically
-  formula <- stats::as.formula(
-    paste(
-      reg$dep_var,
-      "~",
-      paste(reg$indep_vars, collapse = " + ")
-    )
-  )
-  
-  # Fit linear model
-  stats::lm(formula, data = data)
+reg <- country_regression_data()
+req(reg)
+
+data <- reg$data
+
+# Drop incomplete cases
+data <- stats::na.omit(data)
+req(nrow(data) > 5)   # safety: avoid model built with tiny dataset n =< 5
+
+# Build formula programmatically
+formula <- stats::as.formula(
+paste(
+  reg$dep_var,
+  "~",
+  paste(reg$indep_vars, collapse = " + ")
+)
+)
+
+# Fit linear model
+stats::lm(formula, data = data)
 })
+
+
+# observeEvent(input$country_reg_run, {
+#   country_regression_data()
+# })
+
 
 
 
@@ -4069,36 +4500,39 @@ country_regression_model <- reactive({
 # OUTPUT summary table
 # ==========================================================
 output$country_reg_summary <- renderPrint({
-  
-  result <- country_regression_data()
-  model  <- country_regression_model()
-  
-  req(result, model)
-  
-  data <- result$data
-  
-  # ------------------------------------------
-  # Custom header (like individual-level)
-  # ------------------------------------------
-  cat("Linear Regression Model Summary\n")
-  cat("================================\n")
-  cat("Outcome variable: ", get_var_label(result$dep_var), "\n")
-  cat(
-    "Independent variables: ",
-    paste(get_var_label(result$indep_vars), collapse = ", "),
-    "\n"
-  )
-  cat(
-    "Number of complete observations: ",
-    nrow(data),
-    "\n\n"
-  )
-  
-  # ------------------------------------------
-  # Standard lm() summary
-  # ------------------------------------------
-  print(summary(model))
+
+result <- country_regression_data()
+model  <- country_regression_model()
+
+req(result, model)
+
+data <- result$data
+
+# ------------------------------------------
+# Custom header (like individual-level)
+# ------------------------------------------
+cat("Linear Regression Model Summary\n")
+cat("================================\n")
+cat("Outcome variable: ", get_var_label(result$dep_var), "\n")
+cat(
+"Independent variables: ",
+paste(get_var_label(result$indep_vars), collapse = ", "),
+"\n"
+)
+cat(
+"Number of complete observations: ",
+nrow(data),
+"\n\n"
+)
+
+# ------------------------------------------
+# Standard lm() summary
+# ------------------------------------------
+print(summary(model))
 })
+
+
+
 
 
 
@@ -4107,14 +4541,16 @@ output$country_reg_summary <- renderPrint({
 # OUTPUT lm diagnostics 
 # ==========================================================
 output$country_reg_diagnostics <- renderPlot({
-  
-  model <- country_regression_model()
-  req(model)
-  
-  # Standard lm diagnostics (4 plots)
-  par(mfrow = c(2, 2))
-  plot(model)
+
+model <- country_regression_model()
+req(model)
+
+# Standard lm diagnostics (4 plots)
+par(mfrow = c(2, 2))
+plot(model)
 })
+
+
 
 
 
@@ -4122,51 +4558,52 @@ output$country_reg_diagnostics <- renderPlot({
 # OUTPUT lm prediction 
 # ==========================================================
 output$country_reg_prediction <- renderPlotly({
-  #Debug
-  #cat(">>> ENTERED LOOK HEREEEEEE lm_plot\n")
-  
-  model <- country_regression_model()
-  data  <- country_regression_data()
-  
-  req(model, data)
-  
-  df <- data$data
-  
-  # ---------------------------------------
-  # Generate predictions
-  # ---------------------------------------
-  df$predicted <- predict(model, newdata = df)
-  
-  # ---------------------------------------
-  # Build plot
-  # ---------------------------------------
-  p <- ggplot2::ggplot(
-    df,
-    ggplot2::aes(
-      x = predicted,
-      y = .data[[data$dep_var]]
-    )
-  ) +
-    ggplot2::geom_point(
-      color = "#2c7fb8",
-      size  = 2,
-      alpha = 0.7
-    ) +
-    ggplot2::geom_abline(
-      intercept = 0,
-      slope = 1,
-      linetype = "dashed",
-      color = "grey40"
-    ) +
-    ggplot2::labs(
-      title = "Observed vs Predicted Values",
-      x = "Predicted outcome",
-      y = "Observed outcome"
-    ) +
-    ggplot2::theme_minimal()
-  
-  plotly::ggplotly(p)
+
+model <- country_regression_model()
+data  <- country_regression_data()
+
+req(model, data)
+
+df <- data$data
+
+# ---------------------------------------
+# Generate predictions
+# ---------------------------------------
+df$predicted <- predict(model, newdata = df)
+
+# ---------------------------------------
+# Build plot
+# ---------------------------------------
+p <- ggplot2::ggplot(
+df,
+ggplot2::aes(
+  x = predicted,
+  y = .data[[data$dep_var]]
+)
+) +
+ggplot2::geom_point(
+  color = "#2c7fb8",
+  size  = 2,
+  alpha = 0.7
+) +
+ggplot2::geom_abline(
+  intercept = 0,
+  slope = 1,
+  linetype = "dashed",
+  color = "grey40"
+) +
+ggplot2::labs(
+  title = "Observed vs Predicted Values",
+  x = "Predicted outcome",
+  y = "Observed outcome"
+) +
+ggplot2::theme_minimal()
+
+plotly::ggplotly(p)
 })
+
+
+
 
 
 
@@ -4176,27 +4613,30 @@ output$country_reg_prediction <- renderPlotly({
 # ==========================================================
 
 observe({
-  
-  req(input$allow_non_hdr_outcome)
-  
-  if (isTRUE(input$allow_non_hdr_outcome)) {
-    
-    updateSelectInput(
-      session,
-      inputId = "country_reg_dep",
-      choices = ALL_OUTCOME_CHOICES
-    )
-    
-  } else {
-    
-    updateSelectInput(
-      session,
-      inputId = "country_reg_dep",
-      choices = HDR_OUTCOME_CHOICES
-    )
-    
-  }
+
+req(input$allow_non_hdr_outcome)
+
+if (isTRUE(input$allow_non_hdr_outcome)) {
+
+updateSelectInput(
+  session,
+  inputId = "country_reg_dep",
+  choices = ALL_OUTCOME_CHOICES
+)
+
+} else {
+
+updateSelectInput(
+  session,
+  inputId = "country_reg_dep",
+  choices = HDR_OUTCOME_CHOICES
+)
+
+}
 })
+
+
+
 
 
 # ==========================================================
@@ -4204,2167 +4644,26 @@ observe({
 # Group filter vs individual country selection
 # ==========================================================
 observe({
-  
-  # Group filter is ON
-  if (isTRUE(input$country_reg_group_on)) {
-    
-    # Clear individual country selection
-    updateSelectizeInput(
-      session,
-      inputId = "country_reg_countries",
-      selected = character(0)
-    )
-    
-    # Disable country selector
-    shinyjs::disable("country_reg_countries")
-    
-  } else {
-    
-    # Re-enable country selector
-    shinyjs::enable("country_reg_countries")
-    
-  }
-})
 
+# Group filter is ON
+if (isTRUE(input$country_reg_group_on)) {
 
+# Clear individual country selection
+updateSelectizeInput(
+  session,
+  inputId = "country_reg_countries",
+  selected = character(0)
+)
 
+# Disable country selector
+shinyjs::disable("country_reg_countries")
 
-#==========================#   
-#===                    ===#
-#===      MODELS        ===#
-#===                    ===#
-#=============================#      
-#===                       ===#
-#===  LINEAR MIXED MODEL   ===#
-#===                       ===#
-#=============================#  
-################################################################################
-# ########### COUNTRY-LEVEL ####################################################  
-################################################################################
-# ==========================================================
-# LMM — MODEL DATA (FROZEN AT RUN TIME)
-# ==========================================================
-# Purpose:
-#   Build the dataset used by the LMM, based only on
-#   user selections at the moment "Run" is clicked.
-#   This prevents reactive re-triggering and freezing.
-# ==========================================================
-lmm_country_data <- reactive({
-  
-  data <- hdr_table2_ctry_long
-  
-  if (!is.null(input$lmm_countries) &&
-      length(input$lmm_countries) > 0) {
-    data <- dplyr::filter(data, country %in% input$lmm_countries)
-  }
-  
-  data %>%
-    dplyr::mutate(
-      time_model = if (isTRUE(input$lmm_center_time)) year_c else year
-    )
-})
+} else {
 
+# Re-enable country selector
+shinyjs::enable("country_reg_countries")
 
-
-# ==========================================================
-# LMM - MODEL FORMULA (FROZEN AT RUN TIME)
-# ==========================================================
-# Purpose:
-#   Build the LMM formula using only frozen inputs.
-#   No data access, no plotting, no fitting here.
-# ==========================================================
-lmm_country_formula <- reactive({
-  
-  extra_fix <- c(
-    input$lmm_country_fixed_extra,
-    input$lmm_country_policy_effects
-  )
-  
-  fixed_terms <- c("time_model", extra_fix)
-  fixed_terms <- fixed_terms[!is.na(fixed_terms) & nzchar(fixed_terms)]
-  
-  random_term <- switch(
-    input$lmm_country_random_structure,
-    "ri"    = "(1 | country)",
-    "rs"    = "(0 + time_model | country)",
-    "ri_rs" = "(1 + time_model | country)"
-  )
-  
-  rhs <- paste(
-    paste(fixed_terms, collapse = " + "),
-    random_term,
-    sep = " + "
-  )
-  
-  as.formula(paste("hdi ~", rhs))
-})
-
-
-
-# ==========================================================
-# FREEZE FIXED EFFECTS AT RUN TIME
-# ==========================================================
-
-lmm_country_fixed_terms <- eventReactive(input$lmm_run, {
-  
-  c(
-    input$lmm_country_fixed_extra,
-    input$lmm_country_policy_effects
-  )
-  
-}, ignoreInit = TRUE)
-
-
-
-
-
-# ==========================================================
-# LMM - MODEL FIT 
-# ==========================================================
-lmm_country_model <- eventReactive(input$lmm_run, {
-  
-  req(lmm_country_data(), lmm_country_formula())
-  
-  data    <- lmm_country_data()
-  formula <- lmm_country_formula()
-  
-  vars_used <- all.vars(formula)
-  
-  model_data <- data %>%
-    dplyr::select(all_of(vars_used)) #%>%
-    #stats::na.omit()
-  
-  if (nrow(model_data) < 20) {
-    shiny::showNotification(
-      paste0(
-        "Not enough observations to fit the model (",
-        nrow(model_data),
-        ")."
-      ),
-      type = "warning"
-    )
-    return(NULL)
-  }
-  
-  lme4::lmer(
-    formula = formula,
-    data    = model_data,
-    REML    = TRUE
-  )
-  
-}, ignoreInit = TRUE)
-
-
-
-# ==========================================================
-# OUTPUT to print lmm summary
-# ==========================================================
-output$lmm_model_summary <- renderPrint({
-
-  model <- lmm_country_model()
-
-  if (is.null(model)) {
-    return("Model is NULL")
-  }
-
-  # --------------------------------------------------
-  # Display time-centering state
-  # --------------------------------------------------
-  if (isTRUE(input$lmm_center_time)) {
-
-    ref_year <- attr(hdr_table2_ctry_long, "year_center_reference")
-
-    cat(
-      "Time variable: centered at year ",
-      round(ref_year, 1),
-      " (mean of observed years)\n\n",
-      sep = ""
-    )
-
-  } else {
-
-    cat("Time variable: calendar year (not centered)\n\n")
-
-  }
-
-  # Existing behaviour
-  print(summary(model))
-})
-
-
-
-
-
-
-# ==========================================================
-# RANDOM EFFECTS - SLOPE PLOT 
-# ==========================================================
-# Uses unified time variable: time_model
-# Works for centered and uncentered time
-# Compatible with new stable server structure
-# ==========================================================
-output$lmm_random_slope_plot <- renderPlotly({
-  # ------------------------------------------
-  # Guard 2: fitted model must exist
-  # ------------------------------------------
-  model <- lmm_country_model()
-  
-  # If model doesn't exist yet => do nothing
-  if (is.null(model)) return(NULL)
-  
-  # ------------------------------------------
-  # Extract random effects with conditional variance
-  # ------------------------------------------
-  re_all <- try(lme4::ranef(model, condVar = TRUE), silent = TRUE)
-  if (inherits(re_all, "try-error")) return(NULL)
-  
-  if (!"country" %in% names(re_all)) return(NULL)
-  
-  re <- re_all$country
-  pv <- attr(re, "postVar")
-  
-  # ------------------------------------------
-  # Identify slope safely
-  # ------------------------------------------ 
-  slope_cols <- setdiff(colnames(re), "(Intercept)")
-  if (length(slope_cols) != 1) return(NULL)
-  
-  slope_name <- slope_cols[1]
-  slope_idx  <- which(colnames(re) == slope_name)
-  
-  effects <- re[, slope_name]
-  se <- sqrt(pv[slope_idx, slope_idx, ])
-  
-  # ------------------------------------------
-  # Build plotting dataframe
-  # ------------------------------------------
-  df <- data.frame(
-    country = rownames(re),
-    effect  = effects,
-    lower   = effects - 1.96 * se,
-    upper   = effects + 1.96 * se
-  )
-  
-  df <- df[order(df$effect), ]
-  df$y_pos <- seq_len(nrow(df))
-  
-  # ------------------------------------------
-  # Adaptive y-axis label thinning
-  # ------------------------------------------
-  n_countries <- nrow(df)
-  
-  if (n_countries > 60) {
-    label_idx <- seq(1, n_countries, by = 3)
-  } else {
-    label_idx <- seq_len(n_countries)
-  }
-  
-  y_tick_vals  <- df$y_pos[label_idx]
-  y_tick_text  <- df$country[label_idx]
-  
-  # ------------------------------------------
-  # Build Plotly plot (mirrors RS)
-  # ------------------------------------------ 
-  plotly::plot_ly() %>%
-    plotly::add_segments(
-      data = df,
-      x = ~lower,
-      xend = ~upper,
-      y = ~y_pos,
-      yend = ~y_pos,
-      line = list(color = "black", width = 1),
-      showlegend = FALSE
-    ) %>%
-    plotly::add_markers(
-      data = df,
-      x = ~effect,
-      y = ~y_pos,
-      marker = list(color = "#0072B2", size = 8),
-      
-      text = ~paste0(
-        "<b>Country:</b> ", country,
-        "<br><b>Random intercept:</b> ", round(effect, 3),
-        "<br><b>95% CI:</b> [", round(lower, 3), ", ", round(upper, 3), "]"
-      ),
-      hovertemplate = "%{text}<extra></extra>",
-      
-    ) %>%
-    plotly::layout(
-      title = paste("Country random slopes:", slope_name),
-      
-      xaxis = list(
-        title = "",          # removes "lower"
-        zeroline = TRUE
-      ),
-      
-      yaxis = list(
-        title = "",
-        tickmode = "array",
-        tickvals = y_tick_vals,
-        ticktext = y_tick_text,
-        automargin = TRUE
-      ),
-      showlegend = FALSE
-    )
-})
-
-
-
-
-
-# ==========================================================
-# RANDOM EFFECTS - INTERCEPT PLOT (WITH CI)
-# ==========================================================
-output$lmm_random_intercept_plot <- renderPlotly({
-  
-  # ------------------------------------------
-  # Guard 1: only run when RI or RI+RS selected
-  # ------------------------------------------
-  req(input$lmm_country_random_structure %in% c("ri", "ri_rs"))
-  
-  # ------------------------------------------
-  # Guard 2: fitted model must exist
-  # ------------------------------------------
-  model <- lmm_country_model()
-  if (is.null(model)) return(NULL)
-  
-  # ------------------------------------------
-  # Extract random effects WITH conditional variance
-  # ------------------------------------------
-  re_all <- try(lme4::ranef(model, condVar = TRUE), silent = TRUE)
-  if (inherits(re_all, "try-error")) return(NULL)
-  
-  if (!"country" %in% names(re_all)) return(NULL)
-  
-  re <- re_all$country
-  pv <- attr(re, "postVar")
-  
-  # ------------------------------------------
-  # Identify intercept safely
-  # ------------------------------------------
-  if (!"(Intercept)" %in% colnames(re)) return(NULL)
-  
-  intercept_idx <- which(colnames(re) == "(Intercept)")
-  
-  effects <- re[, "(Intercept)"]
-  se      <- sqrt(pv[intercept_idx, intercept_idx, ])
-  
-  # ------------------------------------------
-  # Build plotting dataframe
-  # ------------------------------------------
-  df <- data.frame(
-    country = rownames(re),
-    effect  = effects,
-    lower   = effects - 1.96 * se,
-    upper   = effects + 1.96 * se
-  )
-  
-  df <- df[order(df$effect), ]
-  df$y_pos <- seq_len(nrow(df))
-  
-  # ------------------------------------------
-  # Adaptive y-axis label thinning
-  # ------------------------------------------
-  n_countries <- nrow(df)
-  
-  if (n_countries > 60) {
-    label_idx <- seq(1, n_countries, by = 3)
-  } else {
-    label_idx <- seq_len(n_countries)
-  }
-  
-  y_tick_vals  <- df$y_pos[label_idx]
-  y_tick_text  <- df$country[label_idx]
-  
-  
-  # ------------------------------------------
-  # Build Plotly plot (mirrors RS)
-  # ------------------------------------------
-  plotly::plot_ly() %>%
-    
-    plotly::add_segments(
-      data = df,
-      x = ~lower,
-      xend = ~upper,
-      y = ~y_pos,
-      yend = ~y_pos,
-      line = list(color = "black", width = 1),
-      showlegend = FALSE
-    ) %>%
-    
-    plotly::add_markers(
-      data = df,
-      x = ~effect,
-      y = ~y_pos,
-      marker = list(color = "#2C7FB8", size = 8),
-      text = ~paste0(
-        "<b>Country:</b> ", country,
-        "<br><b>Random intercept:</b> ", round(effect, 3),
-        "<br><b>95% CI:</b> [", round(lower, 3), ", ", round(upper, 3), "]"
-      ),
-      hovertemplate = "%{text}<extra></extra>",
-      showlegend = FALSE
-    ) %>%
-    
-    plotly::layout(
-      title = "Country-level random intercepts",
-      xaxis = list(
-        title = "Deviation from global intercept",
-        zeroline = TRUE
-      ),
-      yaxis = list(
-        title = "",
-        tickmode = "array",
-        tickvals = y_tick_vals,
-        ticktext = y_tick_text,
-        automargin = TRUE
-      ),
-      showlegend = FALSE
-    )
-})
-
-
-
-# ==========================================================
-# DIAGNOSTIC 1 — Residuals vs Fitted
-# ==========================================================
-output$lmm_diag_resid_fitted <- renderPlotly({
-  
-  model <- lmm_country_model()
-  req(model)
-  
-  df <- data.frame(
-    fitted = fitted(model),
-    resid  = resid(model)
-  )
-  
-  plotly::plot_ly(
-    df,
-    x = ~fitted,
-    y = ~resid,
-    type = "scatter",
-    mode = "markers",
-    marker = list(
-      size    = 7,
-      opacity = 0.6,
-      color   = "#2C7FB8",
-      line  = list(color = "black", width = 0.6)
-    )
-  ) %>%
-    plotly::layout(
-      title = "Residuals vs Fitted",
-      xaxis = list(title = "Fitted values"),
-      yaxis = list(
-        title    = "Residuals",
-        zeroline = TRUE
-      )
-    )
-})
-
-
-
-
-# ==========================================================
-# DIAGNOSTIC 2 - Residual Q–Q 
-# ==========================================================
-output$lmm_diag_resid_qq <- plotly::renderPlotly({
-  
-  model <- lmm_country_model()
-  req(model)
-  
-  # --------------------------------------------------
-  # use standardised residuals 
-  # --------------------------------------------------
-  r <- resid(model, scaled = TRUE)
-  
-  # Explicit QQ computation 
-  qq <- qqnorm(r, plot.it = FALSE)
-  
-  df <- data.frame(
-    theoretical = qq$x,
-    sample      = qq$y
-  )
-  
-  # Correct QQ reference line (quartile-based)
-  q25 <- quantile(r, 0.25, na.rm = TRUE)
-  q75 <- quantile(r, 0.75, na.rm = TRUE)
-  z25 <- qnorm(0.25)
-  z75 <- qnorm(0.75)
-  
-  slope     <- (q75 - q25) / (z75 - z25)
-  intercept <- q25 - slope * z25
-  
-  p <- ggplot2::ggplot(
-    df,
-    ggplot2::aes(
-      x = theoretical,
-      y = sample,
-      text = paste0(
-        "Theoretical: ", round(theoretical, 3),
-        "<br>Residual: ", round(sample, 3)
-      )
-    )
-  ) +
-    
-    # Points: identical to old app
-    ggplot2::geom_point(
-      shape  = 21,
-      fill   = "#0072B2",
-      color  = "black",
-      size   = 2,
-      stroke = 0.1,
-      alpha  = 0.8
-    ) +
-    
-    # Q–Q reference line: identical to old app
-    ggplot2::geom_abline(
-      slope     = slope,
-      intercept = intercept,
-      color     = "red",
-      linetype  = "dashed",
-      linewidth = 0.5
-    ) +
-    
-    ggplot2::labs(
-      title = "Normal Q–Q plot of residuals",
-      x = "Theoretical quantiles",
-      y = "Standardised residuals"
-    ) +
-    ggplot2::theme_minimal()
-  
-  plotly::ggplotly(p, tooltip = "text") %>%
-    plotly::layout(
-      showlegend = FALSE,
-      xaxis = list(showspikes = FALSE),
-      yaxis = list(showspikes = FALSE)
-    )
-})
-
-
-
-
-
-# ==========================================================
-# DIAGNOSTIC 3 - Random Effects Q–Q
-# ==========================================================
-# Helper — Check if random-effect variance is non-zero
-# ----------------------------------------------------------
-# Purpose:
-#   Determine whether a fitted mixed-effects model has
-#   meaningful (non-negligible) variance for a specified
-#   random effect at the country level.
-
-has_nonzero_ranef_variance <- function(model, effect = c("intercept", "slope")) {
-  
-  effect <- match.arg(effect)
-  
-  vc <- lme4::VarCorr(model)
-  vc <- as.data.frame(vc)
-  
-  if (effect == "intercept") {
-    out <- vc %>%
-      dplyr::filter(grp == "country", var1 == "(Intercept)") %>%
-      dplyr::pull(vcov)
-  } else {
-    out <- vc %>%
-      dplyr::filter(grp == "country", var1 != "(Intercept)") %>%
-      dplyr::pull(vcov)
-  }
-  
-  length(out) > 0 && is.finite(out) && out > 1e-6
 }
-
-
-
-#### Q-Q norm plot
-output$lmm_diag_ranef_qq <- plotly::renderPlotly({
-  
-  model <- lmm_country_model()
-  req(model)
-  
-  # ------------------------------------------
-  # Extract random intercepts
-  # ------------------------------------------
-  # re <- lme4::ranef(model)$country
-  # req("(Intercept)" %in% colnames(re))
-  
-  # ------------------------------------------
-  # Decide WHICH random effect to extract
-  #   - Intercept if present
-  #   - Otherwise slope
-  # ------------------------------------------
-  re <- lme4::ranef(model)$country
-  
-  if ("(Intercept)" %in% colnames(re)) {
-    
-    r <- re[, "(Intercept)"]
-    label <- "Random intercept"
-    
-  } else {
-    
-    slope_cols <- setdiff(colnames(re), "(Intercept)")
-    req(length(slope_cols) > 0)
-    
-    r <- re[, slope_cols[1]]
-    label <- paste("Random slope (", slope_cols[1], ")", sep = "")
-  }
-  
-  r <- as.numeric(r)
-  req(length(r) > 1)
-  
-  # ------------------------------------------
-  # Detect near-zero variance (RS-only case)
-  # ------------------------------------------
-  var_r <- stats::var(r, na.rm = TRUE)
-  
-  show_note <- is.finite(var_r) && var_r < 1e-6
- 
-
-  # ------------------------------------------
-  # Q–Q data (same as qqnorm)
-  # ------------------------------------------
-  qq <- qqnorm(r, plot.it = FALSE)
-  
-  df <- data.frame(
-    theoretical = qq$x,
-    sample      = qq$y
-  )
-  
-  # ------------------------------------------
-  # Q–Q reference line (IDENTICAL to qqline)
-  # ------------------------------------------
-  q25 <- quantile(r, 0.25, na.rm = TRUE)
-  q75 <- quantile(r, 0.75, na.rm = TRUE)
-  z25 <- qnorm(0.25)
-  z75 <- qnorm(0.75)
-  
-  slope     <- (q75 - q25) / (z75 - z25)
-  intercept <- q25 - slope * z25
-  
-  # ------------------------------------------
-  # Extend line across FULL theoretical range
-  # ------------------------------------------
-  x_rng <- range(df$theoretical)
-  line_df <- data.frame(
-    x = x_rng,
-    y = intercept + slope * x_rng
-  )
-  
-  # ------------------------------------------
-  # Build Plotly plot
-  # ------------------------------------------
-  plotly::plot_ly() %>%
-    
-    # --- Points: blue fill + black outline (same as old app)
-    plotly::add_markers(
-      data = df,
-      x = ~theoretical,
-      y = ~sample,
-      marker = list(
-        size  = 8,
-        color = "#0072B2",
-        line  = list(color = "black", width = 0.6),
-        opacity = 0.8
-      ),
-      hoverinfo = "none"
-    ) %>%
-    
-    # --- Q–Q reference line: thin dashed red
-    plotly::add_lines(
-      data = line_df,
-      x = ~x,
-      y = ~y,
-      line = list(
-        color = "red",
-        dash  = "dash",
-        width = 2
-      ),
-      hoverinfo = "none"
-    ) %>%
-    
-  # ------------------------------------------
-  # Plotting
-  # ------------------------------------------
-  plotly::layout(
-    showlegend = FALSE,
-    title = paste0("Random effects Q–Q plot (", label, ")"),
-    xaxis = list(
-      title = "Theoretical quantiles",
-      zeroline = TRUE,
-      showspikes = FALSE
-    ),
-    yaxis = list(
-      title = "Sample quantiles",
-      zeroline = TRUE,
-      showspikes = FALSE
-    ),
-    annotations = if (show_note) {
-      list(
-        list(
-          x = 0.5,
-          y = 0.95,
-          xref = "paper",
-          yref = "paper",
-          text = paste0(
-            "<b>Note:</b> Random slope variance ≈ 0.<br>",
-            "No detectable between-country variation in slopes."
-          ),
-          showarrow = FALSE,
-          font = list(size = 12, color = "gray40"),
-          align = "center"
-        )
-      )
-    } else {
-      NULL
-    }
-  )
-  
-})
-
-
-
-
-# ==========================================================
-# Diagnostic 4 - Scale–location plot
-# ==========================================================
-output$lmm_diag_scale_location <- plotly::renderPlotly({
-  
-  # ------------------------------------------
-  # Extract fitted values and residuals
-  # ------------------------------------------
-  model <- lmm_country_model()
-  req(model)
-  
-  df <- data.frame(
-    fitted         = fitted(model),
-    sqrt_abs_resid = sqrt(abs(resid(model)))
-  )
-  
-  # ------------------------------------------
-  # Build scale-location plot
-  # ------------------------------------------
-  p <- ggplot2::ggplot(
-    df,
-    ggplot2::aes(
-      x = fitted,
-      y = sqrt_abs_resid,
-      text = paste0(
-        "Fitted HDI: ", round(fitted, 3),
-        "<br>√|Residual|: ", round(sqrt_abs_resid, 3)
-      )
-    )
-  ) +
-    
-    # Points: blue fill with black outline
-    ggplot2::geom_point(
-      shape  = 21,
-      fill   = "#0072B2",
-      color  = "black",
-      size   = 2,
-      stroke = 0.1,
-      alpha  = 0.6
-    ) +
-    
-    # Smooth trend (variance pattern detection)
-    ggplot2::geom_smooth(
-      method = "loess",
-      se     = FALSE,
-      color  = "red",
-      linewidth = 0.5
-    ) +
-    
-    ggplot2::labs(
-      title = "Scale–location plot",
-      x     = "Fitted HDI",
-      y     = "√|Residuals|"
-    ) +
-    ggplot2::theme_minimal()
-  
-  # ------------------------------------------
-  # Convert to Plotly 
-  # ------------------------------------------
-  plotly::ggplotly(p, tooltip = "text") %>%
-    plotly::layout(
-      xaxis = list(showspikes = FALSE),
-      yaxis = list(showspikes = FALSE)
-    )
-})
-
-
-
-
-# output$lmm_predicted_trajectories <- plotly::renderPlotly({
-#   
-#   req(lmm_country_model())
-#   
-#   model <- lmm_country_model()
-#   data  <- hdr_table2_ctry_long
-#   
-#   # Optional country filtering
-#   if (!is.null(input$lmm_countries) && length(input$lmm_countries) > 0) {
-#     data <- dplyr::filter(data, country %in% input$lmm_countries)
-#   }
-#   
-#   # Time variable used in the model
-#   time_var <- if (isTRUE(input$lmm_center_time)) "year_c" else "year"
-#   
-#   # -------------------------------
-#   # GLOBAL AVERAGE (FIXED EFFECTS + CI)
-#   # -------------------------------
-#   if (input$lmm_pred_type == "fixed") {
-#     
-#     time_vals <- sort(unique(data[[time_var]]))
-#     
-#     beta <- lme4::fixef(model)
-#     V    <- vcov(model)
-#     
-#     b0 <- beta["(Intercept)"]
-#     b1 <- beta["time_model"]   
-#     
-#     fit <- b0 + b1 * time_vals
-#     
-#     se <- sqrt(
-#       V["(Intercept)", "(Intercept)"] +
-#         2 * time_vals * V["(Intercept)", "time_model"] +
-#         (time_vals^2) * V["time_model", "time_model"]
-#     )
-#     
-#     global_df <- data.frame(
-#       time  = time_vals,
-#       fit   = fit,
-#       lower = fit - 1.96 * se,
-#       upper = fit + 1.96 * se
-#     )
-#     
-#     plotly::plot_ly() %>%
-#       
-#       plotly::add_ribbons(
-#         data = global_df,
-#         x = ~time,
-#         ymin = ~lower,
-#         ymax = ~upper,
-#         fillcolor = "rgba(44,127,184,0.25)",
-#         line = list(width = 0),
-#         hoveron = "fills",
-#         hovertemplate = paste(
-#           "<b>Time:</b> %{x}",
-#           "<br><b>95% CI:</b> [",
-#           round(global_df$lower, 3), ", ",
-#           round(global_df$upper, 3), "]",
-#           "<extra></extra>"
-#         ),
-#         showlegend = FALSE
-#       ) %>%
-#       
-#       plotly::add_lines(
-#         data = global_df,
-#         x = ~time,
-#         y = ~fit,
-#         mode = "lines+markers",
-#         line = list(color = "#2C7FB8", width = 3),
-#         marker = list(
-#           color = "#2C7FB8",
-#           size  = 9,
-#           line  = list(color = "black", width = 1.1)
-#         ),
-#         hovertemplate = paste(
-#           "<b>Global average</b>",
-#           "<br><b>Time:</b> %{x}",
-#           "<br><b>Predicted HDI:</b> %{y:.3f}",
-#           "<extra></extra>"
-#         ),
-#         showlegend = FALSE
-#       ) %>%
-#       
-#       plotly::layout(
-#         title = "Predicted HDI trajectory (global fixed effects)",
-#         xaxis = list(title = ifelse(time_var == "year_c", "Year (centred)", "Year")),
-#         yaxis = list(title = "Predicted HDI"),
-#         showlegend = FALSE
-#       )
-#   } else {
-#     
-#     # -------------------------------
-#     # COUNTRY-SPECIFIC (CONDITIONAL)
-#     # -------------------------------
-#     
-# # -------------------------------
-# # COUNTRY-SPECIFIC (CONDITIONAL)
-# # -------------------------------
-# 
-# # Use the exact data used by the model
-# df <- model.frame(model)
-# 
-# # Apply the same country filter safely
-# if (!is.null(input$lmm_countries) && length(input$lmm_countries) > 0) {
-#   df <- dplyr::filter(df, country %in% input$lmm_countries)
-# }
-
-# # Add conditional (random-effects) predictions
-# df$pred <- predict(model, newdata = df, allow.new.levels = TRUE)
-# 
-# plotly::plot_ly(
-#   data = df,
-#   x    = df[[time_var]],
-#   y    = df$pred,
-#   group = df$country,
-#   color = df$country,
-#   type  = "scatter",
-#   mode  = "lines",
-#   opacity = 0.35,
-#   line = list(width = 1),
-#   showlegend = FALSE
-# ) %>%
-#   plotly::layout(
-#     title = "Country-specific predicted HDI trajectories",
-#     xaxis = list(title = ifelse(time_var == "year_c", "Year (centred)", "Year")),
-#     yaxis = list(title = "Predicted HDI")
-#   )
-# 
-#   }
-#   
-# })
-
-
-output$lmm_predicted_trajectories <- plotly::renderPlotly({
-
-  req(lmm_country_model())
-
- model <- lmm_country_model()
- data  <- hdr_table2_ctry_long
- 
- # Optional country filtering
- if (!is.null(input$lmm_countries) && length(input$lmm_countries) > 0) {
-   data <- dplyr::filter(data, country %in% input$lmm_countries)
-  }
-
- # Time variable used in the model
- time_var <- if (isTRUE(input$lmm_center_time)) "year_c" else "year"
- 
-   # -------------------------------
-   # GLOBAL AVERAGE (FIXED EFFECTS + CI)
-   # -------------------------------
-  if (input$lmm_pred_type == "fixed") {
-
-  time_vals <- sort(unique(data[[time_var]]))
-  
-  beta <- lme4::fixef(model)
-  V    <- vcov(model)
-
-  b0 <- beta["(Intercept)"]
-  b1 <- beta["time_model"]
-
-  fit <- b0 + b1 * time_vals
-
-  se <- sqrt(
-     V["(Intercept)", "(Intercept)"] +
-       2 * time_vals * V["(Intercept)", "time_model"] +
-       (time_vals^2) * V["time_model", "time_model"]
-   )
-   global_df <- data.frame(
-    time  = time_vals,
-    fit   = fit,
-    lower = fit - 1.96 * se,
-    upper = fit + 1.96 * se
-  )
-
-  plotly::plot_ly() %>%
-
-  plotly::add_ribbons(
-    data = global_df,
-    x = ~time,
-    ymin = ~lower,
-    ymax = ~upper,
-    fillcolor = "rgba(44,127,184,0.25)",
-    line = list(width = 0),
-    hoveron = "fills",
-    hovertemplate = paste(
-      "<b>Time:</b> %{x}",
-      "<br><b>95% CI:</b> [",
-      round(global_df$lower, 3), ", ",
-      round(global_df$upper, 3), "]",
-      "<extra></extra>"
-      ),
-    showlegend = FALSE
-    ) %>%
-    plotly::add_lines(
-      data = global_df,
-      x = ~time,
-      y = ~fit,
-      mode = "lines+markers",
-      line = list(color = "#2C7FB8", width = 3),
-      marker = list(
-        color = "#2C7FB8",
-        size  = 9,
-        line  = list(color = "black", width = 1.1)
-        ),
-        hovertemplate = paste(
-          "<b>Global average</b>",
-          "<br><b>Time:</b> %{x}",
-          "<br><b>Predicted HDI:</b> %{y:.3f}",
-          "<extra></extra>"
-        ),
-        showlegend = FALSE
-      ) %>%
-
-      plotly::layout(
-        title = "Predicted HDI trajectory (global fixed effects)",
-        xaxis = list(title = ifelse(time_var == "year_c", "Year (centred)", "Year")),
-        yaxis = list(title = "Predicted HDI"),
-        showlegend = FALSE
-      )
-  } else {
-
-    data$pred <- predict(model)  # includes random effects
-    
-    plotly::plot_ly() %>%
-      
-      plotly::add_lines(
-        data = data,
-        x = ~.data[[time_var]],
-        y = ~pred,
-        group = ~country,
-        color = ~country,
-        colors = RColorBrewer::brewer.pal(8, "Dark2"),
-        opacity = 0.35,
-        line = list(width = 1),
-        showlegend = FALSE
-      ) %>%
-      
-      plotly::layout(
-        title = list(text = "Country-specific predicted HDI trajectories"),
-        xaxis = list(title = "Year"),
-        yaxis = list(title = "Predicted HDI")
-      )
-
-  }
-
-})
-
-
-
-
-# ==========================================================
-# STEP X — Country-level Intercept–Slope correlation (RI+RS)
-# ==========================================================
-output$lmm_country_ranef_correlation <- renderText({
-
-  model <- lmm_country_model()
-  req(model)
-  req(input$lmm_country_random_structure == "ri_rs")
-
-  vc <- lme4::VarCorr(model)
-  corr <- round(attr(vc$country, "correlation"), 3)
-
-  paste0(
-    "Intercept–slope correlation\n\n",
-    paste(capture.output(print(corr)), collapse = "\n"),
-    "\n\n",
-    "Negative correlation => countries starting higher tend to grow more slowly\n",
-    "Positive correlation => countries with higher baseline HDI grow faster"
-  )
-})
-
-
-
-
-
-
-
-
-################################################################################
-############ GROUP-LEVEL #######################################################  
-################################################################################
-
-########### SUMMARY TABLE GROUP-LEVEL########################
-
-# ==========================================================
-# STEP 1 — Group-level LMM data reactive
-# ----------------------------------------------------------
-# Uses aggregate-only HDR Table 2 data
-# ==========================================================
-lmm_group_data <- reactive({
-  
-  # ------------------------------------------
-  # Base dataset: HDR Table 2 aggregates (long)
-  # ------------------------------------------
-  data <- hdr_table2_aggregates_long
-  
-  # ------------------------------------------
-  # Select aggregation system based on UI
-  # ------------------------------------------
-  data <- switch(
-    input$lmm_group_type,
-    
-    "regions" = {
-      data %>% dplyr::filter(group_type == "region")
-    },
-    
-    "hd_groups" = {
-      data %>% dplyr::filter(group_type == "hd_group")
-    },
-    
-    "ref_groups" = {
-      data %>% dplyr::filter(group_type == "reference_group")
-    }
-  )
-  
-  # ------------------------------------------
-  # Time handling (same logic as country-level)
-  # ------------------------------------------
-  data <- data %>%
-    dplyr::mutate(
-      time_model = if (isTRUE(input$lmm_group_center_time)) year_c else year
-    )
-  
-  # ------------------------------------------
-  # Safety checks
-  # ------------------------------------------
-  req(
-    "group"      %in% names(data),
-    "group_type" %in% names(data),
-    "hdi"        %in% names(data),
-    "time_model" %in% names(data)
-  )
-  
-  data
-})
-
-
-
-
-# ==========================================================
-# STEP 2 - Build group-level random-effects term
-# ==========================================================
-build_group_random_effect <- function(input) {
-  
-  switch(
-    input$lmm_group_random_structure,
-    
-    # Random intercept only (default)
-    ri = "(1 | group)",
-    
-    # Random slope only (advanced / usually mis-specified)
-    rs = "(0 + time_model | group)",
-    
-    # Random intercept + random slope (recommended extension)
-    ri_rs = "(time_model | group)",
-    
-    # Random intercept + slope (DECOUPLED to improve stability)
-    #ri_rs = "(1 | group) + (0 + time_model | group)",
-    
-    
-    # No random effects (diagnostic only)
-    none = NULL
-  )
-}
-
-
-
-# ==========================================================
-# STEP 3 - Assemble full group-level LMM formula
-# Combine fixed effects and random effects
-#  Return a valid model formula
-# ==========================================================
-lmm_group_formula <- reactive({
-  
-  # Fixed effects (always time)
-  fixed_terms <- "time_model"
-  
-  # Random effects (from STEP 2)
-  random_term <- build_group_random_effect(input)
-  
-  # Assemble RHS
-  rhs <- if (is.null(random_term)) {
-    fixed_terms
-  } else {
-    paste(fixed_terms, random_term, sep = " + ")
-  }
-  
-  # Final formula
-  as.formula(
-    paste("hdi ~", rhs)
-  )
-})
-
-
-
-
-# ==========================================================
-# STEP 4 - EVENTREACTIVE TO Fit group-level LMM
-# Fit the group-level linear mixed model
-# Triggered ONLY by the Run button
-# ==========================================================
-lmm_group_model <- eventReactive(input$lmm_group_run, {
-  
-  # ------------------------------------------
-  # Require model inputs
-  # ------------------------------------------
-  req(
-    lmm_group_data(),
-    lmm_group_formula()
-  )
-  
-  # ------------------------------------------
-  # Fit model
-  # ------------------------------------------
-  model <- lme4::lmer(
-    formula = lmm_group_formula(),
-    data    = lmm_group_data(),
-    REML    = TRUE
-  )
-  
-  model
-})
-
-
-
-# ==========================================================
-# STEP 5 - Group-level LMM: Model summary UI
-# Display the fitted group-level LMM summary
-# Triggered only after the model is fitted
-# ==========================================================
-output$lmm_group_model_summary <- renderPrint({
-  
-  message(">>> renderPrint requesting lmm_group_model <<<")
-  
-  model <- lmm_group_model()
-  
-  if (is.null(model)) {
-    return("Model is NULL")
-  }
-  
-  # --------------------------------------------------
-  # Display time-centering state (group-level)
-  # --------------------------------------------------
-  if (isTRUE(input$lmm_group_center_time)) {
-    
-    # Reference year from aggregate dataset
-    ref_year <- mean(
-      hdr_table2_aggregates_long$year,
-      na.rm = TRUE
-    )
-    
-    cat(
-      "Time variable: centered at year ",
-      round(ref_year, 1),
-      " (mean of observed years)\n\n",
-      sep = ""
-    )
-    
-  } else {
-    
-    cat("Time variable: calendar year (not centered)\n\n")
-    
-  }
-  
-  # --------------------------------------------------
-  # Existing behaviour: model summary
-  # --------------------------------------------------
-  print(summary(model))
-  #print(lme4::fixef(model))
-  
-})
-
-
-
-
-# ==========================================================
-# STEP 6A - Group-level Random Intercept Plot (with CI)
-# ==========================================================
-output$lmm_group_random_intercept_plot <- plotly::renderPlotly({
-  
-  # ------------------------------------------
-  # Guard: only when RI or RI+RS selected
-  # ------------------------------------------
-  req(input$lmm_group_random_structure %in% c("ri", "ri_rs"))
-  
-  model <- lmm_group_model()
-  if (is.null(model)) return(NULL)
-  
-  # ------------------------------------------
-  # Extract random effects with conditional var
-  # ------------------------------------------
-  re_all <- try(lme4::ranef(model, condVar = TRUE), silent = TRUE)
-  if (inherits(re_all, "try-error")) return(NULL)
-  if (!"group" %in% names(re_all)) return(NULL)
-  
-  re <- re_all$group
-  pv <- attr(re, "postVar")
-  
-  if (!"(Intercept)" %in% colnames(re)) return(NULL)
-  
-  idx <- which(colnames(re) == "(Intercept)")
-  eff <- re[, "(Intercept)"]
-  se  <- sqrt(pv[idx, idx, ])
-  
-  df <- data.frame(
-    group  = rownames(re),
-    effect = eff,
-    lower  = eff - 1.96 * se,
-    upper  = eff + 1.96 * se
-  )
-  
-  df <- df[order(df$effect), ]
-  df$y_pos <- seq_len(nrow(df))
-  
-  plotly::plot_ly() %>%
-    
-    plotly::add_segments(
-      data = df,
-      x = ~lower, xend = ~upper,
-      y = ~y_pos, yend = ~y_pos,
-      line = list(color = "black", width = 1),
-      showlegend = FALSE
-    ) %>%
-    
-    plotly::add_markers(
-      data = df,
-      x = ~effect,
-      y = ~y_pos,
-      marker = list(color = "#2C7FB8", size = 8),
-      showlegend = FALSE
-    ) %>%
-    
-    plotly::layout(
-      title = "Group-level random intercepts",
-      xaxis = list(
-        title = "Deviation from global intercept",
-        zeroline = TRUE
-      ),
-      yaxis = list(
-        title = "",
-        tickmode = "array",
-        tickvals = df$y_pos,
-        ticktext = df$group,
-        automargin = TRUE
-      )
-    )
-})
-
-
-
-# ==========================================================
-# STEP 6B - Group-level Random Slope Plot (with CI)
-# ==========================================================
-output$lmm_group_random_slope_plot <- plotly::renderPlotly({
-  
-  # ------------------------------------------
-  # Guard: only when RS or RI+RS selected
-  # ------------------------------------------
-  req(input$lmm_group_random_structure %in% c("rs", "ri_rs"))
-  
-  model <- lmm_group_model()
-  if (is.null(model)) return(NULL)
-  
-  re_all <- try(lme4::ranef(model, condVar = TRUE), silent = TRUE)
-  if (inherits(re_all, "try-error")) return(NULL)
-  if (!"group" %in% names(re_all)) return(NULL)
-  
-  re <- re_all$group
-  pv <- attr(re, "postVar")
-  
-  slope_cols <- setdiff(colnames(re), "(Intercept)")
-  if (length(slope_cols) != 1) return(NULL)
-  
-  slope_name <- slope_cols[1]
-  idx <- which(colnames(re) == slope_name)
-  
-  eff <- re[, slope_name]
-  se  <- sqrt(pv[idx, idx, ])
-  
-  df <- data.frame(
-    group  = rownames(re),
-    effect = eff,
-    lower  = eff - 1.96 * se,
-    upper  = eff + 1.96 * se
-  )
-  
-  df <- df[order(df$effect), ]
-  df$y_pos <- seq_len(nrow(df))
-  
-  plotly::plot_ly() %>%
-    
-    plotly::add_segments(
-      data = df,
-      x = ~lower, xend = ~upper,
-      y = ~y_pos, yend = ~y_pos,
-      line = list(color = "black", width = 1),
-      showlegend = FALSE
-    ) %>%
-    
-    plotly::add_markers(
-      data = df,
-      x = ~effect,
-      y = ~y_pos,
-      marker = list(color = "#0072B2", size = 8),
-      showlegend = FALSE
-    ) %>%
-    
-    plotly::layout(
-      title = paste("Group-level random slopes:", slope_name),
-      xaxis = list(
-        title = "Deviation from global slope",
-        zeroline = TRUE
-      ),
-      yaxis = list(
-        title = "",
-        tickmode = "array",
-        tickvals = df$y_pos,
-        ticktext = df$group,
-        automargin = TRUE
-      )
-    )
-})
-
-
-
-
-# ==========================================================
-# STEP 7c - OUTPUT Intercept–slope correlation (RI+RS only)
-# ==========================================================
-output$lmm_group_ranef_correlation <- renderPrint({
-  
-  model <- lmm_group_model()
-  req(model)
-  
-  # Only meaningful for RI + RS
-  req(input$lmm_group_random_structure == "ri_rs")
-  
-  vc <- lme4::VarCorr(model)
-  
-  corr <- attr(vc$group, "correlation")
-  
-  cat("Correlation between random intercept and random slope:\n\n")
-  print(round(corr, 3))
-})
-
-
-
-
-
-################# DIAGNOSTIC GROUP-LEVEL  ###################################
-# ==========================================================
-# DIAGNOSTICS - Residuals vs fitted (group-level)
-# ==========================================================
-output$lmm_group_diag_resid_fitted <- plotly::renderPlotly({
-  
-  model <- lmm_group_model()
-  req(model)
-  
-  df <- data.frame(
-    fitted = fitted(model),
-    resid  = resid(model)
-  )
-  
-  plotly::plot_ly(
-    df,
-    x = ~fitted,
-    y = ~resid,
-    type = "scatter",
-    mode = "markers",
-    marker = list(
-      size    = 8,
-      opacity = 0.6,
-      color   = "#2C7FB8",
-      line    = list(color = "black", width = 0.6)
-    )
-  ) %>%
-    plotly::layout(
-      title = "Residuals vs Fitted",
-      xaxis = list(title = "Fitted values"),
-      yaxis = list(
-        title    = "Residuals",
-        zeroline = TRUE
-      )
-    )
-})
-
-
-
-# ==========================================================
-# DIAGNOSTIC 2 - Residual Q–Q plot + qqline (GROUP LEVEL)
-# ==========================================================
-output$lmm_group_diag_resid_qq <- plotly::renderPlotly({
-  
-  model <- lmm_group_model()
-  req(model)
-  
-  # Extract residuals
-  r <- resid(model)
-  r <- r[is.finite(r)]
-  
-  # Q–Q data (same as qqnorm)
-  qq <- qqnorm(r, plot.it = FALSE)
-  
-  df <- data.frame(
-    theoretical = qq$x,
-    sample      = qq$y
-  )
-  
-  # ----------------------------
-  # Compute qqline (base-R logic)
-  # ----------------------------
-  q_theoretical <- quantile(qq$x, probs = c(0.25, 0.75))
-  q_sample      <- quantile(qq$y, probs = c(0.25, 0.75))
-  
-  slope     <- diff(q_sample) / diff(q_theoretical)
-  intercept <- q_sample[1] - slope * q_theoretical[1]
-  
-  line_df <- data.frame(
-    x = range(df$theoretical),
-    y = intercept + slope * range(df$theoretical)
-  )
-  
-  # ----------------------------
-  # Plot
-  # ----------------------------
-  plotly::plot_ly() %>%
-    
-    # Q–Q points
-    plotly::add_markers(
-      data = df,
-      x = ~theoretical,
-      y = ~sample,
-      marker = list(
-        size    = 8,
-        opacity = 0.6,
-        color   = "#2C7FB8",
-        #line    = list(color = "black", width = 0.6)
-        line    = list(
-          color = "black",
-          width = 1,     # slightly thicker for visibility
-          dash ="dash"
-        )
-      ),
-      showlegend = FALSE
-    ) %>%
-    
-    # qqline
-    plotly::add_lines(
-      data = line_df,
-      x = ~x,
-      y = ~y,
-      #line = list(color = "red", width = 2),
-      line = list(
-        color = "red",
-        width = 2,
-        dash  = "dash"
-      ),
-      
-      showlegend = FALSE
-    ) %>%
-    
-    plotly::layout(
-      title = "Residual Q–Q plot",
-      xaxis = list(title = "Theoretical quantiles"),
-      yaxis = list(title = "Sample quantiles")
-    )
-})
-
-
-
-
-
-# ==========================================================
-# DIAGNOSTIC 3 - Random effects Q–Q plot (GROUP LEVEL)
-# ==========================================================
-output$lmm_group_diag_ranef_qq <- plotly::renderPlotly({
-  
-  model <- lmm_group_model()
-  req(model)
-  
-  # ------------------------------------------
-  # Extract random effects
-  # ------------------------------------------
-  re_list <- lme4::ranef(model)
-  req("group" %in% names(re_list))
-  
-  re_mat <- re_list$group
-  req(ncol(re_mat) >= 1)
-  
-  # Prefer intercept; otherwise take first slope
-  if ("(Intercept)" %in% colnames(re_mat)) {
-    re_vals <- re_mat[, "(Intercept)"]
-    title_suffix <- "Random intercepts"
-  } else {
-    re_vals <- re_mat[, 1]
-    title_suffix <- paste("Random slope:", colnames(re_mat)[1])
-  }
-  
-  re_vals <- as.numeric(re_vals)
-  re_vals <- re_vals[is.finite(re_vals)]
-  req(length(re_vals) > 2)
-  
-  # ------------------------------------------
-  # Q–Q data
-  # ------------------------------------------
-  qq <- qqnorm(re_vals, plot.it = FALSE)
-  
-  df <- data.frame(
-    theoretical = qq$x,
-    sample      = qq$y
-  )
-  
-  # ------------------------------------------
-  # qqline (base-R logic: quartiles)
-  # ------------------------------------------
-  q_theoretical <- quantile(df$theoretical, probs = c(0.25, 0.75))
-  q_sample      <- quantile(df$sample, probs = c(0.25, 0.75))
-  
-  slope     <- diff(q_sample) / diff(q_theoretical)
-  intercept <- q_sample[1] - slope * q_theoretical[1]
-  
-  line_df <- data.frame(
-    x = range(df$theoretical),
-    y = intercept + slope * range(df$theoretical)
-  )
-  
-  # ------------------------------------------
-  # Plot
-  # ------------------------------------------
-  plotly::plot_ly() %>%
-    
-    plotly::add_markers(
-      data = df,
-      x = ~theoretical,
-      y = ~sample,
-      marker = list(
-        size    = 8,
-        opacity = 0.6,
-        color   = "#2C7FB8",
-        line    = list(color = "black", width = 1)
-      ),
-      showlegend = FALSE
-    ) %>%
-    
-    plotly::add_lines(
-      data = line_df,
-      x = ~x,
-      y = ~y,
-      line = list(
-        color = "red",
-        width = 2,
-        dash  = "dash"
-      ),
-      showlegend = FALSE
-    ) %>%
-    
-    plotly::layout(
-      title = paste("Random effects Q–Q plot —", title_suffix),
-      xaxis = list(title = "Theoretical quantiles"),
-      yaxis = list(title = "Sample quantiles")
-    )
-})
-
-
-
-
-# ==========================================================
-# DIAGNOSTIC 4 - Scale–Location plot (GROUP LEVEL)
-# ==========================================================
-output$lmm_group_diag_scale_location <- plotly::renderPlotly({
-  
-  model <- lmm_group_model()
-  req(model)
-  
-  # Extract fitted values and Pearson residuals
-  fitted_vals <- fitted(model)
-  pearson_res <- residuals(model, type = "pearson")
-  
-  # Build dataframe
-  df <- data.frame(
-    fitted = fitted_vals,
-    scale  = sqrt(abs(pearson_res))
-  )
-  
-  df <- df[is.finite(df$fitted) & is.finite(df$scale), ]
-  req(nrow(df) > 0)
-  
-  plotly::plot_ly(
-    df,
-    x = ~fitted,
-    y = ~scale,
-    type = "scatter",
-    mode = "markers",
-    marker = list(
-      size    = 8,
-      opacity = 0.6,
-      color   = "#2C7FB8",
-      line    = list(color = "black", width = 1)
-    )
-  ) %>%
-    plotly::layout(
-      title = "Scale–Location plot",
-      xaxis = list(title = "Fitted values"),
-      yaxis = list(title = "√|Pearson residuals|")
-    )
-})
-
-
-
-
-############# subtab PREDICTED TRAJECTORIES
-
-# ==========================================================
-# HELP TEXT
-# ==========================================================
-output$lmm_group_pred_help <- renderUI({
-  
-  req(input$lmm_group_type)
-  
-  if (input$lmm_group_type == "region") {
-    
-    tags$p(
-      strong("Interpretation: "),
-      "Each line represents a model-implied trajectory for the average country ",
-      "within a world region. Use this plot to compare broad regional trends."
-    )
-    
-  } else if (input$lmm_group_type == "hd_group") {
-    
-    tags$p(
-      strong("Interpretation note: "),
-      "Human development groups are defined using HDI itself. ",
-      "Only the global trajectory is shown to avoid circular interpretation."
-    )
-    
-  } else if (input$lmm_group_type == "reference") {
-    
-    tags$p(
-      strong("Interpretation note: "),
-      "International reference groups (OECD, SIDS, World) are overlapping. ",
-      "Only the global trajectory is shown."
-    )
-  }
-})
-
-
-
-
-# ==========================================================
-# GROUP-LEVEL - Predicted trajectories (context-aware)
-# ==========================================================
-output$lmm_group_predicted_trajectories <- plotly::renderPlotly({
-  
-  model <- lmm_group_model()
-  req(model)
-  
-  # Model frame = data actually used by the model
-  df <- model.frame(model)
-  df$pred <- as.numeric(predict(model))
-  
-  # Identify time variable used by the model
-  time_var <- intersect(
-    c("time_model", "year", "year_c"),
-    names(df)
-  )[1]
-  req(time_var)
-  
-  # -------------------------------
-  # Branch 1 — Individual trajectories
-  # -------------------------------
-  if (input$lmm_group_pred_view == "individual") {
-    
-    p <- plotly::plot_ly()
-    
-    groups <- unique(df$group)
-    
-    for (g in groups) {
-      
-      d <- df[df$group == g, ]
-      
-      p <- p %>%
-        plotly::add_lines(
-          x = d[[time_var]],
-          y = d$pred,
-          name = g,           
-          text = paste(
-            "<b>Group:</b>", g,
-            "<br><b>Time:</b>", d[[time_var]],
-            "<br><b>Predicted HDI:</b>", round(d$pred, 3)
-          ),
-          hoverinfo = "text",
-          line = list(color = "#2C7FB8", width = 2),
-          showlegend = FALSE
-        ) %>%
-        plotly::add_markers(
-          x = d[[time_var]],
-          y = d$pred,
-          text = paste(
-            "<b>Group:</b>", g,
-            "<br><b>Time:</b>", d[[time_var]],
-            "<br><b>Predicted HDI:</b>", round(d$pred, 3)
-          ),
-          hoverinfo = "text",
-          marker = list(
-            color = "#2C7FB8",
-            size  = 10,
-            line  = list(color = "black", width = 1.2)
-          ),
-          showlegend = FALSE
-        )
-    }
-    
-    p %>%
-      plotly::layout(
-        title = list(
-          text = paste(
-            "Predicted HDI trajectories —",
-            switch(
-              input$lmm_group_type,
-              regions    = "Regions",
-              hd_groups  = "Human development groups",
-              ref_groups = "Reference groups"
-            )
-          )
-        ),
-        xaxis = list(title = ifelse(time_var == "time_model", "Time", time_var)),
-        yaxis = list(title = "Predicted HDI"),
-        showlegend = FALSE
-      )
-  }
-  
-  # -------------------------------
-  # Branch 2 — Global average trajectory
-  # -------------------------------
-  else {
-    
-    # Time values
-    time_vals <- sort(unique(df[[time_var]]))
-    
-    # Fixed effects
-    beta <- lme4::fixef(model)
-    V    <- vcov(model)
-    
-    b0 <- beta["(Intercept)"]
-    b1 <- beta["time_model"]
-    
-    # Mean prediction
-    fit <- b0 + b1 * time_vals
-    
-    # Standard error of mean prediction
-    se <- sqrt(
-      V["(Intercept)", "(Intercept)"] +
-        2 * time_vals * V["(Intercept)", "time_model"] +
-        (time_vals^2) * V["time_model", "time_model"]
-    )
-    
-    global_df <- data.frame(
-      time  = time_vals,
-      fit   = fit,
-      lower = fit - 1.96 * se,
-      upper = fit + 1.96 * se
-    )
-    
-    plotly::plot_ly() %>%
-      
-      # --- Confidence interval ribbon ---
-      plotly::add_ribbons(
-        data = global_df,
-        x = ~time,
-        ymin = ~lower,
-        ymax = ~upper,
-        fillcolor = "rgba(44,127,184,0.25)",
-        line = list(width = 0),
-        hoverinfo = "text",
-        text = paste(
-          "<b>Time:</b>", global_df$time,
-          "<br><b>95% CI:</b> [",
-          round(global_df$lower, 3), ", ",
-          round(global_df$upper, 3), "]"
-        ),
-        showlegend = FALSE
-      ) %>%
-      
-      # --- Mean trajectory ---
-      plotly::add_lines(
-        data = global_df,
-        x = ~time,
-        y = ~fit,
-        mode = "lines+markers",
-        line = list(color = "#2C7FB8", width = 3),
-        marker = list(
-          color = "#2C7FB8",
-          size  = 10,
-          line  = list(color = "black", width = 1.2)
-        ),
-        hoverinfo = "text",
-        text = paste(
-          "<b>Global average</b>",
-          "<br><b>Time:</b>", global_df$time,
-          "<br><b>Predicted HDI:</b>", round(global_df$fit, 3)
-        ),
-        showlegend = FALSE
-      ) %>%
-      
-      plotly::layout(
-        title = paste(
-          "Global average predicted HDI —",
-          switch(
-            input$lmm_group_type,
-            regions    = "Regions",
-            hd_groups  = "Human development groups",
-            ref_groups = "Reference groups"
-          )
-        ),
-        xaxis = list(title = "Time"),
-        yaxis = list(title = "Predicted HDI"),
-        showlegend = FALSE
-      )
-  }
-  
-})
-
-
-
-
-
-
-
-
-#==========================#   
-#===                    ===#
-#===  VISUALISATION     ===#
-#===                    ===#
-#=============================#      
-#===                       ===#
-#===    World Map          ===#
-#===                       ===#
-#=============================#  
-################################################################################
-# ########### COUNTRY-LEVEL WORLD MAP###########################################  
-################################################################################
-# ==========================================================
-# Reactive: Filter HDR data by world area selection
-# ----------------------------------------------------------
-# Joins cleaned HDR master data with area lookup
-# Keeps a single country name column
-# Optionally filters countries by selected region
-# ==========================================================
-filtered_data_area <- reactive({
-  
-  # Join HDR data with area lookup and clean country columns
-  df <- HDRs_master_clean %>%
-    left_join(HDR_AREA_LOOKUP, by = "iso3") %>%
-    rename(country = country.x) %>%
-    select(-country.y)
-  
-  # Apply area filtering (skip if "World" is selected)
-  if (input$filtered_area != "World") {
-    df <- df %>% 
-      filter(area == input$filtered_area)
-  }
-  
-  # Return filtered dataset
-  return(df)
-})
-
-
-
-# ==========================================================
-# UI Output: Display list of countries for selected area
-# ----------------------------------------------------------
-# Shown only when the user opts to view the country list
-# Uses the area-filtered HDR dataset
-# Displays countries as a simple HTML list
-# ==========================================================
-output$area_country_list <- renderUI({
-  
-  # Only render when the checkbox is enabled and area is selected
-  req(input$show_country_list)     
-  req(input$filtered_area)         
-  
-  # Retrieve area-filtered dataset
-  df <- filtered_data_area()
-  
-  # Extract and sort unique country names
-  countries <- sort(unique(df$country))
-  
-  # Render formatted HTML output
-  HTML(paste0(
-    "<b>Countries in ", input$filtered_area, ":</b><br>",
-    paste(countries, collapse = "<br>")
-  ))
-})
-
-
-
-# ==========================================================
-# Reactive: Prepare WVS7 country-level data
-# ----------------------------------------------------------
-# Selects chosen WVS indicator
-# Standardises column names for joining
-# ==========================================================
-wvs_map_data <- reactive({
-  
-  req(input$wvs_var)
-  
-  wvs7_ctry %>%
-    select(
-      iso3 = B_COUNTRY_ALPHA,
-      wvs_value = all_of(input$wvs_var)
-    ) %>%
-    filter(!is.na(wvs_value))
-})
-
-
-
-
-
-# ==========================================================
-# Reactive: Join HDR + WVS + area filter + world map
-# ----------------------------------------------------------
-# Prepares country-level data for choropleth mapping
-# Supports HDR-only and HDR–WVS alignment modes
-# ==========================================================
-map_area <- reactive({
-  
-  # ------------------------------------------
-  # Retrieve HDR data filtered by selected area
-  # ------------------------------------------
-  df_hdr <- filtered_data_area()
-  
-  # Keep exactly one row per country (required for mapping)
-  df_hdr_unique <- df_hdr %>%
-    group_by(iso3) %>%        # group rows by country
-    slice(1) %>%              # keep first row per country
-    ungroup()                 # remove grouping
-  
-  # ------------------------------------------
-  # Retrieve WVS country-level data (if selected)
-  # ------------------------------------------
-  df_wvs <- wvs_map_data()
-  
-  # Join WVS7 values onto HDR data using ISO3 code
-  df_joined <- df_hdr_unique %>%
-    left_join(df_wvs, by = "iso3")
-  
-  # ------------------------------------------
-  # Compute map value depending on display mode
-  # ------------------------------------------
-  if (input$map_mode == "alignment") {
-    
-    # df_joined <- df_joined %>%
-    #   mutate(
-    #     hdr_val   = .data[[input$indicator_hdr]], # selected HDR indicator
-    #     hdr_z     = as.numeric(scale(hdr_val)), # standardised HDR value
-    #     wvs_z     = as.numeric(scale(wvs_value)), # standardised WVS value
-    #     map_value = wvs_z - hdr_z               # alignment difference
-    #   )
-    
-    df_joined <- df_joined %>%
-      
-      # compute z-scores ONCE (vectorised)
-      mutate(
-        hdr_z = as.numeric(scale(.data[[input$indicator_hdr]])),
-        wvs_z = as.numeric(scale(wvs_value))
-      ) %>%
-      
-      # compute alignment row-wise using precomputed z-scores
-      mutate(
-        map_value = ifelse(
-          !is.na(hdr_z) & !is.na(wvs_z),
-          wvs_z - hdr_z,
-          NA_real_
-        )
-      ) } else {
-    
-    # HDR-only mode: map selected indicator directly
-    df_joined <- df_joined %>%
-      mutate(
-        map_value = .data[[input$indicator_hdr]]
-      )
-  }
-  
-  # ------------------------------------------
-  # Join prepared data to world map polygons
-  # ------------------------------------------
-  world_shape %>%
-    left_join(df_joined, by = c("iso_a3" = "iso3"))
-})
-
-
-
-# ==========================================================
-# World map legend (changes with map mode)
-# ==========================================================
-output$worldmap_legend <- renderUI({
-  
-  # Ensure a map mode is selected
-  req(input$map_mode)
-  
-  # -------------------------------
-  # Alignment mode legend
-  # -------------------------------
-  if (input$map_mode == "alignment") {
-    
-    tagList(
-      h4("Worldview–Development Alignment"),   # Legend header
-      
-      p(
-        "This map shows how closely each country’s worldviews align with its level of human development."
-      ),
-        
-        tags$li(
-          tags$span(
-            "Red:",
-            style = "background-color:#D55E00; padding:2px 6px; border-radius:3px; font-weight:600;"
-          ),
-           " worldviews stronger than expected given development level"
-        ),
-
-        tags$li(
-          tags$span(
-            "Blue:",
-            style = "background-color:#0072B2; padding:2px 6px; border-radius:3px; font-weight:600;"
-          ), 
-        " worldviews weaker than expected given development level"
-        ),
-
-        tags$li(
-          tags$span(
-            "Neutral:",
-            style = "background-color:#ffffbf; padding:2px 6px; border-radius:3px; font-weight:600;"
-          ),
-          " worldviews aligned with development level"
-        ),
-      
-      tags$li(
-        tags$span(
-          style = "background-color:#DDDDDD; padding:2px 6px; border-radius:3px;",
-          "Grey"
-        ),
-        " indicates countries with no available WVS data."
-      ),
-      
-      br(),
-      p(
-        "Worldview indicators are shown in the tooltip for comparison."
-      )
-        
-      )
-      
-      
-    #)
-    
-    # -------------------------------
-    # Development-only (HDR) legend
-    # -------------------------------
-  } else {
-    
-    tagList(
-      h4("Human Development Level"),   # Legend header
-      
-      p(
-        "This map shows country-level values of the selected human development indicator."
-      ),
-      
-      p(
-        "Worldview indicators are shown in the tooltip for comparison."
-      )
-    )
-  }
 })
 
 
@@ -6376,223 +4675,16 @@ output$worldmap_legend <- renderUI({
 
 
 # ==========================================================
-# Reactive: Check whether map can be rendered
-# ----------------------------------------------------------
-# Used to display user-facing warnings when alignment
-# cannot be computed safely
-# ==========================================================
-map_is_valid <- reactive({
-  
-  # HDR-only mode is always valid
-  if (input$map_mode != "alignment") {
-    return(TRUE)
-  }
-  
-  # Alignment mode: check WVS availability
-  df_wvs <- tryCatch(wvs_map_data(), error = function(e) NULL)
-  if (is.null(df_wvs) || nrow(df_wvs) < 3) {
-    return(FALSE)
-  }
-  
-  # Check overlap after area filtering
-  df_hdr <- filtered_data_area()
-  overlap <- intersect(df_hdr$iso3, df_wvs$iso3)
-  
-  length(overlap) >= 3
-})
-
 
 # ==========================================================
-# UI Output: Map warning message (shown when map is invalid)
-# ==========================================================
-output$map_warning <- renderUI({
-  
-  # Only show warning when map is NOT valid
-  req(!map_is_valid())
-  
-  div(
-    style = "margin-bottom: 10px;",
-    tags$div(
-      style = "
-        background-color: #fff3cd;
-        color: #856404;
-        border: 1px solid #ffeeba;
-        padding: 10px;
-        border-radius: 4px;
-      ",
-      strong("Map unavailable for current selection."),
-      tags$br(),
-      "There is insufficient data to compute the alignment between the selected worldview indicator and development level.",
-      tags$br(),
-      "Try selecting a different worldview indicator or a broader region."
-    )
-  )
-})
 
-
-
-
-
-output$world_choropleth <- renderLeaflet({
-  
-  shp <- map_area()
-  
-  # ------------------------------------------
-  # neutral is light yellow (NOT grey)
-  # ------------------------------------------
-  pal_fun <- colorRampPalette(c(
-    "#2166ac",   # blue  (negative)
-    "#ffffbf",   # neutral (CLEARLY visible)
-    "#b2182b"    # red   (positive)
-  ))
-  
-  n_col <- 100
-  scaled_vals <- shp$map_value
-  rng <- range(scaled_vals, na.rm = TRUE)
-  
-  idx <- round(
-    (scaled_vals - rng[1]) / (rng[2] - rng[1]) * (n_col - 1)
-  ) + 1
-  
-  # Grey ONLY for no data
-  cols <- rep("#DDDDDD", length(idx))
-  ok <- !is.na(idx)
-  cols[ok] <- pal_fun(n_col)[idx[ok]]
-  
-  
-  # ======================================================
-  # hover text shows HDR + WVS in alignment mode
-  # ======================================================
-  hover_text <- if (input$map_mode == "alignment") {
-    
-    paste0(
-      "<strong>", shp$country, "</strong><br/>",
-      "Alignment: ",
-      ifelse(
-        is.na(shp$map_value),
-        "No data",
-        round(shp$map_value, 2)
-      ),
-      "<br/>HDR (", input$indicator_hdr, "): ",
-      ifelse(
-        is.na(shp[[input$indicator_hdr]]),
-        "No data",
-        round(shp[[input$indicator_hdr]], 2)
-      ),
-      "<br/>WVS: ",
-      ifelse(
-        is.na(shp$wvs_value),
-        "No data",
-        round(shp$wvs_value, 2)
-      )
-    )
-    
-  } else {
-    
-    paste0(
-      "<strong>", shp$country, "</strong><br/>",
-      "HDR (", input$indicator_hdr, "): ",
-      ifelse(
-        is.na(shp[[input$indicator_hdr]]),
-        "No data",
-        round(shp[[input$indicator_hdr]], 2)
-      )
-    )
-  }
-  
-
-  leaflet(shp) %>%
-    addTiles() %>%
-    setView(lng = 0, lat = 20, zoom = 1.5) %>%
-    addPolygons(
-      fillColor   = cols,
-      fillOpacity = 0.9,
-      color       = "black",
-      weight      = 1,
-      
-      #dynamic hover text (HTML-safe)
-      label = lapply(hover_text, htmltools::HTML),
-      
-      labelOptions = labelOptions(
-        direction = "auto",
-        opacity   = 0.9,
-        textsize  = "13px",
-        style     = list(
-          "background-color" = "white",
-          "padding"          = "6px"
-        ),
-        sticky = TRUE
-      )
-    ) %>%
-    # ======================================================
-  # gradient bar inside the map (SAFE)
-  # ======================================================
-  addControl(
-    html = '
-        <div style="
-          background:white;
-          padding:8px 10px;
-          border-radius:4px;
-          box-shadow:0 0 6px rgba(0,0,0,0.3);
-          font-size:12px;
-          width:180px;
-        ">
-          <div style="
-            height:12px;
-            background: linear-gradient(
-              to right,
-              #2166ac,
-              #ffffbf,
-              #b2182b
-            );
-            margin-bottom:6px;
-          "></div>
-          <div style="
-            display:flex;
-            justify-content:space-between;
-            font-size:11px;
-          ">
-            <span>Lower</span>
-            <span>Aligned</span>
-            <span>Higher</span>
-          </div>
-        </div>
-      ',
-    position = "bottomright"
-  )
-  
-})
 
 
 
 
 # ==========================================================
-# Populate WVS worldview indicator dropdown (LABELLED)
-# ==========================================================
-observe({
-  
-  # Use existing WVS variable codes
-  wvs_vars <- WVS7_COUNTRY_VARS
-  
-  # Join with dictionary to get labels
-  dict <- FULL_COUNTRY_VAR_DICT %>%
-    dplyr::filter(
-      var_code %in% wvs_vars,
-      source == "WVS7"
-    )
-  
-  # Build named vector: label (shown) -> var_code (used)
-  choices <- setNames(dict$var_code, dict$label)
-  
-  updateSelectizeInput(
-    session,
-    inputId  = "wvs_var",
-    choices  = choices,
-    selected = isolate(input$wvs_var),
-    server   = TRUE
-  )
-})
 
+# ==========================================================
 
 
 
@@ -6605,6 +4697,11 @@ observe({
 
 
 
+
+
+# ==========================================================
+
+# ==========================================================
 
 
 

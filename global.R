@@ -2,6 +2,8 @@
 #### REQUIRED PACKAGES ####
 ###########################-
 
+
+
 required_packages <- c("shiny", "markdown", "haven", "here", "labelled", "sjlabelled", "DT", "ggplot2", "naniar",
                        "readxl", "writexl", "tm", "shinyBS", "shinycssloaders", "shinydashboard", "shinyWidgets",
                        "tidyverse", "corrplot", "broom", "viridis", "plotly", "psych", "car", "randomForest")
@@ -54,7 +56,7 @@ library(randomForest)
 # library(leaflet)
 # library(rnaturalearth)
 # library(sf)
-# library(dplyr)
+library(dplyr)
 # library(rstatix)
 # library(scales)
 # library(skimr)
@@ -136,6 +138,8 @@ MASTER_COUNTRY_DATA <- readRDS(
  )
 
 
+
+
 #Load "MASTER_HDR_WVS7_CLASSIFIED""
 MASTER_HDR_WVS7_CLASSIFIED <- MASTER_COUNTRY_DATA
 
@@ -180,13 +184,17 @@ FULL_VARIABLE_DICTIONARY <- FULL_VARIABLE_DICTIONARY %>%
 HDR_GROUP_BENCHMARKS<- readRDS("Support_Files/HDR_GROUP_BENCHMARKS.rds")
 
 
-
-
 # ======================================
 # Load variables in build_HDR_tables.R
 # ======================================
 source("HDR_files/build_HDR_tables.R")
 
+
+# ======================================
+# Load variables in build_HDR_tables.R
+# ======================================
+#source("Support_Files/Build_WVS7_tables.R")
+source("Support_Files/HDR_WVS7_dropdown_choices.R")
 
 
 
@@ -200,8 +208,7 @@ MASTER_HDR_WVS7_CLASSIFIED <- MASTER_COUNTRY_DATA
 # Load HDR_GROUP_LOOKUP 
 # ======================================
 HDR_GROUP_LOOKUP <- readRDS("Support_Files/HDR_GROUP_LOOKUP.rds")
-
-
+View(HDR_GROUP_LOOKUP)
 
 
 # ======================================
@@ -222,40 +229,12 @@ HDR_BENCHMARK_VARS <- HDR_GROUP_BENCHMARKS %>%
   names()
 
 
-# ==========================================================
-# HDR variable choices for GROUP-LEVEL scatter
-# ==========================================================
-# #join with FULL_VARIABLE_DICTIONARY for labels
-# HDR_GROUP_VAR_CHOICES <- FULL_VARIABLE_DICTIONARY %>%
-#   
-#   # Keep HDR variables only
-#   dplyr::filter(source == "HDR") %>%
-#   
-#   # Keep only variables that exist in group benchmarks
-#   dplyr::filter(var_code %in% unique(HDR_GROUP_BENCHMARKS$variable)) %>%
-#   
-#   dplyr::select(var_code, short_label) %>%
-#   dplyr::distinct() %>%
-#   
-#   # Clean labels (remove stray quotes)
-#   dplyr::mutate(
-#     short_label = stringr::str_remove_all(short_label, "^'|'$")
-#   ) %>%
-#   
-#   dplyr::arrange(short_label) %>%
-#   
-#   # Named vector for Shiny: label -> var_code
-#   {
-#     setNames(.$var_code, .$short_label)
-#   }
-
 
 
 
 # ======================================
 # Load HDR_AREA_LOOKUP 
 # ======================================
-
 HDR_LABELS <- readRDS("Support_Files/HDR_LABELS.rds")  
 
 
@@ -277,8 +256,6 @@ HDR_GROUP_VAR_CHOICES <- HDR_GROUP_BENCHMARKS %>%
 
  
 
-
-
 # ==================================================================
 # Load WVS7_country_variable_dictionary for WVS7 readable dropdwn
 # ==================================================================
@@ -294,4 +271,52 @@ WVS7_COUNTRY_DICT <- readRDS(
 FULL_COUNTRY_VAR_DICT <- readRDS(
   "Support_Files/FULL_COUNTRY_VAR_DICT.rds"
 )
+
+
+
+# ==========================================================================
+# Load country-level dataset for LMM
+# ==========================================================================
+hdr_table2_ctry_long<- readRDS(here::here("Support_Files/hdr_table2_ctry_long.rds"))
+
+
+countries_table2 <- readRDS(here::here("Support_Files/countries_table2.rds"))
+
+
+
+
+# ==========================================================
+# Load group level dataset for LMM
+# ==========================================================
+hdr_table2_aggregates_long <- readRDS("Support_Files/hdr_table2_aggregates_long.rds")
+
+
+
+# ============================================================
+# HDR country-level outcome choices (UI-safe)
+# ============================================================
+HDR_var_choices <- FULL_COUNTRY_VAR_DICT %>%
+  
+  # Keep HDR variables only
+  dplyr::filter(source == "HDR") %>%
+  
+  # Exclude identifiers / non-outcomes
+  dplyr::filter(!var_code %in% c("country", "iso3")) %>%
+  
+  # Build named choices for selectInput()
+  dplyr::arrange(label) %>%
+  {
+    setNames(.$var_code, .$label)
+  }
+
+
+
+
+
+
+
+
+
+
+
 

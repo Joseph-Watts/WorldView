@@ -1,19 +1,20 @@
 library(readxl)
 library(dplyr)
 library(janitor)
+library(writexl)
 
 
 
 
-################ FUNCTIONS ####################################
+################ HELPER FUNCTIONS ####################################
 
-# 1. HARMONISE PLACEHOLDER FOR MISSING VALUE-----------------------------------
-fix_missing <- function(x) {
-  x <- trimws(x)  # remove leading/trailing spaces
-  
-  x[x %in% c("—", "-", "..", "...", "", "n/a", "N/A", "NA")] <- NA
-  return(x)
-}
+# # 1. HARMONISE PLACEHOLDER FOR MISSING VALUE-----------------------------------
+# fix_missing <- function(x) {
+#   x <- trimws(x)  # remove leading/trailing spaces
+#   
+#   x[x %in% c("—", "-", "..", "...", "", "n/a", "N/A", "NA")] <- NA
+#   return(x)
+# }
 
 
 #CLEAN COLUMN
@@ -84,7 +85,7 @@ convert_types <- function(df,
 
 
 # 4. DROP ROWS THAT ARE COMPLETY EMPTY (all NA)---------------------------------
-drop_empty_rows <- function(df) df[rowSums(is.na(df)) != ncol(df), ]
+#drop_empty_rows <- function(df) df[rowSums(is.na(df)) != ncol(df), ]
 
 
 
@@ -118,7 +119,7 @@ remove_rows_above_header <- function(df, header_keyword = "HDI", ignore_case = T
   
   #Error if no matching header row is found
   if (is.na(header_row)) {
-    stop(paste0("❌ No header row found containing keyword: '", header_keyword, "'"))
+    stop(paste0("No header row found containing keyword: '", header_keyword, "'"))
   }
   
   #Keep the header row AND all rows below it
@@ -130,32 +131,21 @@ remove_rows_above_header <- function(df, header_keyword = "HDI", ignore_case = T
 
 
 # 7. APPLY NEW COL NANES ----------------------------------------------------
-apply_new_colnames <- function(df, new_names, header_keyword = NULL) {
-  
-  #Assign new column names
-  if (length(new_names) != ncol(df)) {
-    stop("new_names must match the number of columns in df.")
-  }
-  colnames(df) <- new_names
-  
-  #If user wants to remove header row
-  if (!is.null(header_keyword)) {
-    df <- df[df[[1]] != header_keyword, ]
-  }
-  
-  return(df)
-}
-
-
-
-#To convert into numeric without using the function------------------------------
-# Identify numeric columns automatically by comparing with `country`
-#numeric_cols_tb5 <- setdiff(names(table5_clean), "country")
-# Convert them
-#table5_clean[numeric_cols_tb5] <- lapply(table5_clean[numeric_cols_tb5], as.numeric)
-
-#View(table5_clean)
-
+# apply_new_colnames <- function(df, new_names, header_keyword = NULL) {
+#   
+#   #Assign new column names
+#   if (length(new_names) != ncol(df)) {
+#     stop("new_names must match the number of columns in df.")
+#   }
+#   colnames(df) <- new_names
+#   
+#   #If user wants to remove header row
+#   if (!is.null(header_keyword)) {
+#     df <- df[df[[1]] != header_keyword, ]
+#   }
+#   
+#   return(df)
+# }
 
 
 ################# GLOBAL VARIABLES ##################################
@@ -241,10 +231,11 @@ region_lookup <- tibble::tribble(
 
 
 #####################CLEANING HDRs_TABLE 1 ####################################
+# ------------- LOAD DATA WITHOUT COL NAME -------------------------------------
 #Read raw table
 table1_raw<- readxl::read_excel("HDR_RawData/Table1_HDR25_Statistical_Annex_HDI.xlsx", col_names = FALSE)
 #table1_raw
-# --------------------- REMOVE FULLY EMPTY COLS -------------------------------
+# -------------- REMOVE FULLY EMPTY COLS & NON-NUMERIC COLS --------------------
 table1_clean <- table1_raw[
   ( 
     # Keep columns that are not fully empty
@@ -260,8 +251,8 @@ table1_clean <- table1_raw[
 #View(table1_clean)
 
 
-# --------------------- STANDARDISE MISSING VALUES -----------------------------
-# Apply the fix_missing() function to EVERY column of table3_clean
+# --------------------- STANDARDISE MISSING VALUES PLACEHOLDERS ----------------
+# Apply the fix_miss_val() function to EVERY column of table3_clean
 table1_clean <- table1_clean %>%
   dplyr::mutate(across(everything(), fix_miss_val))
 
@@ -283,7 +274,7 @@ table1_clean <- table1_clean[-c(1, 3), ]
 
 #View(table1_clean)
 
-# --------------------- STANDARDISE COL NAMES ---------------------------------
+# --------------------- RENNAME COLUMNS  ---------------------------------------
 # list new col names
 new_colnames_tb1 <- c(
   "hdi_rank",
@@ -306,7 +297,7 @@ table1_clean <- table1_clean[-2, ]
 
 #View(table1_clean)
 
-# --------------------- DROP BAD ROWS AT THE BOTTOM ------------
+# --------------------- DROP BAD ROWS AT THE BOTTOM ----------------------------
 # HDR tables often include notes or text blocks at the bottom.
 # These rows have non-numeric values in hdi_rank (e.g., "Notes:", "HDI: ...").
 # Remove footer rows starting at "Notes"
@@ -348,7 +339,7 @@ table1_clean <- convert_types(
 #sapply(table1_clean, class)
 
 
-# --------------------- REMOVE ALL CATEGORY HEADERS ROWS-----------------------
+# -----------------  REMOVE EMBEDDED SUBCATEGORY HEADERS  ---------------------
 # Remove rows where ALL columns (except the country column) are NA => it remove the header rows of 
 #the categories "very high human development", " High Human development", "Medium Human development",
 #"Low Human Development", Other countries or territories", ", Human development groups", "Regions"
@@ -416,10 +407,10 @@ saveRDS(special_groups_table1, "Support_Files/special_groups_table1.rds")
 
 
 #####################CLEANING HDRs_TABLE 2 ############################################
-#Read raw table
+# ------------- LOAD DATA WITHOUT COL NAME -------------------------------------
 table2_raw<- readxl::read_excel("HDR_RawData/Table2_HDR25_Statistical_Annex_HDI_Trends.xlsx", col_names = FALSE)
 
-# --------------------- REMOVE FULLY EMPTY COLS ---------------------
+# -------------- REMOVE FULLY EMPTY COLS & NON-NUMERIC COLS --------------------
 table2_clean <- table2_raw[
   (
     # Keep columns that are not fully empty
@@ -435,14 +426,14 @@ table2_clean <- table2_raw[
 #View(table2_clean)
 
 
-# --------------------- STANDARDISE MISSING VALUES ---------------------
-# Apply the fix_missing() function to EVERY column of table3_clean
+# --------------------- STANDARDISE MISSING VALUES PLACEHOLDERS ----------------
+# Apply the fix_miss_val() function to EVERY column of table3_clean
 table2_clean <- table2_clean %>%
   dplyr::mutate(across(everything(), fix_miss_val))
 
 #View(table2_clean)
 
-# --------------------- REMOVE FULLY EMPTY ROWS ---------------------
+# --------------------- REMOVE FULLY EMPTY ROWS -------------------------------
 table2_clean <- table2_clean[
   rowSums(!is.na(table2_clean)) > 0,   # keep only rows with at least one non-NA value
 ]
@@ -458,7 +449,7 @@ table2_clean <- table2_clean[-c(1, 2), ]
 
 #View(table2_clean)
 
-# --------------------- STANDARDISE COL NAMES ---------------------
+# --------------------- RENNAME COLUMNS  ---------------------------------------
 # list new col names
 new_colnames_tb2 <- c(
   "hdi_rank",
@@ -488,7 +479,7 @@ table2_clean <- table2_clean[-1, ]
 
 #View(table2_clean)
 
-# --------------------- REMOVE BOTTOM ROWS (drop footer and problematic rows at the bottom) ---------------------
+# --------------------- DROP BAD ROWS AT THE BOTTOM ----------------------------
 # HDR tables often include notes or text blocks at the bottom.
 # These rows have non-numeric values in hdi_rank (e.g., "Notes:", "HDI: ...").
 # Remove footer rows starting at "Notes"
@@ -500,7 +491,7 @@ table2_clean <- table2_clean[1:(notes_row_tb2 - 1), ]
 #View(table2_clean)
 
 
-# --------------------- CONVERT DATATYPES ---------------------
+# --------------------- CONVERT DATATYPES --------------------------------------
 # Convert to Numeric
 numeric_cols_tb2 <- setdiff(names(table2_clean), "country")
 str(table2_clean)
@@ -517,7 +508,7 @@ table2_clean <- convert_types(
 #sapply(table2_clean, class)
 
 
-# --------------------- REMOVE ALL CATEGORY HEADERS ROWS-------------------------------
+# -----------------  REMOVE EMBEDDED SUBCATEGORY HEADERS  ---------------------
 # Remove rows where ALL columns (except the country column) are NA => it remove the header rows of
 #the categories "very high human development", " High Human development", "Medium Human development",
 #"Low Human Development", Other countries or territories", ", Human development groups", "Regions"
@@ -567,11 +558,11 @@ countries_table2 <- table2_clean[
 ## special_groups_table2<- clean_columns(special_groups_table2)
 
 
-#View category tables
-# View(countries_table2)
-# View(hdi_groups_table2)
-# View(regions_table2)
-# View(special_groups_table2)
+# View category tables
+View(countries_table2)
+View(hdi_groups_table2)
+View(regions_table2)
+View(special_groups_table2)
 
 
 #Save each object as .rds
@@ -581,11 +572,17 @@ saveRDS(regions_table2, "Support_Files/regions_table2.rds")
 saveRDS(special_groups_table2, "Support_Files/special_groups_table2.rds")
 
 
+#save countries_table2 in excel file 
+writexl::write_xlsx(countries_table2, "Support_Files/countries_table2.xlsx")
+
+
+
+
 #####################CLEANING HDRs_TABLE 3 ####################################
-# #Read raw table
+# ------------- LOAD DATA WITHOUT COL NAME -------------------------------------
 table3_raw<- readxl::read_excel("HDR_RawData/Table3_HDR25_Statistical_Annex_IHDI.xlsx", col_names = FALSE)
 
-# --------------------- REMOVE FULLY EMPTY COLS -------------------------------
+# -------------- REMOVE FULLY EMPTY COLS & NON-NUMERIC COLS --------------------
 table3_clean <- table3_raw[
   (
     # Keep columns that are not fully empty
@@ -601,8 +598,8 @@ table3_clean <- table3_raw[
 #View(table3_clean)
 
 
-# --------------------- STANDARDISE MISSING VALUES -----------------------------
-# Apply the fix_missing() function to EVERY column of table3_clean
+# --------------------- STANDARDISE MISSING VALUES PLACEHOLDERS ----------------
+# Apply the fix_miss_val() function to EVERY column of table3_clean
 table3_clean <- table3_clean %>%
   dplyr::mutate(across(everything(), fix_miss_val))
 
@@ -624,7 +621,7 @@ table3_clean <- table3_clean[-c(1, 2), ]
 
 #View(table3_clean)
 
-# --------------------- STANDARDISE COL NAMES ---------------------------------
+# --------------------- RENNAME COLUMNS  ---------------------------------------
 # list new col names
 new_colnames_tb3 <- c(
   "hdi_rank",
@@ -654,7 +651,7 @@ table3_clean <- table3_clean[-1, ]
 
 #View(table3_clean)
 
-# --------------------- DROP BAD ROWS AT THE BOTTOM ------------
+# --------------------- DROP BAD ROWS AT THE BOTTOM ----------------------------
 # HDR tables often include notes or text blocks at the bottom.
 # These rows have non-numeric values in hdi_rank (e.g., "Notes:", "HDI: ...").
 # Remove footer rows starting at "Notes"
@@ -671,7 +668,7 @@ table3_clean <- table3_clean[1:(notes_row_tb3 - 1), ]
 # Convert to Numeric
 #list cols to convert into numeric
 numeric_cols_tb3 <- setdiff(names(table3_clean), "country")
-str(table3_clean)
+#str(table3_clean)
 
 #convert cols into numeric
 table3_clean <- convert_types(
@@ -685,7 +682,7 @@ table3_clean <- convert_types(
 sapply(table3_clean, class)
 
 
-# --------------------- REMOVE ALL CATEGORY HEADERS ROWS-----------------------
+# -----------------  REMOVE EMBEDDED SUBCATEGORY HEADERS  ---------------------
 # Remove rows where ALL columns (except the country column) are NA => it remove the header rows of
 #the categories "very high human development", " High Human development", "Medium Human development",
 #"Low Human Development", Other countries or territories", ", Human development groups", "Regions"
@@ -753,12 +750,10 @@ saveRDS(special_groups_table3, "Support_Files/special_groups_table3.rds")
 
 
 #####################CLEANING HDRs_TABLE 4 ####################################
-#Read raw table
+# ------------- LOAD DATA WITHOUT COL NAME -------------------------------------
 table4_raw<- readxl::read_excel("HDR_RawData/Table4_HDR25_Statistical_Annex_GDI.xlsx", col_names = FALSE)
 
-
-
-# --------------------- REMOVE FULLY EMPTY COLS -------------------------------
+# -------------- REMOVE FULLY EMPTY COLS & NON-NUMERIC COLS --------------------
 table4_clean <- table4_raw[
   ( 
     # Keep columns that are not fully empty
@@ -774,8 +769,8 @@ table4_clean <- table4_raw[
 #View(table4_clean)
 
 
-# --------------------- STANDARDISE MISSING VALUES -----------------------------
-# Apply the fix_missing() function to EVERY column of table3_clean
+# --------------------- STANDARDISE MISSING VALUES PLACEHOLDERS ----------------
+# Apply the fix_miss_val() function to EVERY column of table3_clean
 table4_clean <- table4_clean %>%
   dplyr::mutate(across(everything(), fix_miss_val))
 
@@ -797,7 +792,7 @@ table4_clean <- table4_clean[-c(1, 2), ]
 
 #View(table5_clean)
 
-# --------------------- STANDARDISE COL NAMES ---------------------------------
+# --------------------- RENNAME COLUMNS  ---------------------------------------
 # list new col names
 new_colnames_tb4 <- c(
   "hdi_rank",
@@ -825,7 +820,7 @@ table4_clean <- table4_clean[-1, ]
 
 #View(table4_clean)
 
-# --------------------- DROP BAD ROWS AT THE BOTTOM ------------
+# --------------------- DROP BAD ROWS AT THE BOTTOM ----------------------------
 # HDR tables often include notes or text blocks at the bottom.
 # These rows have non-numeric values in hdi_rank (e.g., "Notes:", "HDI: ...").
 # Remove footer rows starting at "Notes"
@@ -856,7 +851,7 @@ table4_clean <- convert_types(
 sapply(table4_clean, class)
 
 
-# --------------------- REMOVE ALL CATEGORY HEADERS ROWS-----------------------
+# -----------------  REMOVE EMBEDDED SUBCATEGORY HEADERS  ---------------------
 # Remove rows where ALL columns (except the country column) are NA => it remove the header rows of 
 #the categories "very high human development", " High Human development", "Medium Human development",
 #"Low Human Development", Other countries or territories", ", Human development groups", "Regions"
@@ -921,9 +916,10 @@ saveRDS(regions_table4, "Support_Files/regions_table4.rds")
 saveRDS(special_groups_table4, "Support_Files/special_groups_table4.rds")
 
 #####################CLEANING HDRs_TABLE 5 ####################################
-#Read raw table
+# ------------- LOAD DATA WITHOUT COL NAME -------------------------------------
 table5_raw<- readxl::read_excel("HDR_RawData/Table5_HDR25_Statistical_Annex_GII.xlsx", col_names = FALSE)
-# --------------------- REMOVE FULLY EMPTY COLS -------------------------------
+
+# -------------- REMOVE FULLY EMPTY COLS & NON-NUMERIC COLS --------------------
 table5_clean <- table5_raw[
   ( 
     # Keep columns that are not fully empty
@@ -938,8 +934,8 @@ table5_clean <- table5_raw[
 
 #View(table5_clean)
 
-# --------------------- STANDARDISE MISSING VALUES -----------------------------
-# Apply the fix_missing() function to EVERY column of table3_clean
+# --------------------- STANDARDISE MISSING VALUES PLACEHOLDERS ----------------
+# Apply the fix_miss_val() function to EVERY column of table3_clean
 table5_clean <- table5_clean %>%
   dplyr::mutate(across(everything(), fix_miss_val))
 
@@ -961,7 +957,7 @@ table5_clean <- table5_clean[-c(1, 2), ]
 
 #View(table5_clean)
 
-# --------------------- STANDARDISE COL NAMES ---------------------------------
+# --------------------- RENNAME COLUMNS  ---------------------------------------
 # list new col names
 new_colnames_tb5 <- c(
   "hdi_rank",
@@ -986,7 +982,7 @@ table5_clean <- table5_clean[-1, ]
 
 #View(table5_clean)
 
-# --------------------- DROP BAD ROWS AT THE BOTTOM ------------
+# --------------------- DROP BAD ROWS AT THE BOTTOM ----------------------------
 # HDR tables often include notes or text blocks at the bottom.
 # These rows have non-numeric values in hdi_rank (e.g., "Notes:", "HDI: ...").
 # Remove footer rows starting at "Notes"
@@ -1017,7 +1013,7 @@ table5_clean <- convert_types(
 #sapply(table5_clean, class)
 
 
-# --------------------- REMOVE ALL CATEGORY HEADERS ROWS-----------------------
+# -----------------  REMOVE EMBEDDED SUBCATEGORY HEADERS  ---------------------
 # Remove rows where ALL columns (except the country column) are NA => it remove the header rows of 
 #the categories "very high human development", " High Human development", "Medium Human development",
 #"Low Human Development", Other countries or territories", ", Human development groups", "Regions"
@@ -1067,7 +1063,7 @@ countries_table5 <- table5_clean[
 ## special_groups_table5<- clean_columns(special_groups_table5)
 
 
-#View category tables
+# View category tables
 # View(countries_table5)
 # View(hdi_groups_table5)
 # View(regions_table5)
@@ -1083,9 +1079,10 @@ saveRDS(special_groups_table5, "Support_Files/special_groups_table5.rds")
 
 
 #####################CLEANING HDRs_TABLE 7 ####################################
-#Read raw table
+# ------------- LOAD DATA WITHOUT COL NAME -------------------------------------
 table7_raw<- readxl::read_excel("HDR_RawData/Table7_HDR25_Statistical_Annex_PHDI.xlsx", col_names = FALSE)
-# --------------------- REMOVE FULLY EMPTY COLS -------------------------------
+
+# -------------- REMOVE FULLY EMPTY COLS & NON-NUMERIC COLS --------------------
 table7_clean <- table7_raw[
   ( 
     # Keep columns that are not fully empty
@@ -1101,8 +1098,8 @@ table7_clean <- table7_raw[
 #View(table7_clean)
 
 
-# --------------------- STANDARDISE MISSING VALUES -----------------------------
-# Apply the fix_missing() function to EVERY column of table3_clean
+# --------------------- STANDARDISE MISSING VALUES PLACEHOLDERS ----------------
+# Apply the fix_miss_val() function to EVERY column of table3_clean
 table7_clean <- table7_clean %>%
   dplyr::mutate(across(everything(), fix_miss_val))
 
@@ -1124,7 +1121,7 @@ table7_clean <- table7_clean[-c(1, 2), ]
 
 #View(table7_clean)
 
-# --------------------- STANDARDISE COL NAMES ---------------------------------
+# --------------------- RENNAME COLUMNS  ---------------------------------------
 # list new col names
 new_colnames_tb7 <- c(
   "hdi_rank",                                  # HDI rank
@@ -1149,7 +1146,7 @@ table7_clean <- table7_clean[-1, ]
 
 #View(table7_clean)
 
-# --------------------- DROP BAD ROWS AT THE BOTTOM ------------
+# --------------------- DROP BAD ROWS AT THE BOTTOM ----------------------------
 # HDR tables often include notes or text blocks at the bottom.
 # These rows have non-numeric values in hdi_rank (e.g., "Notes:", "HDI: ...").
 # Remove footer rows starting at "Notes"
@@ -1180,7 +1177,7 @@ table7_clean <- convert_types(
 #sapply(table7_clean, class)
 
 
-# --------------------- REMOVE ALL CATEGORY HEADERS ROWS-----------------------
+# -----------------  REMOVE EMBEDDED SUBCATEGORY HEADERS  ---------------------
 # Remove rows where ALL columns (except the country column) are NA => it remove the header rows of 
 #the categories "very high human development", " High Human development", "Medium Human development",
 #"Low Human Development", Other countries or territories", ", Human development groups", "Regions"
@@ -1263,6 +1260,11 @@ saveRDS(table7_clean, "Support_Files/table7_clean.rds")
 
 
 
+
+
+
+
+
 ###############################################################################
 ##################### create ?????          ####################################
 ########################################## ####################################
@@ -1311,6 +1313,64 @@ specialgroup_labels_extract <- c(
 
 
 
+###########################################################################################################
+
+HDR_GROUP_BENCHMARKS <-readRDS("Support_files/HDR_GROUP_BENCHMARKS.rds")
+#View(HDR_GROUP_BENCHMARKS)
+
+HDR_GROUP_LOOKUP<- readRDS("Support_files/HDR_GROUP_LOOKUP.rds")
+#View(HDR_GROUP_LOOKUP)
+
+
+FULL_COUNTRY_VAR_DICT<- readRDS("Support_Files/FULL_COUNTRY_VAR_DICT.rds")
+#View(FULL_COUNTRY_VAR_DICT)
+
+
+FULL_VARIABLE_DICTIONARY<- readRDS("Support_Files/FULL_VARIABLE_DICTIONARY.rds")
+#View(FULL_VARIABLE_DICTIONARY)
+
+
+
+MASTER_HDR_WVS7_CLASSIFIED<- readRDS("Support_Files/MASTER_HDR_WVS7_CLASSIFIED.rds")
+#View(MASTER_HDR_WVS7_CLASSIFIED)
+
+MASTER_HDR_WVS7_CLASSIFIED<- readRDS("Support_Files/MASTER_HDR_WVS7_CLASSIFIED.rds")
+#str(MASTER_HDR_WVS7_CLASSIFIED)
+
+
+MASTER_COUNTRY_DATA<- readRDS("Support_Files/MASTER_COUNTRY_DATA.rds")
+#View(MASTER_COUNTRY_DATA)
+
+
+HDR_GROUP_LOOKUP<- readRDS("Support_Files/HDR_GROUP_LOOKUP.rds")
+#View(HDR_GROUP_LOOKUP)
+
+
+
+
+
+table2_clean <- readRDS("Support_Files/table2_clean.rds")
+#View(table2_clean)
+
+
+
+hdr_table2_aggregates_long <- readRDS("Support_Files/hdr_table2_aggregates_long.rds")
+#View(hdr_table2_aggregates_long)
+#unique(hdr_table2_aggregates_long$group_type)
+
+
+hdr_table2_ctry_long <- readRDS("Support_Files/hdr_table2_ctry_long.rds")
+#View(hdr_table2_ctry_long)
+
+
+
+
+
+m <- lmm_group_model()
+
+#head(predict(m))
+#summary(predict(m))
+#anyNA(predict(m))
 
 
 

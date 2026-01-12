@@ -1,11 +1,64 @@
-#build_HDR_tables.R
-#Purpose: create HDR master table
+# ==============================================================================
+# Script name : build_HDR_tables.R
+# Purpose
+# ------------------------------------------------------------------------------
+# This script assembles and harmonises cleaned Human Development Report (HDR)
+# tables into analysis-ready master datasets.
+#
+# It integrates country-level data and aggregate benchmark tables (HDI groups,
+# regions, and special groups), enriches datasets with ISO-3 country codes,
+# constructs group-level benchmark datasets, and generates lookup tables and
+# metadata used throughout the Shiny application.
+
+# Inputs
+# ------------------------------------------------------------------------------
+# - Cleaned HDR tables (.rds) produced by clean_HDRs.R:
+#   table1_clean, table2_clean, table3_clean, table4_clean,
+#   table5_clean, table7_clean
+
+# Outputs
+# ------------------------------------------------------------------------------
+# The following datasets are created and saved for downstream use:
+# 1. Structured HDR table collection:
+#    - HDR_DATA
+#      • Nested list containing, for each HDR table:
+#        - countries_tableX
+#        - hdi_groups_tableX
+#        - regions_tableX
+#        - special_groups_tableX
+
+# 2. Group-level benchmark dataset:
+#    - HDR_GROUP_BENCHMARKS
+#      • Long-format dataset combining HDI groups, regions,
+#        and special groups across all HDR tables
+
+# 3. Group and area lookup tables:MASTER_HDR_WVS7_CLASSIFIED
+#    - HDR_GROUP_LOOKUP
+#    - HDR_AREA_LOOKUP
+#    - HDR_HDI_GROUP_LOOKUP
+#    - HDR_REGION_LOOKUP
+#    - HDR_SPECIAL_LOOKUP
+
+# 4. Indicator metadata and dictionaries:
+#    - TABLEX_INDICATORS, 
+#    - ALL_HDR_INDICATORS
+#    - HDR_VARIABLE_DEFINITIONS
+
+# 5. Country-level master datasets with ISO-3 codes:
+#    - HDRs_master
+#    - HDRs_master_clean
+#
+# Usage
+# ------------------------------------------------------------------------------
+# Run once during data preparation. All outputs are saved as .rds files and
+# loaded by the Shiny application; this script is not executed at runtime.
+# ==============================================================================
 
 
 
 
 #==============================================================================
-# READ ALL HDRs CLEAN TABLES
+# 1a. LOAD ALL HDRs CLEAN TABLES
 #==============================================================================
 table1_clean <- readRDS("Support_Files/table1_clean.rds")
 table2_clean <- readRDS("Support_Files/table2_clean.rds")
@@ -13,17 +66,15 @@ table3_clean <- readRDS("Support_Files/table3_clean.rds")
 table4_clean <- readRDS("Support_Files/table4_clean.rds")
 table5_clean <- readRDS("Support_Files/table5_clean.rds")
 table7_clean <- readRDS("Support_Files/table7_clean.rds")
-
+#View(table1_clean)
 
 #==============================================================================
-# Recreate  groups table (needed downstream)
+# 1b. Load all groups table (needed downstream)
 #==============================================================================
-
 countries_table1<- readRDS("Support_Files/countries_table1.rds")
 hdi_groups_table1 <- readRDS("Support_Files/hdi_groups_table1.rds")
 regions_table1<-readRDS("Support_Files/regions_table1.rds")
 special_groups_table1 <- readRDS("Support_Files/special_groups_table1.rds")
-
 
 
 countries_table2<- readRDS("Support_Files/countries_table2.rds")
@@ -36,7 +87,6 @@ countries_table3<- readRDS("Support_Files/countries_table3.rds")
 hdi_groups_table3 <- readRDS("Support_Files/hdi_groups_table3.rds")
 regions_table3<-readRDS("Support_Files/regions_table3.rds")
 special_groups_table3 <- readRDS("Support_Files/special_groups_table3.rds")
-
 
 
 countries_table4<- readRDS("Support_Files/countries_table4.rds")
@@ -52,20 +102,14 @@ special_groups_table5 <- readRDS("Support_Files/special_groups_table5.rds")
 
 
 
-
 hdi_groups_table7 <- readRDS("Support_Files/hdi_groups_table7.rds")
 regions_table7<- readRDS("Support_Files/regions_table7.rds")
 countries_table7<- readRDS("Support_Files/countries_table7.rds")
 special_groups_table7 <- readRDS("Support_Files/special_groups_table7.rds")
-
-
-
-
-
-
+#View(special_groups_table1)
 
 #==============================================================================
-            # STRUCTURED LIST FOR ALL HDRs TABLES
+# 2.          STRUCTURED LIST FOR ALL HDRs TABLES
 #==============================================================================
 HDR_DATA <- list(
   "Table 1 - HDI & Components" = list(
@@ -115,184 +159,306 @@ HDR_DATA <- list(
 )
 
 
+#View(HDR_DATA)
 
 
 
 
 ###############################################################################
-#==============================================================================
-# Build the group-level master dataset
-#==============================================================================
-##############################################################################
-HDR_GROUP_BENCHMARKS <- purrr::map_dfr(
-  names(HDR_DATA),
-  function(table_name) {
-    
-    bind_rows(
-      # ------------------------------
-      # HDI groups
-      # ------------------------------
-      HDR_DATA[[table_name]]$groups %>%
-        dplyr::mutate(group_type = "HDI group"),
-      
-      # ------------------------------
-      # Regions
-      # ------------------------------
-      HDR_DATA[[table_name]]$regions %>%
-        dplyr::mutate(group_type = "Region"),
-      
-      # ------------------------------
-      # Special groups (OECD, SIDS…)
-      # ------------------------------
-      HDR_DATA[[table_name]]$special %>%
-        dplyr::mutate(group_type = "Special group")
-    ) %>%
-      # ------------------------------
-    # Clean + reshape
-    # ------------------------------
-    dplyr::select(
-      group_type,
+# =============================================================================
+#                3. ADD ISO3 CODE TO COUNTRIES
+# =============================================================================
+###############################################################################
+# Create a version of Table 1 (countries only) with ISO-3 code added
+tab1_Iso3 <- HDR_DATA$`Table 1 - HDI & Components`$countries %>% 
+  mutate(
+    # Add a new column 'iso3' by converting country names
+    # ISO-3 codes (e.g., NZL, AUS, USA) are required for joining
+    # with world shapefiles and building maps
+    iso3 = countrycode(
+      country,                  # input: country names
+      origin = "country.name",  # tells the function countrycode() the input format
+      destination = "iso3c"     # tells the function the output format: 3-letter ISO-3 country code
+    )
+  )
+
+#View(tab1_Iso3)
+
+# Create Table 2 with ISO-3 code 
+tab2_Iso3 <- HDR_DATA$`Table 2 - HDI Trends`$countries%>%
+  mutate(
+    iso3 = countrycode(
       country,
-      where(is.numeric),
-      -contains("rank")   #drop hdi_rank and "change in hdi rank" because type factor
-    ) %>%
-      dplyr::rename(group = country) %>%
-      tidyr::pivot_longer(
-        cols = -c(group, group_type),
-        names_to  = "variable",
-        values_to = "value"
-      ) %>%
-      dplyr::mutate(
-        table  = table_name,
-        source = "HDR"
-      )
-  }
-)
-
-
-saveRDS(HDR_GROUP_BENCHMARKS, "Support_Files/HDR_GROUP_BENCHMARKS.rds")
+      origin = "country.name",
+      destination = "iso3c"
+    )
+  )
 
 
 
-
-# ==========================================================
-# BUILD STATIC HDR_GROUP_LOOKUP TABLE 
-# ==========================================================
-
-ref_table <- "Table 1 - HDI & Components"
-
-# ---- Sanity checks ----
-stopifnot(ref_table %in% names(HDR_DATA))
-stopifnot(all(c("groups", "regions", "special") %in% names(HDR_DATA[[ref_table]])))
-stopifnot("country" %in% names(HDR_DATA[[ref_table]]$groups))
-stopifnot("country" %in% names(HDR_DATA[[ref_table]]$regions))
-stopifnot("country" %in% names(HDR_DATA[[ref_table]]$special))
-
-
-# ---- Extract group names from "country" column ----
-HDR_GROUP_LOOKUP <- list(
-  
-  groups = sort(unique(
-    as.character(HDR_DATA[[ref_table]]$groups$country)
-  )),
-  
-  regions = sort(unique(
-    as.character(HDR_DATA[[ref_table]]$regions$country)
-  )),
-  
-  special = sort(unique(
-    as.character(HDR_DATA[[ref_table]]$special$country)
-  ))
-)
-
-# ---- Final validation ----
-stopifnot(length(HDR_GROUP_LOOKUP$groups)  > 0)
-stopifnot(length(HDR_GROUP_LOOKUP$regions) > 0)
-stopifnot(length(HDR_GROUP_LOOKUP$special) > 0)
-stopifnot(length(HDR_GROUP_LOOKUP$special) > 0)
-
-
-# ---- Save lookup ----
-saveRDS(
-  HDR_GROUP_LOOKUP,
-  "Support_Files/HDR_GROUP_LOOKUP.rds"
-)
+# Create Table 3 with ISO-3 code
+tab3_Iso3 <- HDR_DATA$`Table 3 - Inequality-adjusted HDI`$countries%>%
+  mutate(
+    iso3 = countrycode(
+      country,
+      origin = "country.name",
+      destination = "iso3c"
+    )
+  )
 
 
 
+# Create Table 4 with ISO-3 code 
+tab4_Iso3 <- HDR_DATA$`Table 4 - GDI`$countries%>%
+  mutate(
+    iso3 = countrycode(
+      country,
+      origin = "country.name",
+      destination = "iso3c"
+    )
+  )
 
 
-# =====================================================
-# DEFINE GROUP NAME VECTORS FROM HDR_GROUP_LOOKUP
-# =====================================================
-# Human Development Groups
-hdi_group_names <- HDR_GROUP_LOOKUP$groups
- 
-# Regions
-region_names <- HDR_GROUP_LOOKUP$regions
 
-# Special Groups
-special_group_names <- HDR_GROUP_LOOKUP$special
+# Create Table 5 with ISO-3 code 
+tab5_Iso3 <- HDR_DATA$`Table 5 - GII`$countries%>%
+  mutate(
+    iso3 = countrycode(
+      country,
+      origin = "country.name",
+      destination = "iso3c"
+    )
+  )
+
+
+
+# Create Table 5 with ISO-3 code
+tab7_Iso3 <- HDR_DATA$`Table 7 - PHDI`$countries%>%
+  mutate(
+    iso3 = countrycode(
+      country,
+      origin = "country.name",
+      destination = "iso3c"
+    )
+  )
+
+#CHECKPOINT: view if col `IsO3` correctly added to the table
+# View(tab1_Iso3)
+# View(tab2_Iso3)
+# View(tab3_Iso3)
+# View(tab4_Iso3)
+# View(tab5_Iso3)
+# View(tab7_Iso3)
+
+
+
+#--CHECKPOINT: Identify countries where ISO3 code conversion failed
+tb1_mismatches <- tab1_Iso3 %>%
+  filter(is.na(iso3)) %>%      # keep rows where Iso3 is missing
+  select(country)              # show only the country names with missing Iso3 col
+# Print the list of unmatched countries
+#View(tb1_mismatches)
+
+tb2_mismatches <- tab2_Iso3 %>%
+  filter(is.na(iso3)) %>%     
+  select(country)            
+#View(tb2_mismatches)
+
+tb3_mismatches <- tab3_Iso3 %>%
+  filter(is.na(iso3)) %>%     
+  select(country)             
+#View(tb3_mismatches)
+
+tb4_mismatches <- tab4_Iso3 %>%
+  filter(is.na(iso3)) %>%      
+  select(country)              
+#View(tb4_mismatches)
+
+tb5_mismatches <- tab5_Iso3 %>%
+  filter(is.na(iso3)) %>%      
+  select(country)              
+#View(tb5_mismatches)         
+
+tb7_mismatches <- tab7_Iso3 %>%
+  filter(is.na(iso3)) %>%      
+  select(country)              
+#View(tb7_mismatches)    
+
+
+
+
+###############################################################################
+# =============================================================================
+#               4.BUILD MASTER HDR DATASETS WITH ISO3 CODES
+# =============================================================================
+###############################################################################
+#CREATE MASTER HDR DATASETS
+HDRs_master<- tab1_Iso3 %>%
+  left_join(tab2_Iso3, by= "iso3")%>%
+  left_join(tab3_Iso3, by= "iso3")%>%
+  left_join(tab4_Iso3, by= "iso3")%>%
+  left_join(tab5_Iso3, by= "iso3")%>%
+  left_join(tab7_Iso3, by= "iso3")
+
+#View(HDRs_master)
+#str(HDRs_master)
+
+#REMOVE DUPLICATE columns (i.e.`country`, and `hdi_2023`)----------
+#Rename `country.x` into 'country' to keep one col `country`
+HDRs_master_clean <- HDRs_master %>%
+  rename(                   #preserve `hdi_rank`, `country` and `hdi_2023`
+    hdi_rank = hdi_rank.x,   
+    country = country.x,
+    hdi_2023 = hdi_2023.x)%>%
+  select(                    # Remove duplicate columns from joins
+    -matches("\\.x$"),
+    -matches("\\.y$"),
+    -matches("\\.x\\.x$"),
+    -matches("\\.y\\.y$"),
+    -matches("\\.x\\.x\\.x$"),
+    -matches("\\.y\\.y\\.y$")
+  )
+
+#View(HDRs_master_clean)
+
+
+#Move the col iso3 right after the col `country`
+HDRs_master_clean<- HDRs_master_clean%>%
+  relocate(iso3, .after=country)
+#View(HDRs_master_clean)
+#str(HDRs_master_clean)
+
+
+#CHECKPOINT: Check which HDR country did NOT match Natural Earth ISO3
+#is there  1 or more country in HDRs_master_clean that do not have iso3 code.
+# This test tells if a country was dropped during the joins that created HDRs_master_clean()
+HDRs_country_missingIso3<- HDRs_master_clean %>%
+  filter(is.na(iso3)) %>%
+  select(country)
+#View(HDRs_country_missingIso3)   #there is no missing iso3 in HDRs_master_clean after join
+
+
+
+
+#########################################################################################
+#########################################################################################
+#########################################################################################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 
 
 ###############################################################################
-#==============================================================================
-          # Extract the list of indicator names for each table
-#==============================================================================
+# =============================================================================
+#             8. CREATE CHOROPLETH: WORLD MAP SHAPEFILE
+# =============================================================================
+###############################################################################
+
+#Load the world map shapefile => gives world map with ISO country codes
+world_shape <- rnaturalearth::ne_countries(scale = "medium", returnclass = "sf")
+#View(world_shape)
+
+#CHECKPOINT: View countries in Natural Earth where ISO3 is missing ("-99")
+#Natural Earth uses "-99" ISO code for: countries with unresolved or special-status,
+#or for countries with multiple separate geographical lands such as France, Norway, etc. 
+NaturalEarth_countries_missingIso3<- world_shape %>%
+                                    filter(is.na(iso_a3) | iso_a3 == "-99") %>%
+                                    select(name, iso_a3)
+#View(NaturalEarth_countries_missingIso3)
+# "France" and "Norway" are the only 2 countries in HDRs that do not have a iso3 code 
+#in Natural Earth dataset because France territory include overseas departments, 
+# and Nowrway is a composites country => Their Iso3 is indefined (-99). 
+
+
+
+
+#FIX ISO3 CODE FOR NORWAY AND FRANCE in world_shape
+world_shape <- world_shape %>%
+  mutate(
+    name_clean = trimws(name),
+    iso_a3 = case_when(
+      name_clean %in% c("France","French Guiana","Guadeloupe","Martinique","Réunion","Mayotte") ~ "FRA",
+      name_clean == "Norway" ~ "NOR",
+      TRUE ~ iso_a3
+    )
+  )
+
+
+#CHECKPOINT: if France and Norway have now an iso3 
+# world_shape %>%
+#   filter(is.na(iso_a3) | iso_a3 == "-99") %>%
+#   select(name, iso_a3)    #Output does not show France and Norway anymore
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+###############################################################################
+# =============================================================================
+#                5. MASTER LIST OF ALL INDICATORS
+# =============================================================================
 ##############################################################################
-# Indicators Table 1
-TABLE1_INDICATORS <- setdiff(
-  # Get ALL column names from the Table 1 "countries" then remove the
-  #'country' column from the list because it is is an identifier, not an indicator to plot
-  #    because 'country' is an identifier,
-  names(HDR_DATA$`Table 1 - HDI & Components`$countries),
-  "country"
-)
+# Build a unified master list of ALL indicators from ALL HDR tables
+ALL_HDR_INDICATORS <- unique(unlist(
+  
+  lapply(HDR_DATA, function(tbl) {
+    
+    # Extract column names from the "countries" sub-table
+    # (this sub-table always contains the full indicator list for each HDR table)
+    names(tbl$countries)
+    
+  })
+))
+
+# Remove the 'country' column because it's an ID, not an indicator
+ALL_HDR_INDICATORS <- setdiff(ALL_HDR_INDICATORS, "country")
+
+#print(ALL_HDR_INDICATORS)
 
 
-# Indicators Table 2
-TABLE2_INDICATORS <- setdiff(
-  names(HDR_DATA$`Table 2 - HDI Trends`$countries),
-  "country"
-)
-
-
-# Indicators Table 3
-TABLE3_INDICATORS <- setdiff(
-  names(HDR_DATA$`Table 3 - Inequality-adjusted HDI`$countries),
-  "country"
-)
-
-
-# Indicators Table 4
-TABLE4_INDICATORS <- setdiff(
-  names(HDR_DATA$`Table 4 - GDI`$countries),
-  "country"
-)
-
-
-# Indicators Table 5
-TABLE5_INDICATORS <- setdiff(
-  names(HDR_DATA$`Table 5 - GII`$countries),
-  "country"
-)
-
-
-# Indicators Table 7
-TABLE7_INDICATORS <- setdiff(
-  names(HDR_DATA$`Table 7 - PHDI`$countries),
-  "country"
-)
 
 
 
 
 ###############################################################################
 #==============================================================================
-           # ENRICHED VARIABLE DEFINITIONS FOR ALL HDRs Tables
+# 9. ENRICHED VARIABLE DEFINITIONS FOR ALL HDRs Tables
 #==============================================================================
 ###############################################################################
 HDR_VARIABLE_DEFINITIONS <- list(
@@ -634,276 +800,6 @@ HDR_VARIABLE_DEFINITIONS <- list(
 
 
 
-###############################################################################
-# =============================================================================
-#                 MASTER LIST OF ALL INDICATORS
-# =============================================================================
-##############################################################################
-# Build a unified master list of ALL indicators from ALL HDR tables
-ALL_HDR_INDICATORS <- unique(unlist(
-  
-  lapply(HDR_DATA, function(tbl) {
-    
-    # Extract column names from the "countries" sub-table
-    # (this sub-table always contains the full indicator list for each HDR table)
-    names(tbl$countries)
-    
-  })
-))
-
-# Remove the 'country' column because it's an ID, not an indicator
-ALL_HDR_INDICATORS <- setdiff(ALL_HDR_INDICATORS, "country")
-
-#print(ALL_HDR_INDICATORS)
-
-
-
-
-###############################################################################
-# =============================================================================
-#                 MASTER LIST OF ALL COUNTRIES & HDRs AREAS
-# =============================================================================
-###############################################################################
-# List ALL countries
-ALL_HDR_COUNTRIES <- unique(unlist(
-  lapply(HDR_DATA, function(tbl){
-    tbl$countries$country
-  })
-))
-
-
-# List ALL areas 
-ALL_HDR_AREAS <- unique(unlist(
-  lapply(HDR_DATA, function(tbl){
-    tbl[c("groups", "regions", "special")]
-  })
-))
-
-
-
-
-
-
-###############################################################################
-# =============================================================================
-#                 ADD ISO3 CODE TO COUNTRIES
-# =============================================================================
-###############################################################################
-# Create a version of Table 1 (countries only) with ISO-3 code added
-tab1_Iso3 <- HDR_DATA$`Table 1 - HDI & Components`$countries %>% 
-  mutate(
-    # Add a new column 'iso3' by converting country names
-    # ISO-3 codes (e.g., NZL, AUS, USA) are required for joining
-    # with world shapefiles and building maps
-    iso3 = countrycode(
-      country,                  # input: country names
-      origin = "country.name",  # tells the function countrycode() the input format
-      destination = "iso3c"     # tells the function the output format: 3-letter ISO-3 country code
-    )
-  )
-
-
-
-# Create Table 2 with ISO-3 code 
-tab2_Iso3 <- HDR_DATA$`Table 2 - HDI Trends`$countries%>%
-  mutate(
-    iso3 = countrycode(
-      country,
-      origin = "country.name",
-      destination = "iso3c"
-    )
-  )
-
-
-
-# Create Table 3 with ISO-3 code
-tab3_Iso3 <- HDR_DATA$`Table 3 - Inequality-adjusted HDI`$countries%>%
-  mutate(
-    iso3 = countrycode(
-      country,
-      origin = "country.name",
-      destination = "iso3c"
-    )
-  )
-
-
-
-# Create Table 4 with ISO-3 code 
-tab4_Iso3 <- HDR_DATA$`Table 4 - GDI`$countries%>%
-  mutate(
-    iso3 = countrycode(
-      country,
-      origin = "country.name",
-      destination = "iso3c"
-    )
-  )
-
-
-
-# Create Table 5 with ISO-3 code 
-tab5_Iso3 <- HDR_DATA$`Table 5 - GII`$countries%>%
-  mutate(
-    iso3 = countrycode(
-      country,
-      origin = "country.name",
-      destination = "iso3c"
-    )
-  )
-
-
-
-# Create Table 5 with ISO-3 code
-tab7_Iso3 <- HDR_DATA$`Table 7 - PHDI`$countries%>%
-  mutate(
-    iso3 = countrycode(
-      country,
-      origin = "country.name",
-      destination = "iso3c"
-    )
-  )
-
-#CHECKPOINT: view if col `IsO3` correctly added to the table
-# View(tab1_Iso3)
-# View(tab2_Iso3)
-# View(tab3_Iso3)
-# View(tab4_Iso3)
-# View(tab5_Iso3)
-# View(tab7_Iso3)
-
-
-
-#--CHECKPOINT: Identify countries where ISO3 code conversion failed
-tb1_mismatches <- tab1_Iso3 %>%
-  filter(is.na(iso3)) %>%      # keep rows where Iso3 is missing
-  select(country)              # show only the country names with missing Iso3 col
-# Print the list of unmatched countries
-#View(tb1_mismatches)
-
-tb2_mismatches <- tab2_Iso3 %>%
-  filter(is.na(iso3)) %>%     
-  select(country)            
-#View(tb2_mismatches)
-
-tb3_mismatches <- tab3_Iso3 %>%
-  filter(is.na(iso3)) %>%     
-  select(country)             
-#View(tb3_mismatches)
-
-tb4_mismatches <- tab4_Iso3 %>%
-  filter(is.na(iso3)) %>%      
-  select(country)              
-#View(tb4_mismatches)
-
-tb5_mismatches <- tab5_Iso3 %>%
-  filter(is.na(iso3)) %>%      
-  select(country)              
-#View(tb5_mismatches)         
-
-tb7_mismatches <- tab7_Iso3 %>%
-  filter(is.na(iso3)) %>%      
-  select(country)              
-#View(tb7_mismatches)    
-
-
-
-
-
-
-
-###############################################################################
-# =============================================================================
-#                BUILD MASTER HDR DATASETS WITH ISO3 CODES
-# =============================================================================
-###############################################################################
-#CREATE MASTER HDR DATASETS
-HDRs_master<- tab1_Iso3 %>%
-  left_join(tab2_Iso3, by= "iso3")%>%
-  left_join(tab3_Iso3, by= "iso3")%>%
-  left_join(tab4_Iso3, by= "iso3")%>%
-  left_join(tab5_Iso3, by= "iso3")%>%
-  left_join(tab7_Iso3, by= "iso3")
-
-#View(HDRs_master)
-
-
-#REMOVE DUPLICATE columns (i.e.`country`, and `hdi_2023`)----------
-#Rename `country.x` into 'country' to keep one col `country`
-HDRs_master_clean <- HDRs_master %>%
-  rename(                   #preserve `hdi_rank`, `country` and `hdi_2023`
-    hdi_rank = hdi_rank.x,   
-    country = country.x,
-    hdi_2023 = hdi_2023.x)%>%
-  select(                    # Remove duplicate columns from joins
-    -matches("\\.x$"),
-    -matches("\\.y$"),
-    -matches("\\.x\\.x$"),
-    -matches("\\.y\\.y$"),
-    -matches("\\.x\\.x\\.x$"),
-    -matches("\\.y\\.y\\.y$")
-  )
-
-#View(HDRs_master_clean)
-
-
-#Move the col iso3 right after the col `country`
-HDRs_master_clean<- HDRs_master_clean%>%
-  relocate(iso3, .after=country)
-View(HDRs_master_clean)
-
-#CHECKPOINT: Check which HDR country did NOT match Natural Earth ISO3
-#is there  1 or more country in HDRs_master_clean that do not have iso3 code.
-# This test tells if a country was dropped during the joins that created HDRs_master_clean()
-HDRs_country_missingIso3<- HDRs_master_clean %>%
-  filter(is.na(iso3)) %>%
-  select(country)
-#View(HDRs_country_missingIso3)   #there is no missing iso3 in HDRs_master_clean after join
-
-
-
-
-###############################################################################
-# =============================================================================
-#                CREATE CHOROPLETH: WORLD MAP
-# =============================================================================
-###############################################################################
-
-#Load the world map shapefile => gives world map with ISO country codes
-world_shape <- rnaturalearth::ne_countries(scale = "medium", returnclass = "sf")
-#View(world_shape)
-
-#CHECKPOINT: View countries in Natural Earth where ISO3 is missing ("-99")
-#Natural Earth uses "-99" ISO code for: countries with unresolved or special-status,
-#or for countries with multiple separate geographical lands such as France, Norway, etc. 
-NaturalEarth_countries_missingIso3<- world_shape %>%
-                                    filter(is.na(iso_a3) | iso_a3 == "-99") %>%
-                                    select(name, iso_a3)
-#View(NaturalEarth_countries_missingIso3)
-# "France" and "Norway" are the only 2 countries in HDRs that do not have a iso3 code 
-#in Natural Earth dataset because France territory include overseas departments, 
-# and Nowrway is a composites country => Their Iso3 is indefined (-99). 
-
-
-
-
-#FIX ISO3 CODE FOR NORWAY AND FRANCE in world_shape
-world_shape <- world_shape %>%
-  mutate(
-    name_clean = trimws(name),
-    iso_a3 = case_when(
-      name_clean %in% c("France","French Guiana","Guadeloupe","Martinique","Réunion","Mayotte") ~ "FRA",
-      name_clean == "Norway" ~ "NOR",
-      TRUE ~ iso_a3
-    )
-  )
-
-
-
-
-#CHECKPOINT: if France and Norway have now an iso3 
-world_shape %>%
-  filter(is.na(iso_a3) | iso_a3 == "-99") %>%
-  select(name, iso_a3)    #Output does not show France and Norway anymore
-
 
 
 
@@ -923,8 +819,6 @@ area_files <- selected_sheets %>%
   set_names() %>%                     # Use sheet names as list element names
   purrr::map(~ read_excel(path, sheet = .x)) # Read each sheet into a data frame
 #View(area_files)
-
-
 
 
 
@@ -1001,24 +895,7 @@ HDR_SPECIAL_LOOKUP <- area_files$special_groups %>%
 
 
 
-# Reorder columns so that classification variables appear immediately after iso3
-# This improves readability and makes the dataset easier to inspect and use in Shiny
-MASTER_HDR_WVS7_CLASSIFIED <- MASTER_HDR_WVS7_CLASSIFIED %>%
-  relocate(
-    # Classification columns to move
-    hdr_group,
-    hdr_region,
-    is_oecd,
-    is_sids,
-    is_ldc,
-    
-    # Place them directly after the ISO3 country code
-    .after = iso3
-  )
 
-
-
-#View(MASTER_HDR_WVS7_CLASSIFIED)
 
 
 
@@ -1053,11 +930,205 @@ HDR_GROUP_NAME_MAP <- tibble::tribble(
 
 
 
+# ==========================================================
+# 4. BUILD HDR_GROUP_LOOKUP TABLE 
+# ==========================================================
+
+ref_table <- "Table 1 - HDI & Components"
+
+# ---- Sanity checks ----
+stopifnot(ref_table %in% names(HDR_DATA))
+stopifnot(all(c("groups", "regions", "special") %in% names(HDR_DATA[[ref_table]])))
+stopifnot("country" %in% names(HDR_DATA[[ref_table]]$groups))
+stopifnot("country" %in% names(HDR_DATA[[ref_table]]$regions))
+stopifnot("country" %in% names(HDR_DATA[[ref_table]]$special))
+
+
+# ---- Extract group names from "country" column ----
+HDR_GROUP_LOOKUP <- list(
+  
+  groups = sort(unique(
+    as.character(HDR_DATA[[ref_table]]$groups$country)
+  )),
+  
+  regions = sort(unique(
+    as.character(HDR_DATA[[ref_table]]$regions$country)
+  )),
+  
+  special = sort(unique(
+    as.character(HDR_DATA[[ref_table]]$special$country)
+  ))
+)
+
+# ---- Final validation ----
+stopifnot(length(HDR_GROUP_LOOKUP$groups)  > 0)
+stopifnot(length(HDR_GROUP_LOOKUP$regions) > 0)
+stopifnot(length(HDR_GROUP_LOOKUP$special) > 0)
+stopifnot(length(HDR_GROUP_LOOKUP$special) > 0)
+
+
+# ---- Save lookup ----
+saveRDS(
+  HDR_GROUP_LOOKUP,
+  "Support_Files/HDR_GROUP_LOOKUP.rds"
+)
+
+
+
+
+###############################################################################
+#==============================================================================
+# 3. Construct the HDR group-level benckmarks master dataset
+#==============================================================================
+##############################################################################
+HDR_GROUP_BENCHMARKS <- purrr::map_dfr(
+  names(HDR_DATA),
+  function(table_name) {
+    
+    bind_rows(
+      # ------------------------------
+      # HDI groups
+      # ------------------------------
+      HDR_DATA[[table_name]]$groups %>%
+        dplyr::mutate(group_type = "HDI group"),
+      
+      # ------------------------------
+      # Regions
+      # ------------------------------
+      HDR_DATA[[table_name]]$regions %>%
+        dplyr::mutate(group_type = "Region"),
+      
+      # ------------------------------
+      # Special groups (OECD, SIDS…)
+      # ------------------------------
+      HDR_DATA[[table_name]]$special %>%
+        dplyr::mutate(group_type = "Special group")
+    ) %>%
+      # ------------------------------
+    # Clean + reshape
+    # ------------------------------
+    dplyr::select(
+      group_type,
+      country,
+      where(is.numeric),
+      -contains("rank")   #drop hdi_rank and "change in hdi rank" because type factor
+    ) %>%
+      dplyr::rename(group = country) %>%
+      tidyr::pivot_longer(
+        cols = -c(group, group_type),
+        names_to  = "variable",
+        values_to = "value"
+      ) %>%
+      dplyr::mutate(
+        table  = table_name,
+        source = "HDR"
+      )
+  }
+)
+
+
+saveRDS(HDR_GROUP_BENCHMARKS, "Support_Files/HDR_GROUP_BENCHMARKS.rds")
+#HDR_GROUP_BENCHMARKS <- readRDS("Support_files/HDR_GROUP_BENCHMARKS.rds")
+#View(HDR_GROUP_BENCHMARKS)
 
 
 
 
 
+
+
+# # =====================================================
+# # DEFINE GROUP NAME VECTORS FROM HDR_GROUP_LOOKUP
+# # =====================================================
+# # Human Development Groups
+# hdi_group_names <- HDR_GROUP_LOOKUP$groups
+#  
+# # Regions
+# region_names <- HDR_GROUP_LOOKUP$regions
+# 
+# # Special Groups
+# special_group_names <- HDR_GROUP_LOOKUP$special
+
+
+
+
+
+#' ###############################################################################
+#' #==============================================================================
+#'           # Extract the list of indicator names for each table
+#' #==============================================================================
+#' ##############################################################################
+#' # Indicators Table 1
+#' TABLE1_INDICATORS <- setdiff(
+#'   # Get ALL column names from the Table 1 "countries" then remove the
+#'   #'country' column from the list because it is is an identifier, not an indicator to plot
+#'   #    because 'country' is an identifier,
+#'   names(HDR_DATA$`Table 1 - HDI & Components`$countries),
+#'   "country"
+#' )
+#' 
+#' 
+#' # Indicators Table 2
+#' TABLE2_INDICATORS <- setdiff(
+#'   names(HDR_DATA$`Table 2 - HDI Trends`$countries),
+#'   "country"
+#' )
+#' 
+#' 
+#' # Indicators Table 3
+#' TABLE3_INDICATORS <- setdiff(
+#'   names(HDR_DATA$`Table 3 - Inequality-adjusted HDI`$countries),
+#'   "country"
+#' )
+#' 
+#' 
+#' # Indicators Table 4
+#' TABLE4_INDICATORS <- setdiff(
+#'   names(HDR_DATA$`Table 4 - GDI`$countries),
+#'   "country"
+#' )
+#' 
+#' 
+#' # Indicators Table 5
+#' TABLE5_INDICATORS <- setdiff(
+#'   names(HDR_DATA$`Table 5 - GII`$countries),
+#'   "country"
+#' )
+#' 
+#' 
+#' # Indicators Table 7
+#' TABLE7_INDICATORS <- setdiff(
+#'   names(HDR_DATA$`Table 7 - PHDI`$countries),
+#'   "country"
+#' )
+
+
+
+# 
+
+
+
+
+
+###############################################################################
+# =============================================================================
+#                 MASTER LIST OF ALL COUNTRIES & HDRs AREAS
+# =============================================================================
+###############################################################################
+# List ALL countries
+# ALL_HDR_COUNTRIES <- unique(unlist(
+#   lapply(HDR_DATA, function(tbl){
+#     tbl$countries$country
+#   })
+# ))
+# 
+# 
+# # List ALL areas 
+# ALL_HDR_AREAS <- unique(unlist(
+#   lapply(HDR_DATA, function(tbl){
+#     tbl[c("groups", "regions", "special")]
+#   })
+# ))
 
 
 

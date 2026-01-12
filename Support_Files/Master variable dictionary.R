@@ -1,5 +1,73 @@
+###############################################################################
+# SCRIPT NAME: Create_full_variable_dictionary.R
+# -----------------------------------------------------------------------------
+# PURPOSE
+# -----------------------------------------------------------------------------
+# This script builds a unified, structured variable dictionary that combined 
+# variable definitions of both datasets, the Human Development Reports (HDRs) and 
+# the World Values Survey (WVS7).
+# The resulting dictionary links each variable code to a human-readable
+# label, data source, originating table/section, and (where available)
+# a textual definition. 
+#This object is used throughout the Shiny app to:
+#  - populate dropdown menus, 
+#  - display labels and tooltips
+# -----------------------------------------------------------------------------
+# CONTENTS
+# -----------------------------------------------------------------------------
+# This script performs the following steps:
+#
+# 1. Organises all cleaned HDR tables into a structured list (HDR_DATA),
+#    separating country-level data from aggregate groups, regions, and
+#    special groups.
+#
+# 2. Constructs an initial HDR variable dictionary (HDR_DICT) containing:
+#    - variable codes
+#    - human-readable labels
+#    - data source (HDR)
+#    - placeholder fields for table and definition
+#
+# 3. Assigns each HDR variable to its corresponding HDR table by inspecting
+#    country-level columns in HDR_DATA.
+#
+# 4. Enriches the HDR dictionary with formal variable definitions by joining
+#    an external HDR codebook (Excel).
+#
+# 5. Aligns the WVS7 country-level variable dictionary to the same schema
+#    (var_code, label, source, table, definition).
+#
+# 6. Removes duplicate variables shared across HDR tables (e.g. country,
+#    HDI rank) to ensure uniqueness.
+#
+# 7. Combines the HDR and WVS7 dictionaries into a single master dictionary
+#    (FULL_VARIABLE_DICTIONARY).
+#
+# -----------------------------------------------------------------------------
+# OUTPUT
+# -----------------------------------------------------------------------------
+# The script produces and saves the following object:
+#
+# - FULL_VARIABLE_DICTIONARY.rds
+#   A unified variable dictionary containing metadata for all HDR and WVS7
+#   country-level variables used in the project.
+#
+# -----------------------------------------------------------------------------
+# USAGE
+# -----------------------------------------------------------------------------
+# This script is executed during the data preparation stage (not at Shiny
+# runtime). The saved dictionary is later loaded in global.R and used to
+# drive dynamic UI elements, variable selection, and consistent labeling
+# across the application.
+#
+###############################################################################
+library(readxl)
+
+
+
+
+
 #==============================================================================
-# STRUCTURED LIST FOR ALL HDRs TABLES
+# 1. STRUCTURED LIST FOR ALL HDRs TABLES
 #==============================================================================
 HDR_DATA <- list(
   "Table 1 - HDI & Components" = list(
@@ -49,12 +117,13 @@ HDR_DATA <- list(
 )
 
 
-#print(HDR_DATA)
+#View(HDR_DATA)
 
 
 #===================================================================================
-# Create dataframe to store var_code, label, source, table and definition of HDR vars
+# 2.1. Create dataframe to store var_code, label, source, table and definition of HDR vars
 #====================================================================================
+#Note: HDR_LABELS is created in 'HDR_WVS7_dropdown_choices.R' 
 HDR_DICT <- tibble::tibble(
   var_code   = names(HDR_LABELS),
   label      = unname(HDR_LABELS),
@@ -63,10 +132,10 @@ HDR_DICT <- tibble::tibble(
   table      = NA_character_
 )
 
-View(HDR_DICT)
+#View(HDR_DICT)
 
 # ------------------------------------------------------------
-# STEP 2: Assign HDR table names to HDR_DICT$table
+# 2.2 Assign HDR table names to HDR_DICT$table
 # ------------------------------------------------------------
 for (tbl_name in names(HDR_DATA)) {
   
@@ -98,24 +167,9 @@ for (tbl_name in names(HDR_DATA)) {
 
 
 
-# #==============================================================================
-# # Extract var_code from HDR tables
-# #==============================================================================
-# # Extract variable codes as a vector (in dataframe order)
-# vars <- HDR_DICT$var_code
-# #Check
-# length(vars)
-# head(vars)
-# tail(vars)
-# # Print one variable per line (Excel-friendly)
-# cat(vars, sep = "\n")
-
-
-
 # ---------------------------------------------------------------------
-# Fill the "definition" col of HDR_DICT using the Excel codebook
+# 2.3. Fill the "definition" col of HDR_DICT using the Excel codebook
 # ---------------------------------------------------------------------
-library(readxl)
 #read codebook
 hdr_codebook <- readxl::read_excel(
   "Support_Files/HDR variables codebook.xlsx"
@@ -140,8 +194,9 @@ dplyr::left_join(
 
 
 #==============================================================================
-# Match WVS7_DICT col names to HDR_DICT col names 
+# 3. Match WVS7_DICT col names to HDR_DICT col names 
 #==============================================================================
+# WVS7_COUNTRY_DICT is built in the R script 'HDR_WVS_dropdown_choices.R'
 WVS7_DICT <- WVS7_COUNTRY_DICT %>%
   dplyr::transmute(
     var_code   = var_code,
@@ -154,20 +209,17 @@ WVS7_DICT <- WVS7_COUNTRY_DICT %>%
 #View(WVS7_DICT)
 
 
-
 #Sanity check
-WVS7_DICT %>%
-  dplyr::count(var_code) %>%
-  dplyr::filter(n > 1)
+# WVS7_DICT %>%
+#   dplyr::count(var_code) %>%
+#   dplyr::filter(n > 1)
 
-names(WVS7_DICT)
+#names(WVS7_DICT)
 # should be: var_code label source table definition
-setdiff(names(WVS7_DICT), names(HDR_DICT))
-setdiff(names(HDR_DICT), names(WVS7_DICT))
-
-
+#setdiff(names(WVS7_DICT), names(HDR_DICT))
+#setdiff(names(HDR_DICT), names(WVS7_DICT))
 #==============================================================================
-# Drop duplicate vars (hdi_rank, hdi_2023, country). 
+# Drop duplicate vars (hdi_rank, country). 
 #Must be done before combining HDR+WVS7
 #==============================================================================
 HDR_DICT <- HDR_DICT %>%
@@ -180,10 +232,8 @@ HDR_DICT <- HDR_DICT %>%
   )
 
 
-
-
 #==============================================================================
-# Combine HDR + WVS7 dictionaries
+# 4. Combine HDR + WVS7 dictionaries
 #==============================================================================
 FULL_VARIABLE_DICTIONARY <- dplyr::bind_rows(
   HDR_DICT,
@@ -191,13 +241,14 @@ FULL_VARIABLE_DICTIONARY <- dplyr::bind_rows(
 )
 
 #Sanity check 
-View(FULL_VARIABLE_DICTIONARY)
+#View(FULL_VARIABLE_DICTIONARY)
+
 #Final validation: source, var_code must be unique
-FULL_VARIABLE_DICTIONARY %>%
-  dplyr::count(source, var_code) %>%
-  dplyr::filter(n > 1)
+# FULL_VARIABLE_DICTIONARY %>%
+#   dplyr::count(source, var_code) %>%
+#   dplyr::filter(n > 1)
 #Quick overview
-table(FULL_VARIABLE_DICTIONARY$source)
+#table(FULL_VARIABLE_DICTIONARY$source)
 
 
 
@@ -206,6 +257,7 @@ saveRDS(
 FULL_VARIABLE_DICTIONARY,
 "Support_Files/FULL_VARIABLE_DICTIONARY.rds"
 )
+
 
 
 

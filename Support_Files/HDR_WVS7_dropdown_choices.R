@@ -1,9 +1,63 @@
+###############################################################################
+# SCRIPT NAME: HDR_WVS7_dropdown_choices.R
+# -----------------------------------------------------------------------------
+# PURPOSE
+# -----------------------------------------------------------------------------
+# This script defines and builds all human-readable labels and dropdown choices
+# used for Human Development Report (HDR) and World Values Survey (WVS7)
+# variables in the HDR–WVS Shiny application.
+#
+# Its main purpose is to separate user-facing labels and variable metadata
+# from the underlying data, ensuring that dropdown menus, plots, and tables
+# display clear, consistent, and authoritative descriptions rather than
+# internal variable codes.
+#
+# -----------------------------------------------------------------------------
+# CONTENTS
+# -----------------------------------------------------------------------------
+# This script performs the following tasks:
+#
+# 1. Defines a named vector (HDR_LABELS) that maps HDR variable codes to
+#    simplified, user-friendly labels for all HDR tables.
+#
+# 2. Saves HDR_LABELS as a reusable .rds object for loading in global.R.
+#
+# 3. Defines clean, human-readable labels for each HDR table to be used in
+#    group-level visualisations and UI elements.
+#
+# 4. Builds a country-level WVS7 variable dictionary from the original WVS
+#    codebook, keeping only variables flagged for display.
+#
+# 5. Combines HDR and WVS7 country-level variables into a unified dictionary
+#    (FULL_COUNTRY_VAR_DICT) that supports mixed HDR–WVS analyses.
+#
+# -----------------------------------------------------------------------------
+# OUTPUT
+# -----------------------------------------------------------------------------
+# This script creates and saves the following objects:
+#
+# - HDR_LABELS.rds
+#   Named vector mapping HDR variable codes to user-friendly labels.
+#
+# - WVS7_COUNTRY_DICT.rds / .xlsx
+#   Country-level variable dictionary for WVS7 indicators.
+#
+# - FULL_COUNTRY_VAR_DICT.rds / .xlsx
+#   Unified dictionary of all country-level HDR and WVS7 variables used in
+#   dropdown menus and visualisations.
+#
+# -----------------------------------------------------------------------------
+# USAGE
+# -----------------------------------------------------------------------------
+# This script is executed during the data preparation stage and is not run
+# at Shiny runtime. The saved objects are loaded in global.R and used to
+# populate dropdowns, legends, and labels dynamically throughout the app.
+###############################################################################
 
 
 # ==========================================================
-# Simplified HDR dropdown labels (authoritative)
+# 1. Simplified HDR dropdown labels (authoritative)
 # ==========================================================
-
 HDR_LABELS <- c(
   # ------------------------------------------------------------------
   # TABLE 1 - Human Development Index (HDI) & Components
@@ -160,63 +214,20 @@ HDR_LABELS <- c(
       "material_footprint_index_2023" = "Material footprint index, 2023"
     )
     
-    
-    
-    
-    
+
 #Save it as .rds object
 saveRDS(HDR_LABELS, "Support_Files/HDR_LABELS.rds")   
     
-    
-    
-    
-
-
-# ==========================================================
-# HDR table labels (GROUP-LEVEL scatter)
-# ----------------------------------------------------------
-# Maps internal HDR table names (as used in HDR_GROUP_BENCHMARKS)
-# to clean, user-friendly labels for the UI
-# ==========================================================
-HDR_table_labels <- c(
-  
-  # HDI core indicators
-  "Table 1 - HDI & Components" =
-    "HDI and its components",
-  
-  # HDI over time
-  "Table 2 - HDI Trends" =
-    "HDI trends over time",
-  
-  # Inequality-adjusted HDI
-  "Table 3 - Inequality-adjusted HDI" =
-    "Inequality-adjusted HDI",
-  
-  # Gender Development Index
-  "Table 4 - GDI" =
-    "Gender Development Index",
-  
-  # Gender Inequality Index
-  "Table 5 - GII" =
-    "Gender Inequality Index",
-  
-  # Planetary pressures–adjusted HDI
-  "Table 7 - PHDI" =
-    "Planetary pressures–adjusted HDI"
-)
-
-saveRDS(HDR_table_labels, "Support_Files/HDR_table_labels.rds")
-
-
-
-
 
 
 
 ############## BUILD MASTER WVS&&HDR READABLE VARIABLES DICTIONARY##############
 # ==========================================================
-# Build WVS7 country-level variable dictionary
+# 2. Build WVS7 country-level variable dictionary
 # ==========================================================
+# `orig_country_data` is built in `WVS_Wave7_Wrangling.R` from the line 
+#orig_country_data <- readRDS("WVS_Dataset/WVS7_Country.rds")
+#------------------------------------------------------------------
 WVS7_COUNTRY_DICT <- orig_codebook_data %>%
   
   # Keep only variables flagged for display
@@ -263,7 +274,7 @@ FULL_COUNTRY_VAR_DICT <- dplyr::bind_rows(
 ) %>%
   dplyr::distinct(var_code, .keep_all = TRUE)
 
-
+#View(FULL_COUNTRY_VAR_DICT)
 
 # Save files in .rds and .xlsx format
 saveRDS(
@@ -274,5 +285,75 @@ writexl::write_xlsx(
   FULL_COUNTRY_VAR_DICT,
   path = "Support_Files/FULL_COUNTRY_VAR_DICT.xlsx"
 )
+
+
+
+
+
+
+
+# ============================================================
+# 3. WVS7 Country-Level Variables Extraction
+# ============================================================
+# Purpose:
+#   • Load the WVS Wave 7 country-level dataset
+#   • Extract all available WVS indicators (questions)
+#   • Remove identifier / metadata columns
+#   • Produce a clean vector of variables for UI dropdowns
+#
+# Output:
+#   • ALL_VARS_WVS7 — character vector of WVS indicator names
+#
+# Notes:
+#   • This file does NOT modify data values
+#   • It only prepares variable names for selection in the app
+# ============================================================
+
+
+# ------------------------------------------------------------
+# Load WVS7 country-level dataset
+# ------------------------------------------------------------
+wvs7_ctry <- readRDS("WVS_Dataset/WVS7_Country.rds")
+
+
+# ------------------------------------------------------------
+# Extract all column names from the dataset
+# ------------------------------------------------------------
+wvs7_vars <- colnames(wvs7_ctry)
+# print(wvs7_vars)   #  view all raw column names
+
+
+# ------------------------------------------------------------
+# Define identifier / metadata columns to exclude
+# (These are not selectable indicators)
+# ------------------------------------------------------------
+wvs7_ID_vars <- c(
+  "country",
+  "B_COUNTRY",
+  "B_COUNTRY_ALPHA"
+)
+
+
+# ------------------------------------------------------------
+# Remove identifier columns to keep WVS indicators only
+# ------------------------------------------------------------
+# ALL_VARS_WVS7 <- setdiff(
+#   wvs7_vars,
+#   wvs7_ID_vars
+# )
+# 
+# Check: inspect final list of WVS indicators
+# print(ALL_VARS_WVS7)
+
+WVS7_COUNTRY_VARS <- setdiff(wvs7_vars, wvs7_ID_vars)
+
+#Check: inspect final list of WVS indicators
+#print(WVS7_COUNTRY_VARS)
+
+
+
+
+
+
 
 

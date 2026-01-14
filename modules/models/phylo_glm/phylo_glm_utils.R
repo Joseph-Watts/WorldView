@@ -15,6 +15,9 @@ phylo_glm_get_label <- function(codebook_data, col_id) {
   if (is.na(lab) || !nzchar(lab)) col_id else lab
 }
 
+phylo_glm_choice_label <- function(codebook_data, col_id) paste0(col_id, " — ", phylo_glm_get_label(codebook_data, col_id))
+
+
 phylo_glm_make_choices <- function(codebook_data, vars) {
   labs <- vapply(vars, function(v) wvs_var_display(v, codebook_data), character(1))
   stats::setNames(vars, labs)

@@ -192,33 +192,48 @@ shinyUI(fluidPage(
                            "Linear Regression",
                            tabName = "regressionTab",
                            icon = icon("line-chart")
+                         ),
+                         menuSubItem(
+                           "PhyloLM",
+                           tabName = "models_phylo_lm",
+                           icon = icon("fullscreen", lib = "glyphicon")
+                         ),
+                         menuSubItem(
+                           "PhyloGLM",
+                           tabName = "models_phylo_glm",
+                           icon = icon("random", lib = "glyphicon")
                          )
                        ),
                        ###################### MODELS ######################
                        
-                       ##################### PHYLOGENY ####################
-                       menuItem("Phylogeny", tabName = "phylogeny", 
+                       ###########Geographic Visualisation#################
+                       menuItem("Geographic Visualisation", tabName = "geographic", 
+                                icon = icon("map-marker"),
+                                startExpanded = F,
+                                menuSubItem(
+                                  "Map",
+                                  tabName = "geo_viz_map",
+                                  icon = icon("map-marker", lib = "glyphicon")
+                                )
+                                
+                       ),
+                       
+                       ###########Geographic Visualisation#################
+                       
+                       #############Phylogenetic Visualisation#############
+                       menuItem("Phylogenetic Visualisation", tabName = "phylogeny", 
                                 icon = icon("sitemap"),
                                 startExpanded = F,
                                 menuSubItem(
                                   "Tree",
-                                  tabName = "phylo_tree",
+                                  tabName = "phylo_viz_tree",
                                   icon = icon("tree-conifer", lib = "glyphicon")
-                                ),
-                                menuSubItem(
-                                  "Map",
-                                  tabName = "phylo_map",
-                                  icon = icon("map-marker", lib = "glyphicon")
-                                ),
-                                menuSubItem(
-                                  "Model",
-                                  tabName = "phylo_model",
-                                  icon = icon("random", lib = "glyphicon")
                                 )
                                 
-                                ),
+                       ),
                        
-                       ##################### PHYLOGENY ####################
+                       #############Phylogenetic Visualisation#############
+                       
                        
                        ######################## FAQ #######################
                        menuItem(
@@ -780,16 +795,18 @@ shinyUI(fluidPage(
                   )
                 )
         ),
-        
+        tabItem(tabName = "models_phylo_lm",models_phylo_lm_ui("models_phylo_lm")),
+        tabItem(tabName = "models_phylo_glm",models_phylo_glm_ui("models_phylo_glm")),
         
         ###################### MODELS ######################
         
-        ##################### PHYLOGENY ####################
+        ###########Geographic Visualisation#################
+        tabItem(tabName = "geo_viz_map",geo_viz_map_ui("geo_viz_map")),
+        ###########Geographic Visualisation#################
         
-        tabItem(tabName = "phylo_tree",phylo_tree_ui("phylo_tree")),
-        tabItem(tabName = "phylo_map",phylo_map_ui("phylo_map")),
-        tabItem(tabName = "phylo_model",phylo_models_ui("phylo_model")),
-        ##################### PHYLOGENY ####################
+        #############Phylogenetic Visualisation#############
+        tabItem(tabName = "phylo_viz_tree",phylo_viz_tree_ui("phylo_viz_tree")),
+        #############Phylogenetic Visualisation#############
  
         ######################## FAQ #######################
         tabItem(tabName = "faq",

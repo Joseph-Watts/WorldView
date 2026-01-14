@@ -95,5 +95,8 @@ grouped_minus_ignored <- lapply(grouped_questions, function(x)
 
 
 
-#### phylogeny module ####
-source("modules/phylogeny/phylogeny_global.R")
+#### modules ####
+# source("modules/phylogeny/phylogeny_global.R")
+source("modules/phylo_viz/phylo_viz_global.R")
+source("modules/geo_viz/geo_viz_global.R")
+source("modules/models/models_global.R")

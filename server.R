@@ -1306,34 +1306,37 @@ shinyServer(
       plotly::ggplotly(p)
     })
     
-    ## phylogeny_server
-    # phylo_tree_server(
-    #   "phylo_tree",
-    #   wvs_country      = wvs_country_real,
-    #   lang_tree        = lang_tree_real,
-    #   lang_country_map = lang_country_map_real
-    # )
-    phylo_tree_server(
-      "phylo_tree",
-      wvs_data = orig_country_data,           
-      codebook_data = orig_codebook_data,     
-      lang_tree = country_phylogeny_tree,      
-      lang_country_map = country_phylogeny   
-    )
     
-    phylo_map_server(
-      "phylo_map",
-      wvs_country = orig_country_data,
-      codebook_data = orig_codebook_data,
-      world_shape = world_shape
-    )
-    
-    phylo_models_server(
-      "phylo_model",
+    models_phylo_lm_server(
+      "models_phylo_lm",
       wvs_country = orig_country_data,
       codebook_data = orig_codebook_data,
       lang_tree = country_phylogeny_tree,
       lang_country_map = country_phylogeny
+    )
+    
+    models_phylo_glm_server(
+      "models_phylo_glm",
+      wvs_country = orig_country_data,
+      codebook_data = orig_codebook_data,
+      lang_tree = country_phylogeny_tree,
+      lang_country_map = country_phylogeny
+    )
+    
+    geo_viz_map_server(
+      "geo_viz_map",
+      wvs_country       = orig_country_data,
+      codebook_data     = orig_codebook_data,
+      world_shape       = world_shape,
+      country_phylogeny = country_phylogeny
+    )
+    
+    phylo_viz_tree_server(
+      "phylo_viz_tree",
+      wvs_data = orig_country_data,           
+      codebook_data = orig_codebook_data,     
+      lang_tree = country_phylogeny_tree,      
+      lang_country_map = country_phylogeny   
     )
     
   }) # end server logic

@@ -1,4 +1,4 @@
-# modules/phylogeny/phylogeny_utils.R
+# modules/phylo_viz/phylo_viz_utils.R
 
 ## check phylogeny dataset exist or not, and initial phylogeny dataset
 phylo_init_dataset <- function(path="WVS_Dataset/phylogeny"){
@@ -199,98 +199,36 @@ phylo_init_dataset <- function(path="WVS_Dataset/phylogeny"){
 }
 
 
-#' Render variable description UI
-#' 
-#' @param data_type Selected data type ("wvs" or "blank")
-#' @param outcome_var Selected outcome variable(s) - can be single or multiple
-#' @param codebook_data Codebook data for variable descriptions
-#' @return UI elements for variable description
-render_variable_description <- function(data_type, outcome_var, codebook_data) {
-  # Handle blank tree mode
-  if (data_type == "blank") {
-    return(
-      tagList(
-        h4("Blank"),
-        p("No variable selected.")
-      )
-    )
+# ----------------------------
+# WVS variable display helper
+# - exact match in codebook:   "Q1.Important in life: Family" (sep configurable)
+# - split option columns:      "Q56.Standard of living comparing with your parents--Better_off"
+# ----------------------------
+wvs_var_display <- function(col_id, codebook_data, label_sep = ".", choice_sep = "--") {
+  stopifnot(!missing(codebook_data))
+  if (is.null(col_id) || length(col_id) != 1 || is.na(col_id)) return(as.character(col_id))
+  
+  # 1) exact match in codebook (e.g., Q1)
+  idx <- match(col_id, codebook_data$Col_ID)
+  if (!is.na(idx)) {
+    lab <- codebook_data$Col_Label[[idx]]
+    if (!is.na(lab) && nzchar(lab)) return(paste0(col_id, label_sep, lab))
+    return(col_id)
   }
   
-  # Handle no variable selected
-  if (is.null(outcome_var) || length(outcome_var) == 0 || (length(outcome_var) == 1 && outcome_var == "")) {
-    return(
-      tagList(
-        h4("No Variable Selected"),
-        p("Please select a variable from the WVS7 dataset.")
-      )
-    )
+  # 2) derived split columns (e.g., Q56.Better_off)
+  if (grepl("\\.", col_id)) {
+    base <- sub("\\..*$", "", col_id)
+    opt  <- sub("^[^.]*\\.", "", col_id)
+    
+    idx2 <- match(base, codebook_data$Col_ID)
+    if (!is.na(idx2)) {
+      lab2 <- codebook_data$Col_Label[[idx2]]
+      if (!is.na(lab2) && nzchar(lab2)) return(paste0(base, label_sep, lab2, choice_sep, opt))
+    }
   }
   
-  # Extract base variable names (remove everything after dot if present)
-  # For variables like "Q56.Better_off", we only need "Q56" to match codebook
-  base_vars <- unique(sapply(outcome_var, function(var) {
-    ifelse(grepl("\\.", var), sub("\\..*", "", var), var)
-  }))
-  
-  # Get variable descriptions from codebook
-  var_info <- codebook_data %>% 
-    filter(Col_ID %in% base_vars)
-  
-  # Handle case where no variables found in codebook
-  if (nrow(var_info) == 0) {
-    return(
-      tagList(
-        h4("Variable Not Found"),
-        p("No description available for the selected variable(s).")
-      )
-    )
-  }
-  
-  # Single variable - show detailed description
-  if (length(outcome_var) == 1) {
-    var_info <- var_info[1, ]  # Take first match
-    
-    # Check if this is a sub-variable of a base variable
-    is_sub_var <- base_vars[1] != outcome_var
-    
-    return(
-      tagList(
-        h4(var_info$ColLab),
-        if (!is.na(var_info$Section) && var_info$Section != "") {
-          p(strong("Section:"), var_info$Section)
-        },
-        if (!is.na(var_info$`Variable Text`) && var_info$`Variable Text` != "") {
-          p(strong("Variable Text:"), br(), var_info$`Variable Text`)
-        },
-        if (!is.na(var_info$`Additional Text`) && var_info$`Additional Text` != "") {
-          p(strong("Additional Text:"), br(), var_info$`Additional Text`)
-        },
-        # Add note if this is a sub-variable
-        if (is_sub_var) {
-          p(em("Note: This is a sub-variable of", base_vars[1]))
-        }
-      )
-    )
-  }
-  
-  # Multiple variables - show concise descriptions only
-  descriptions <- lapply(base_vars, function(base_var) {
-    info <- var_info %>% filter(Col_ID == base_var)
-    if (nrow(info) == 0) return(NULL)
-    
-    # Find all sub-variables for this base variable
-    sub_vars <- outcome_var[grepl(paste0("^", base_var, "(\\.|$)"), outcome_var)]
-    
-    tagList(
-      h5(info$ColLab[1])
-    )
-  })
-  
-  # Remove NULL elements
-  descriptions <- descriptions[!sapply(descriptions, is.null)]
-  
-  # Return multiple variable description
-  tagList(
-    descriptions
-  )
+  # 3) fallback
+  col_id
 }
+

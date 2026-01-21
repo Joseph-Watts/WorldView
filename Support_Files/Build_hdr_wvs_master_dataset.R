@@ -63,7 +63,7 @@ selected_sheets <- c("hdi_groups", "regions", "special_groups")
 area_files <- selected_sheets %>%
   set_names() %>%                     # Use sheet names as list element names
   purrr::map(~ read_excel(path, sheet = .x)) # Read each sheet into a data frame
-#View(area_files)
+#View(area_files$special_groups)
 
 
 
@@ -204,31 +204,31 @@ master_HDR_WVS7_data <- HDRs_master_clean %>%
 # Number of countries present in BOTH HDR and WVS
 #length(intersect(HDRs_master_clean$iso3, wvs7_country$iso3))
 # Expected: ~62 countries
+#view(master_HDR_WVS7_data)
 
 # =======================================================================
 # II.3. Join Human development group classification (authoritative)
 # ============================================
-
 # Join HDI group from UNDP annex lookup
 # Countries not classified by UNDP (e.g. PRK, Monaco) will retain NA
 MASTER_HDR_WVS7_HDI <- master_HDR_WVS7_data %>%
   left_join(HDR_HDI_GROUP_LOOKUP, by = "iso3")
 
 # Check HDI group distribution
-count(MASTER_HDR_WVS7_HDI, hdr_group, sort = TRUE)
+#count(MASTER_HDR_WVS7_HDI, hdr_group, sort = TRUE)
+
 
 # ============================================
 # II.4. Join HDR region (one-to-one classification)
 # ============================================
-
 # Add geographic region for each country
 MASTER_HDR_WVS7_HDI_REGION <- MASTER_HDR_WVS7_HDI %>%
   left_join(HDR_REGION_LOOKUP, by = "iso3")
 
+
 # ============================================
 # II.5. Add special group flags (OECD, SIDS, LDC)
 # ============================================
-
 # Create binary indicators for special HDR groups
 MASTER_HDR_WVS7_HDI_REGION_SPECIAL <- MASTER_HDR_WVS7_HDI_REGION %>%
   mutate(
@@ -238,19 +238,29 @@ MASTER_HDR_WVS7_HDI_REGION_SPECIAL <- MASTER_HDR_WVS7_HDI_REGION %>%
     is_sids = iso3 %in% HDR_SPECIAL_LOOKUP$iso3[
       HDR_SPECIAL_LOOKUP$special_group == "SIDS"
     ],
+    is_dc  = iso3 %in% HDR_SPECIAL_LOOKUP$iso3[
+      HDR_SPECIAL_LOOKUP$special_group == "DCs"
+    ],
     is_ldc  = iso3 %in% HDR_SPECIAL_LOOKUP$iso3[
-      HDR_SPECIAL_LOOKUP$special_group == "Least developed countries"
+      HDR_SPECIAL_LOOKUP$special_group == "LCDs"
     ]
   )
 
+#View(MASTER_HDR_WVS7_HDI_REGION_SPECIAL)
 # ============================================
 # II.6. Final classified master dataset
 # ============================================
-
 MASTER_HDR_WVS7_CLASSIFIED <- MASTER_HDR_WVS7_HDI_REGION_SPECIAL
 
 # Final check
 count(MASTER_HDR_WVS7_CLASSIFIED, hdr_group, sort = TRUE)
+#Checking the 2 NAs in the count
+# MASTER_HDR_WVS7_CLASSIFIED %>%
+#   filter(is.na(hdr_group)) %>%
+#   select(country, iso3)
+# output
+# 1 Korea (Democratic People's Rep. of) PRK  
+# 2 Monaco                              MCO  
 
 
 # Reorder columns so that classification variables appear immediately after iso3
@@ -263,7 +273,7 @@ MASTER_HDR_WVS7_CLASSIFIED <- MASTER_HDR_WVS7_CLASSIFIED %>%
     is_oecd,
     is_sids,
     is_ldc,
-    
+    is_dc,
     # Place them directly after the ISO3 country code
     .after = iso3
   )

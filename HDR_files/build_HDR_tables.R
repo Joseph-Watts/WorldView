@@ -159,6 +159,9 @@ HDR_DATA <- list(
 )
 
 
+#save 
+saveRDS(HDR_DATA,"Support_Files/HDR_DATA.rds")
+
 #View(HDR_DATA)
 
 
@@ -319,6 +322,9 @@ HDRs_master_clean <- HDRs_master %>%
     -matches("\\.y\\.y\\.y$")
   )
 
+
+#Save and view
+saveRDS(HDRs_master_clean, "Support_files/HDRs_master_clean.rds")
 #View(HDRs_master_clean)
 
 
@@ -891,9 +897,6 @@ HDR_SPECIAL_LOOKUP <- area_files$special_groups %>%
   ) %>%
   select(iso3, special_group) %>%
   distinct()
-
-
-
 
 
 

@@ -83,6 +83,12 @@ shinyUI(fluidPage(
                            "Questionnaire Codebook",
                            tabName = "codebookview",
                            icon = icon("book", lib = "glyphicon")
+                         ),
+                         
+                         menuSubItem(
+                           "HDR Data Sources",
+                           tabName = "hdr_sources",
+                           icon = icon("database")
                          )
                        ),
                        ############## VARIABLE DOCUMENTATION ##############
@@ -109,18 +115,18 @@ shinyUI(fluidPage(
                  
                        ### NEW SUMMARY STATTISTICS START ######
                        menuItem(
-                         "Summary Statistics NEW",
+                         "Summary Statistics",
                          #tabName = "summary_stats_NEW",
                          icon = icon('info-sign', lib = "glyphicon"),
                          
                        menuSubItem(
-                         "Univariate Statistics (NEW)",
+                         "Univariate Statistics",
                          tabName = "univariateStats_new",
                          icon = icon("chart-bar")
                        ),
                        
                        menuSubItem(
-                         "Bivariate Statistics (NEW)",
+                         "Bivariate Statistics",
                          tabName = "bivariateStats_new",
                          icon = icon("project-diagram")
                        )
@@ -129,38 +135,9 @@ shinyUI(fluidPage(
                        ################ NEW SUMMARY STATISTICS END ################
                        
                        
-                       # ################## VISUALISATIONS ##################
-                       # menuItem(
-                       #   "Visualisations",
-                       #   tabName = "dummy",
-                       #   icon = icon('picture', lib = "glyphicon"),
-                       #   startExpanded = F,
-                       #   
-                       #   menuSubItem(
-                       #     "Bar Chart",
-                       #     tabName = "barChart",
-                       #     icon = icon("stats", lib = "glyphicon")
-                       #   ),
-                       #   
-                       #   menuSubItem(
-                       #     "Correlation", 
-                       #     tabName = "correlationView",
-                       #     icon = icon("equalizer", lib = "glyphicon")
-                       #   ),
-                       #   
-                       #   menuSubItem(
-                       #     "Histogram",
-                       #     tabName = "histogramView",
-                       #     icon = icon("signal")
-                       #     # icon = icon("bi-soundwave", lib = "glyphicon")
-                       #   )
-                       # ),
-                       # ################## VISUALISATIONS ##################
-                       
-                       
                        ################## VISUALISATIONS NEW START ##########
                        menuItem(
-                         "Visualisations NEW",
+                         "Visualisations",
                          tabName = "scatterParticipants",
                          icon = icon('move', lib = "glyphicon"),
                          startExpanded = F,
@@ -259,9 +236,7 @@ shinyUI(fluidPage(
 ###DASHBOARDBODY#########    
 
     dashboardBody(
-      #DEBUG
-      verbatimTextOutput("ui_canary"),
-      #####
+
       tabItems(
         
         tabItem(tabName = "dummy"
@@ -277,6 +252,7 @@ shinyUI(fluidPage(
 
         
         ############## VARIABLE DOCUMENTATION ##############
+        # WVS7 sources
         tabItem(tabName = "surveyview",
                 fluidRow(column(12, shinycssloaders::withSpinner(uiOutput("surveyview"))))
         ),
@@ -284,6 +260,24 @@ shinyUI(fluidPage(
         tabItem(tabName = "codebookview",
                 fluidRow(column(12, shinycssloaders::withSpinner(uiOutput("codebookview"))))
         ),
+        
+        # HDR sources
+        tabItem(
+          tabName = "hdr_sources",
+          includeMarkdown("www/instructions/hdr_sources.md"),
+          # downloadLink(
+          #   "download_hdr_tables_excelWorkbook",
+          #   "Download: HDR Statistical Annex Tables (Excel)"
+          # )
+          downloadButton(
+                    "download_hdr_tables_excelWorkbook",
+                    "Download HDR Statistical Annex Tables (Excel)",
+                    class = "btn-primary"
+                          )
+                              ),
+        
+        
+        
         ############## VARIABLE DOCUMENTATION ##############
         
         
@@ -1766,7 +1760,7 @@ shinyUI(fluidPage(
         # ===========================================================
         tabItem(
           tabName = "regressionTab",
-          includeMarkdown("www/instructions/linearreg_instruction.md"),
+          ##includeMarkdown("www/instructions/linearreg_instruction.md"),
           
           # Sub-tabs for regression level
           tabsetPanel(
@@ -1779,6 +1773,8 @@ shinyUI(fluidPage(
             # ---------------------------------------------------------
             tabPanel(
               "Individual-level (WVS)",
+              includeMarkdown("www/instructions/linearreg_instruction_ind.md"),
+              
               
               fluidRow(
                 shinydashboard::box(width = 3, status = "primary",
@@ -1845,7 +1841,7 @@ shinyUI(fluidPage(
           # ---------------------------------------------------------
             tabPanel(
               "Country-level",
-              
+              includeMarkdown("www/instructions/linearreg_instruction_ctry.md"),
               fluidRow(
                 
                 # ================
@@ -1937,7 +1933,8 @@ shinyUI(fluidPage(
                       pickerInput(
                         inputId = "country_manual_list",
                         label   = "Select countries:",
-                        choices = picker_country_list,
+                        #choices = picker_country_list,
+                        choices = NULL, 
                         multiple = TRUE,
                         options = list(
                           `live-search` = TRUE,
@@ -1975,7 +1972,7 @@ shinyUI(fluidPage(
                               )
                     ),
                     tabPanel(
-                      "Prediction",
+                      "Model accuracy (Observed vs Predicted)",
                         plotlyOutput(outputId= "country_reg_prediction", height = "500px")
                     )
                   ) #end tabsetPanel output
@@ -2009,11 +2006,7 @@ shinyUI(fluidPage(
                   tabPanel(
                     title = "Country-level",
                     value = "lmm_country",
-                    
-                    ###DEBUG
-                    verbatimTextOutput("lmm_global_pred_debug"),
-                    #####
-                    
+                    includeMarkdown("www/instructions/lmm_instruction_ctry.md"),
                     fluidRow(
                       
                       # ================
@@ -2121,7 +2114,8 @@ shinyUI(fluidPage(
                           choices = c(
                             "OECD member country"                  = "is_oecd",
                             "Small Island Developing State (SIDS)" = "is_sids",
-                            "Least Developed Country (LDC)"        = "is_ldc"
+                            "Least Developed Country (LDC)"        = "is_ldc",
+                            "Developing Country (DCs)"        = "is_dc"
                           )
                         ),
                         
@@ -2334,7 +2328,7 @@ shinyUI(fluidPage(
                           # PREDICTED TRAJECTORIES subtab
                           # -------------------------------
                           tabPanel(
-                            title = "Predicted trajectories",
+                            title = "Model-based trajectories",
                             value = "predicted",
                             p(
                               class = "text-muted",
@@ -2360,6 +2354,9 @@ shinyUI(fluidPage(
                   tabPanel(
                     title = "Group-level",
                     value = "lmm_group",
+                    
+                    includeMarkdown("www/instructions/lmm_instruction_grp.md"),
+                    
                     
                     fluidRow(
                       
@@ -2588,7 +2585,7 @@ shinyUI(fluidPage(
                           # PREDICTED TRAJECTORIES subtab
                           # -------------------------------
                           tabPanel(
-                            title = "Predicted trajectories",
+                            title = "Model-based trajectories",
                             
                             # Choose how predictions are displayed
                             radioButtons(

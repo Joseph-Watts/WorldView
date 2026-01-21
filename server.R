@@ -16,14 +16,6 @@ session$onSessionEnded(function() {
   stopApp()
 })
   
-  
-##DEBUG####
-  observe({
-    print("DEBUG: uni_questions_ind exists?")
-    print(exists("uni_questions_ind"))
-  })
-  
-  
 
 ############################-
 #### Read in data files ####
@@ -131,7 +123,6 @@ output$codebookview <- renderUI({
 ####################-
 #### DataTables ####
 ####################-
-
 # Reactive control for selecting country
 output$raw_selectCountry <- renderUI({
   shinyWidgets::pickerInput(
@@ -147,6 +138,9 @@ output$raw_selectCountry <- renderUI({
   )
 })
 
+
+
+#Reactive that returns an individual-level dataset, optionally filtered by one selected country
 raw_filtering <- reactive({
   if(is.null(input$raw_country)) {
     get_I_longID() |> dplyr::select(-S007)
@@ -158,38 +152,43 @@ raw_filtering <- reactive({
   }
 })
 
+
+
+# Displays the raw data filtered by country in an interactive DataTable
 output$raw_filtered_country <- DT::renderDataTable({
   DT::datatable(data = raw_filtering()|>
                   dplyr::rename(Country = B_COUNTRY, `Country ISO` = B_COUNTRY_ALPHA),
                 options = list(pageLength = 10, scrollX = TRUE))
 })
 
+
+
 # Data table - Country aggregate responses
-output$Table_country <- DT::renderDataTable({
-  
-  DT::datatable(
-    data = get_C_data() |>
-      
-      # Round numeric variables EXCEPT rank variables
-      dplyr::mutate(
-        across(
-          where(is.numeric) & !matches("rank"),
-          ~ round(.x, 2)
-        )
-      ) |>
-      
-      # Rename identifiers for display
-      dplyr::rename(
-        Country     = B_COUNTRY,
-        `Country ISO` = B_COUNTRY_ALPHA
-      ),
-    
-    options = list(
-      scrollX = TRUE
-    )
-  )
-  
-})
+# output$Table_country <- DT::renderDataTable({
+#   
+#   DT::datatable(
+#     data = get_C_data() |>
+#       
+#       # Round numeric variables EXCEPT rank variables
+#       dplyr::mutate(
+#         across(
+#           where(is.numeric) & !matches("rank"),
+#           ~ round(.x, 2)
+#         )
+#       ) |>
+#       
+#       # Rename identifiers for display
+#       dplyr::rename(
+#         Country     = B_COUNTRY,
+#         `Country ISO` = B_COUNTRY_ALPHA
+#       ),
+#     
+#     options = list(
+#       scrollX = TRUE
+#     )
+#   )
+#   
+# })
 
 
 
@@ -1199,6 +1198,7 @@ data_with_region <- reactive({
 # 1. Populate the country dropdown menu
 # ==========================================================
 # This observes the data and updates the dropdown choices
+#MASTER_COUNTRY_DATA == MASTER_HDR_WVS7_CLASSIFIED.rds
 observe({
   
   updateSelectizeInput(
@@ -1262,8 +1262,6 @@ filtered_country_data <- reactive({
 
 
 
-
-
 # ==========================================================
 # 3. Render the filtered country-level raw data table
 # ==========================================================
@@ -1296,12 +1294,12 @@ output$Table_country <- renderDT({
     DT::formatRound(
       columns = setdiff(
         names(df)[sapply(df, is.numeric)],
-        "HDI rank, 2023"   # EXCLUDED FROM ROUNDING
+        "HDI rank"   # Excluded from rounding
       ),
       digits = 2
-    )
-  
+    ) 
 })
+
 
 
 
@@ -1725,7 +1723,6 @@ output$univariate_indiv_tabs <- renderUI({
 ################################################################################
 # ########### COUNTRY-LEVEL ####################################################   
 ################################################################################
-
 # =====================================================
 # COUNTRY-LEVEL: DATA ACCESS
 # =====================================================
@@ -1734,10 +1731,9 @@ country_var_dict    <- reactiveVal(FULL_VARIABLE_DICTIONARY)
 
 
 
-
-# =====================================================
-# optional: Clears country selection when upstream inputs change
-# =====================================================
+# ==============================================================================
+# Clears variable & country selection when upstream filters change
+# ==============================================================================
 observeEvent(
   list(
     input$country_var_source_new,
@@ -1745,132 +1741,44 @@ observeEvent(
     input$country_wvs_section
   ),
   {
-    updateSelectizeInput(
-      session,
-      "uni_question_country",
-      selected = character(0)
-    )
-    
-    updateSelectizeInput(
-      session,
-      "uni_countries_country",
-      selected = character(0)
-    )
+    updateSelectizeInput(session, "uni_question_country", selected = character(0))
+    updateSelectizeInput(session, "uni_countries_country", selected = character(0))
   },
   ignoreInit = TRUE
 )
 
 
 
-
-#=====================================================
-# 
 # =====================================================
-output$country_source_refinement_ui_new <- renderUI({
-  
-  req(input$country_var_source_new)
-  
-  if (input$country_var_source_new == "HDR") {
-    
-    hdr_tables <- sort(unique(
-      FULL_VARIABLE_DICTIONARY$table[
-        FULL_VARIABLE_DICTIONARY$source == "HDR"
-      ]
-    ))
-    
-    selectInput(
-      inputId = "country_hdr_table",
-      label   = "Filter by HDR table (optional):",
-      choices = c("All tables", hdr_tables),
-      selected = "All tables"
-    )
-    
-  } else if (input$country_var_source_new == "WVS7") {
-    
-    wvs_sections <- sort(unique(
-      FULL_VARIABLE_DICTIONARY$table[
-        FULL_VARIABLE_DICTIONARY$source == "WVS7"
-      ]
-    ))
-    
-    #REMOVE METADATA SECTION
-    wvs_sections <- setdiff(wvs_sections, "ID")
-    
-    selectInput(
-      inputId = "country_wvs_section",
-      label   = "Filter by WVS section (optional):",
-      choices = c("All sections", wvs_sections),
-      selected = "All sections"
-    )
-    
-  } else {
-    
-    NULL
-    
-  }
-})
-
-
-
-# =====================================================
-# Variable source filter (HDR / WVS / ALL)
-# =====================================================
-filtered_country_dictionary <- reactive({
-  req(country_var_dict(), input$country_var_source_new)
-  
-  dict <- country_var_dict()
-  
-  if (input$country_var_source_new == "ALL") {
-    dict
-  } else {
-    dplyr::filter(dict, source == input$country_var_source_new)
-  }
-})
-
-
-
-
-
-# =====================================================
-# Refine dictionary based on source-specific selection
+# Refine dictionary based on source / table / section
 # =====================================================
 filtered_country_dictionary_refined <- reactive({
   
   req(input$country_var_source_new)
   
-  # Use the COUNTRY dictionary
   dict <- FULL_COUNTRY_VAR_DICT
   
-  # --------------------------------------------------
-  # SOURCE FILTER
-  # --------------------------------------------------
+  # Source filter
   if (input$country_var_source_new != "ALL") {
-    dict <- dict %>%
-      dplyr::filter(source == input$country_var_source_new)
+    dict <- dict %>% dplyr::filter(source == input$country_var_source_new)
   }
   
-  # --------------------------------------------------
-  # HDR TABLE FILTER
-  # --------------------------------------------------
+  # HDR table filter
   if (
     input$country_var_source_new == "HDR" &&
     !is.null(input$country_hdr_table) &&
     input$country_hdr_table != "All tables"
   ) {
-    dict <- dict %>%
-      dplyr::filter(section == input$country_hdr_table)
+    dict <- dict %>% dplyr::filter(section == input$country_hdr_table)
   }
   
-  # --------------------------------------------------
-  # WVS SECTION FILTER
-  # --------------------------------------------------
+  # WVS section filter
   if (
     input$country_var_source_new == "WVS7" &&
     !is.null(input$country_wvs_section) &&
     input$country_wvs_section != "All sections"
   ) {
-    dict <- dict %>%
-      dplyr::filter(section == input$country_wvs_section)
+    dict <- dict %>% dplyr::filter(section == input$country_wvs_section)
   }
   
   dict
@@ -1878,79 +1786,34 @@ filtered_country_dictionary_refined <- reactive({
 
 
 
-# =====================================================
-# Selected country-level variable -> data
-# =====================================================
-univariate_country_data <- eventReactive(
-  list(
-    input$uni_question_country,
-    input$uni_countries_country
-  ),
-  {
-    req(input$uni_question_country)
-    req(input$uni_question_country %in% names(country_master_data()))
-    req(length(input$uni_countries_country) > 0)
-    
-    country_master_data() %>%
-      dplyr::filter(country %in% input$uni_countries_country) %>%
-      dplyr::select(
-        country,
-        response = all_of(input$uni_question_country)
-      )
-  },
-  ignoreInit = TRUE
-)
-
-
-
-
-# ================================================================================
-# set vector of IDs to be excluded from country-level VARIABLE selector just below
-# ==============================================================================
-ID_VARS_GLOBAL <- c(
-  "country",
-  "iso3",
-  "hdi_rank"
-)
-
-ID_VARS_WVS <- c(
-  "B_COUNTRY",
-  "B_COUNTRY_ALPHA",
-  "S007"
-)
-
-
 # ==============================================================
-# Populate country-level VARIABLE selector (readable labels)
+# Populate country-level VARIABLE selector
 # ==============================================================
+ID_VARS_GLOBAL <- c("country", "iso3", "hdi_rank")
+ID_VARS_WVS    <- c("B_COUNTRY", "B_COUNTRY_ALPHA", "S007")
+
 observeEvent(filtered_country_dictionary_refined(), {
   
   dict <- filtered_country_dictionary_refined()
   
-  # Exclude ID variables
   vars_to_drop <- if (input$country_var_source_new == "WVS7") {
     c(ID_VARS_GLOBAL, ID_VARS_WVS)
   } else {
     ID_VARS_GLOBAL
   }
   
-  dict <- dict %>%
-    dplyr::filter(!var_code %in% vars_to_drop)
+  dict <- dict %>% dplyr::filter(!var_code %in% vars_to_drop)
   
-  # Named vector: label (shown) -> var_code (used internally)
-  choices <- setNames(
-    dict$var_code,
-    dict$label
-  )
+  choices <- setNames(dict$var_code, dict$label)
   
   updateSelectizeInput(
     session,
-    inputId = "uni_question_country",
-    choices = choices,
-    server  = TRUE
+    inputId  = "uni_question_country",
+    choices  = choices,
+    selected = character(0),   # prevents auto-selection
+    server   = TRUE
   )
 })
-
 
 
 
@@ -1970,103 +1833,162 @@ observe({
 
 
 
+# =====================================================
+# Selected country-level variable -> data
+# (handles single-column + multi-response WVS variables)
+# =====================================================
+univariate_country_data <- eventReactive(
+  list(input$uni_question_country, input$uni_countries_country),
+  {
+    req(input$uni_question_country)
+    req(length(input$uni_countries_country) > 0)
+    
+    var  <- input$uni_question_country
+    data <- country_master_data()
+    
+    # -------------------------------
+    # Case 1: single-column variable
+    # -------------------------------
+    if (var %in% names(data)) {
+      return(
+        data %>%
+          dplyr::filter(country %in% input$uni_countries_country) %>%
+          dplyr::select(country, response = all_of(var)) %>%
+          dplyr::mutate(type = "single")
+      )
+    }
+    
+    # ---------------------------------------
+    # Case 2: multi-response WVS variable
+    # ---------------------------------------
+    response_cols <- grep(
+      paste0("^", var, "\\."),
+      names(data),
+      value = TRUE
+    )
+    
+    if (length(response_cols) > 0) {
+      return(
+        data %>%
+          dplyr::filter(country %in% input$uni_countries_country) %>%
+          dplyr::select(country, all_of(response_cols)) %>%
+          tidyr::pivot_longer(
+            -country,
+            names_to  = "response",
+            values_to = "value"
+          ) %>%
+          dplyr::mutate(
+            response = sub(paste0(var, "\\."), "", response),
+            type = "multi"
+          )
+      )
+    }
+    
+    NULL
+  },
+  ignoreInit = TRUE
+)
+
+
 
 # ==============================================================
-# OUTPUT (render only)  uiOutput("univariate_country_summary")
+# OUTPUT: Univariate country summary
 # ==============================================================
 output$univariate_country_tabs <- renderUI({
   
   data <- univariate_country_data()
-  if (is.null(data)) return(NULL)
+  req(!is.null(data))
   
   countries <- input$uni_countries_country
-  if (length(countries) == 0) return(NULL)
+  req(length(countries) > 0)
   
-  
-  
-  # ==============================
-  # Helper: summary table renderer
-  # ==============================
-  render_summary_table <- function(df) {
+  # --------------------------------------------------
+  # Case 1: numeric single-column variable
+  # --------------------------------------------------
+  if (unique(data$type) == "single") {
     
-    summary_tbl <- df %>%
-      dplyr::summarise(
-        N      = n(),
-        Mean   = round(mean(response), 3),
-        SD     = round(sd(response), 3),
-        Median = round(median(response), 3),
-        Min    = round(min(response), 3),
-        Max    = round(max(response), 3),
-        Skewness = ifelse(
-          n() >= 3,
-          round(psych::skew(response), 3),
-          NA
-        ),
-        Kurtosis = ifelse(
-          n() >= 3,
-          round(psych::kurtosi(response), 3),
-          NA
+    render_summary_table <- function(df) {
+      summary_tbl <- df %>%
+        dplyr::summarise(
+          N        = n(),
+          Mean     = round(mean(response, na.rm = TRUE), 3),
+          SD       = round(sd(response, na.rm = TRUE), 3),
+          Median   = round(median(response, na.rm = TRUE), 3),
+          Min      = round(min(response, na.rm = TRUE), 3),
+          Max      = round(max(response, na.rm = TRUE), 3),
+          Skewness = ifelse(n() >= 3, round(psych::skew(response), 3), NA),
+          Kurtosis = ifelse(n() >= 3, round(psych::kurtosi(response), 3), NA)
         )
-      )
-    
-    tags$table(
-      class = "table table-striped table-bordered",
-      tags$thead(
-        tags$tr(lapply(names(summary_tbl), tags$th))
-      ),
-      tags$tbody(
-        tags$tr(lapply(summary_tbl[1, ], tags$td))
-      )
-    )
-  }
-  
-  # ==============================
-  # Pooled tab (ALWAYS shown)
-  # ==============================
-  pooled_tab <- tabPanel(
-    "Pooled",
-    {
-      pooled_data <- data %>% filter(!is.na(response))
       
-      if (nrow(pooled_data) == 0) {
-        tags$p(
-          style = "color: #777; font-style: italic;",
-          "No data available for the current selection."
-        )
-      } else {
-        render_summary_table(pooled_data)
-      }
+      tags$table(
+        class = "table table-striped table-bordered",
+        tags$thead(tags$tr(lapply(names(summary_tbl), tags$th))),
+        tags$tbody(tags$tr(lapply(summary_tbl[1, ], tags$td)))
+      )
     }
-  )
-  
-  # ==============================
-  # Country tabs (ALWAYS created)
-  # ==============================
-  country_tabs <- lapply(countries, function(cty) {
     
-    tabPanel(
-      cty,
+    pooled_tab <- tabPanel(
+      "Pooled",
       {
-        country_data <- data %>%
-          filter(country == cty, !is.na(response))
-        
-        if (nrow(country_data) == 0) {
-          tags$p(
-            style = "color: #777; font-style: italic;",
-            paste("No data available for", cty)
-          )
+        pooled_data <- data %>% filter(!is.na(response))
+        if (nrow(pooled_data) == 0) {
+          tags$p("No data available.")
         } else {
-          render_summary_table(country_data)
+          render_summary_table(pooled_data)
         }
       }
     )
-  })
+    
+    country_tabs <- lapply(countries, function(cty) {
+      tabPanel(
+        cty,
+        {
+          df <- data %>% filter(country == cty, !is.na(response))
+          if (nrow(df) == 0) {
+            tags$p(paste("No data available for", cty))
+          } else {
+            render_summary_table(df)
+          }
+        }
+      )
+    })
+    
+    return(
+      do.call(tabsetPanel, c(list(type = "tabs"), list(pooled_tab), country_tabs))
+    )
+  }
   
-  do.call(
-    tabsetPanel,
-    c(list(type = "tabs"), list(pooled_tab), country_tabs)
-  )
+  # --------------------------------------------------
+  # Case 2: multi-response WVS variable
+  # --------------------------------------------------
+  if (unique(data$type) == "multi") {
+    
+    summary_tbl <- data %>%
+      dplyr::group_by(country, response) %>%
+      dplyr::summarise(
+        Proportion = round(mean(value, na.rm = TRUE), 3),
+        .groups = "drop"
+      ) %>%
+      tidyr::pivot_wider(
+        names_from  = response,
+        values_from = Proportion
+      )
+    
+    return(
+      DT::datatable(
+        summary_tbl,
+        rownames = FALSE,
+        options = list(dom = "t", scrollX = TRUE)
+      )
+    )
+  }
 })
+
+
+
+
+
+
 
 
 
@@ -3574,9 +3496,6 @@ HDR_GROUP_COUNTS <- HDR_AREA_LOOKUP %>%
   )
 
 
-cat("This is HDR_GROUP_COUNTS:\n")
-print(HDR_GROUP_COUNTS)
-
 
 
 # ==============================================================================
@@ -3599,8 +3518,8 @@ n_developing <- HDR_AREA_LOOKUP %>%
   dplyr::distinct(country) %>%
   nrow()
 
-cat("This is DEVELOPING_REGIONS:\n")
-print(n_developing)
+#cat("This is DEVELOPING_REGIONS:\n")
+#print(n_developing)
 
 
 
@@ -3611,8 +3530,8 @@ n_world <- MASTER_COUNTRY_DATA %>%
   dplyr::distinct(country) %>%
   nrow()
 
-cat("This is World group ie all HDR countries:\n")
-print(n_world)
+#cat("This is World group ie all HDR countries:\n")
+#print(n_world)
 
 
 
@@ -3631,8 +3550,8 @@ HDR_GROUP_COUNTS <- HDR_GROUP_COUNTS %>%
     )
   )
 
-cat("This is HDR_GROUP_COUNTS:\n")
-print(HDR_GROUP_COUNTS)
+#cat("This is HDR_GROUP_COUNTS:\n")
+#print(HDR_GROUP_COUNTS)
 
 
 
@@ -3863,7 +3782,6 @@ output$scatter_group_plot <- plotly::renderPlotly({
 ################################################################################
 # ########### COUNTRY-LEVEL ####################################################  
 ################################################################################
-
 # ==========================================================
 #  DEFINE DATA
 # ==========================================================
@@ -3968,6 +3886,30 @@ observe({
 
 
 
+
+################################################################################
+# ########### COUNTRY-LEVEL REGRESSION ##########################################
+################################################################################
+
+#Populate the picker from the server, using ISO codes internally
+observe({
+  req(MASTER_COUNTRY_DATA)
+  
+  updatePickerInput(
+    session,
+    inputId = "country_manual_list",
+    choices = setNames(
+      MASTER_COUNTRY_DATA$iso3,
+      MASTER_COUNTRY_DATA$country
+    )
+  )
+  
+})
+
+
+
+
+
 # ==========================================================
 # Build country-level regression dataset
 # Triggered by Run Regression button
@@ -3985,24 +3927,41 @@ country_regression_data <- eventReactive(input$country_reg_run, {
   # ------------------------------------------
   # Extract variable names
   # ------------------------------------------
-  dep_var     <- input$country_reg_dep
-  indep_vars  <- input$country_reg_indep
-  
-  # ------------------------------------------
-  # Safety: remove outcome from predictors
-  # ------------------------------------------
-  indep_vars <- setdiff(indep_vars, dep_var)
+  dep_var    <- input$country_reg_dep
+  indep_vars <- setdiff(input$country_reg_indep, dep_var)
   req(length(indep_vars) > 0)
   
   # ------------------------------------------
-  # Build dataset
+  # Build dataset (KEEP ISO CODE)
   # ------------------------------------------
   data <- MASTER_COUNTRY_DATA %>%
-    dplyr::select(all_of(c(dep_var, indep_vars)))
+    dplyr::select(
+      country,
+      iso3,
+      all_of(c(dep_var, indep_vars))
+    )
   
   # ------------------------------------------
-  # Return structured object
+  # Apply manual country selection (ISO-BASED)
   # ------------------------------------------
+  if (isTRUE(input$manual_country_select) &&
+      length(input$country_manual_list) > 0) {
+    
+    data <- data %>%
+      dplyr::filter(iso3 %in% input$country_manual_list)
+  }
+  
+  # # ------------------------------------------
+  # # DEBUG (safe to keep or remove later)
+  # # ------------------------------------------
+  # cat("\n===== COUNTRY REGRESSION DEBUG =====\n")
+  # cat("Outcome:", dep_var, "\n")
+  # cat("Predictors:", paste(indep_vars, collapse = ", "), "\n")
+  # cat("Rows BEFORE na.omit():", nrow(data), "\n")
+  # cat("NA count per column:\n")
+  # print(colSums(is.na(data)))
+  # cat("===================================\n")
+  
   list(
     data       = data,
     dep_var    = dep_var,
@@ -4011,7 +3970,72 @@ country_regression_data <- eventReactive(input$country_reg_run, {
 })
 
 
-#View(country_regression_data)
+
+# ==========================================================
+# Fit regression model
+# ==========================================================
+country_regression_model <- reactive({
+  
+  reg <- country_regression_data()
+  req(reg)
+  
+  data <- reg$data
+  
+  # ------------------------------------------
+  # Drop incomplete cases
+  # ------------------------------------------
+  data <- stats::na.omit(data)
+  
+  # ------------------------------------------
+  # Safety check
+  # ------------------------------------------
+  #req(nrow(data) > 5)
+  
+  # ------------------------------------------
+  # Build formula
+  # ------------------------------------------
+  formula <- stats::as.formula(
+    paste(
+      reg$dep_var,
+      "~",
+      paste(reg$indep_vars, collapse = " + ")
+    )
+  )
+  
+  stats::lm(formula, data = data)
+})
+
+
+
+# ==========================================================
+# OUTPUT: regression summary
+# ==========================================================
+output$country_reg_summary <- renderPrint({
+  
+  result <- country_regression_data()
+  model  <- country_regression_model()
+  
+  req(result, model)
+  
+  data <- stats::na.omit(result$data)
+  
+  cat("Linear Regression Model Summary\n")
+  cat("================================\n")
+  cat("Outcome variable: ", get_var_label(result$dep_var), "\n")
+  cat(
+    "Independent variables: ",
+    paste(get_var_label(result$indep_vars), collapse = ", "),
+    "\n"
+  )
+  cat(
+    "Number of complete observations: ",
+    nrow(data),
+    "\n\n"
+  )
+  
+  print(summary(model))
+})
+
 
 
 
@@ -4037,73 +4061,6 @@ get_var_label <- function(var_codes) {
 
 
 # ==========================================================
-#     Fit regression model
-# ==========================================================
-country_regression_model <- reactive({
-  reg <- country_regression_data()
-  req(reg)
-  
-  data <- reg$data
-  
-  # Drop incomplete cases
-  data <- stats::na.omit(data)
-  req(nrow(data) > 5)   # safety: avoid model built with tiny dataset n =< 5
-  
-  # Build formula programmatically
-  formula <- stats::as.formula(
-    paste(
-      reg$dep_var,
-      "~",
-      paste(reg$indep_vars, collapse = " + ")
-    )
-  )
-  
-  # Fit linear model
-  stats::lm(formula, data = data)
-})
-
-
-
-
-# ==========================================================
-# OUTPUT summary table
-# ==========================================================
-output$country_reg_summary <- renderPrint({
-  
-  result <- country_regression_data()
-  model  <- country_regression_model()
-  
-  req(result, model)
-  
-  data <- result$data
-  
-  # ------------------------------------------
-  # Custom header (like individual-level)
-  # ------------------------------------------
-  cat("Linear Regression Model Summary\n")
-  cat("================================\n")
-  cat("Outcome variable: ", get_var_label(result$dep_var), "\n")
-  cat(
-    "Independent variables: ",
-    paste(get_var_label(result$indep_vars), collapse = ", "),
-    "\n"
-  )
-  cat(
-    "Number of complete observations: ",
-    nrow(data),
-    "\n\n"
-  )
-  
-  # ------------------------------------------
-  # Standard lm() summary
-  # ------------------------------------------
-  print(summary(model))
-})
-
-
-
-
-# ==========================================================
 # OUTPUT lm diagnostics 
 # ==========================================================
 output$country_reg_diagnostics <- renderPlot({
@@ -4122,9 +4079,7 @@ output$country_reg_diagnostics <- renderPlot({
 # OUTPUT lm prediction 
 # ==========================================================
 output$country_reg_prediction <- renderPlotly({
-  #Debug
-  #cat(">>> ENTERED LOOK HEREEEEEE lm_plot\n")
-  
+
   model <- country_regression_model()
   data  <- country_regression_data()
   
@@ -4140,11 +4095,14 @@ output$country_reg_prediction <- renderPlotly({
   # ---------------------------------------
   # Build plot
   # ---------------------------------------
+  ## Define common axis limits:take the combined range of observed & predicted values
+  lims <- range(c(df$predicted, df[[data$dep_var]]), na.rm = TRUE)
+  
   p <- ggplot2::ggplot(
     df,
     ggplot2::aes(
-      x = predicted,
-      y = .data[[data$dep_var]]
+      x = predicted,              # model predictions on x-axis
+      y = .data[[data$dep_var]]   # model predictions on y-axis
     )
   ) +
     ggplot2::geom_point(
@@ -4158,13 +4116,18 @@ output$country_reg_prediction <- renderPlotly({
       linetype = "dashed",
       color = "grey40"
     ) +
+    
+    #Enforce equal scaling on both axes to ensure dashed line at true 45-degree angle
+    coord_equal(xlim = lims, ylim = lims) +  
     ggplot2::labs(
       title = "Observed vs Predicted Values",
+      subtitle = "Dashed line indicates perfect prediction (y = x)",
       x = "Predicted outcome",
       y = "Observed outcome"
     ) +
     ggplot2::theme_minimal()
   
+  # Convert ggplot to interactive Plotly plot
   plotly::ggplotly(p)
 })
 
@@ -4229,6 +4192,15 @@ observe({
 
 
 
+
+
+
+
+
+
+
+
+
 #==========================#   
 #===                    ===#
 #===      MODELS        ===#
@@ -4253,6 +4225,9 @@ lmm_country_data <- reactive({
   
   data <- hdr_table2_ctry_long
   
+  # ------------------------------------------
+  # Apply country filtering
+  # ------------------------------------------
   if (!is.null(input$lmm_countries) &&
       length(input$lmm_countries) > 0) {
     data <- dplyr::filter(data, country %in% input$lmm_countries)
@@ -4263,6 +4238,10 @@ lmm_country_data <- reactive({
       time_model = if (isTRUE(input$lmm_center_time)) year_c else year
     )
 })
+
+
+
+
 
 
 
@@ -4304,7 +4283,6 @@ lmm_country_formula <- reactive({
 # ==========================================================
 # FREEZE FIXED EFFECTS AT RUN TIME
 # ==========================================================
-
 lmm_country_fixed_terms <- eventReactive(input$lmm_run, {
   
   c(
@@ -4313,7 +4291,6 @@ lmm_country_fixed_terms <- eventReactive(input$lmm_run, {
   )
   
 }, ignoreInit = TRUE)
-
 
 
 
@@ -4331,16 +4308,38 @@ lmm_country_model <- eventReactive(input$lmm_run, {
   vars_used <- all.vars(formula)
   
   model_data <- data %>%
-    dplyr::select(all_of(vars_used)) #%>%
-    #stats::na.omit()
+    dplyr::select(all_of(vars_used))
+  
+  # DEBUG: inspect variation in is_dc
+  if ("is_dc" %in% names(model_data)) {
+    print(table(model_data$is_dc, useNA = "ifany"))
+  }
+  ###
+  
+  # ------------------------------------------
+  # Handle HDI group ONLY if used
+  # ------------------------------------------
+  if ("hdr_group" %in% vars_used) {
+    
+    # Ensure factor
+    model_data$hdr_group <- as.factor(model_data$hdr_group)
+    
+    # Drop unused levels AFTER country filtering
+    model_data$hdr_group <- droplevels(model_data$hdr_group)
+    
+    # Guard against single-level factor
+    if (nlevels(model_data$hdr_group) < 2) {
+      shiny::showNotification(
+        "HDI group cannot be included: only one group remains after country selection.",
+        type = "warning"
+      )
+      return(NULL)
+    }
+  }
   
   if (nrow(model_data) < 20) {
     shiny::showNotification(
-      paste0(
-        "Not enough observations to fit the model (",
-        nrow(model_data),
-        ")."
-      ),
+      paste0("Not enough observations to fit the model (", nrow(model_data), ")."),
       type = "warning"
     )
     return(NULL)
@@ -4353,6 +4352,11 @@ lmm_country_model <- eventReactive(input$lmm_run, {
   )
   
 }, ignoreInit = TRUE)
+
+
+
+
+
 
 
 
@@ -4390,8 +4394,6 @@ output$lmm_model_summary <- renderPrint({
   # Existing behaviour
   print(summary(model))
 })
-
-
 
 
 
@@ -4993,259 +4995,142 @@ output$lmm_diag_scale_location <- plotly::renderPlotly({
 
 
 
-# output$lmm_predicted_trajectories <- plotly::renderPlotly({
-#   
-#   req(lmm_country_model())
-#   
-#   model <- lmm_country_model()
-#   data  <- hdr_table2_ctry_long
-#   
-#   # Optional country filtering
-#   if (!is.null(input$lmm_countries) && length(input$lmm_countries) > 0) {
-#     data <- dplyr::filter(data, country %in% input$lmm_countries)
-#   }
-#   
-#   # Time variable used in the model
-#   time_var <- if (isTRUE(input$lmm_center_time)) "year_c" else "year"
-#   
-#   # -------------------------------
-#   # GLOBAL AVERAGE (FIXED EFFECTS + CI)
-#   # -------------------------------
-#   if (input$lmm_pred_type == "fixed") {
-#     
-#     time_vals <- sort(unique(data[[time_var]]))
-#     
-#     beta <- lme4::fixef(model)
-#     V    <- vcov(model)
-#     
-#     b0 <- beta["(Intercept)"]
-#     b1 <- beta["time_model"]   
-#     
-#     fit <- b0 + b1 * time_vals
-#     
-#     se <- sqrt(
-#       V["(Intercept)", "(Intercept)"] +
-#         2 * time_vals * V["(Intercept)", "time_model"] +
-#         (time_vals^2) * V["time_model", "time_model"]
-#     )
-#     
-#     global_df <- data.frame(
-#       time  = time_vals,
-#       fit   = fit,
-#       lower = fit - 1.96 * se,
-#       upper = fit + 1.96 * se
-#     )
-#     
-#     plotly::plot_ly() %>%
-#       
-#       plotly::add_ribbons(
-#         data = global_df,
-#         x = ~time,
-#         ymin = ~lower,
-#         ymax = ~upper,
-#         fillcolor = "rgba(44,127,184,0.25)",
-#         line = list(width = 0),
-#         hoveron = "fills",
-#         hovertemplate = paste(
-#           "<b>Time:</b> %{x}",
-#           "<br><b>95% CI:</b> [",
-#           round(global_df$lower, 3), ", ",
-#           round(global_df$upper, 3), "]",
-#           "<extra></extra>"
-#         ),
-#         showlegend = FALSE
-#       ) %>%
-#       
-#       plotly::add_lines(
-#         data = global_df,
-#         x = ~time,
-#         y = ~fit,
-#         mode = "lines+markers",
-#         line = list(color = "#2C7FB8", width = 3),
-#         marker = list(
-#           color = "#2C7FB8",
-#           size  = 9,
-#           line  = list(color = "black", width = 1.1)
-#         ),
-#         hovertemplate = paste(
-#           "<b>Global average</b>",
-#           "<br><b>Time:</b> %{x}",
-#           "<br><b>Predicted HDI:</b> %{y:.3f}",
-#           "<extra></extra>"
-#         ),
-#         showlegend = FALSE
-#       ) %>%
-#       
-#       plotly::layout(
-#         title = "Predicted HDI trajectory (global fixed effects)",
-#         xaxis = list(title = ifelse(time_var == "year_c", "Year (centred)", "Year")),
-#         yaxis = list(title = "Predicted HDI"),
-#         showlegend = FALSE
-#       )
-#   } else {
-#     
-#     # -------------------------------
-#     # COUNTRY-SPECIFIC (CONDITIONAL)
-#     # -------------------------------
-#     
-# # -------------------------------
-# # COUNTRY-SPECIFIC (CONDITIONAL)
-# # -------------------------------
-# 
-# # Use the exact data used by the model
-# df <- model.frame(model)
-# 
-# # Apply the same country filter safely
-# if (!is.null(input$lmm_countries) && length(input$lmm_countries) > 0) {
-#   df <- dplyr::filter(df, country %in% input$lmm_countries)
-# }
-
-# # Add conditional (random-effects) predictions
-# df$pred <- predict(model, newdata = df, allow.new.levels = TRUE)
-# 
-# plotly::plot_ly(
-#   data = df,
-#   x    = df[[time_var]],
-#   y    = df$pred,
-#   group = df$country,
-#   color = df$country,
-#   type  = "scatter",
-#   mode  = "lines",
-#   opacity = 0.35,
-#   line = list(width = 1),
-#   showlegend = FALSE
-# ) %>%
-#   plotly::layout(
-#     title = "Country-specific predicted HDI trajectories",
-#     xaxis = list(title = ifelse(time_var == "year_c", "Year (centred)", "Year")),
-#     yaxis = list(title = "Predicted HDI")
-#   )
-# 
-#   }
-#   
-# })
-
-
+#=============================================================
+# Model-based trajectories 
+#=============================================================
 output$lmm_predicted_trajectories <- plotly::renderPlotly({
-
-  req(lmm_country_model())
-
- model <- lmm_country_model()
- data  <- hdr_table2_ctry_long
- 
- # Optional country filtering
- if (!is.null(input$lmm_countries) && length(input$lmm_countries) > 0) {
-   data <- dplyr::filter(data, country %in% input$lmm_countries)
-  }
-
- # Time variable used in the model
- time_var <- if (isTRUE(input$lmm_center_time)) "year_c" else "year"
- 
-   # -------------------------------
-   # GLOBAL AVERAGE (FIXED EFFECTS + CI)
-   # -------------------------------
-  if (input$lmm_pred_type == "fixed") {
-
-  time_vals <- sort(unique(data[[time_var]]))
   
-  beta <- lme4::fixef(model)
-  V    <- vcov(model)
-
-  b0 <- beta["(Intercept)"]
-  b1 <- beta["time_model"]
-
-  fit <- b0 + b1 * time_vals
-
-  se <- sqrt(
-     V["(Intercept)", "(Intercept)"] +
-       2 * time_vals * V["(Intercept)", "time_model"] +
-       (time_vals^2) * V["time_model", "time_model"]
-   )
-   global_df <- data.frame(
-    time  = time_vals,
-    fit   = fit,
-    lower = fit - 1.96 * se,
-    upper = fit + 1.96 * se
-  )
-
-  plotly::plot_ly() %>%
-
-  plotly::add_ribbons(
-    data = global_df,
-    x = ~time,
-    ymin = ~lower,
-    ymax = ~upper,
-    fillcolor = "rgba(44,127,184,0.25)",
-    line = list(width = 0),
-    hoveron = "fills",
-    hovertemplate = paste(
-      "<b>Time:</b> %{x}",
-      "<br><b>95% CI:</b> [",
-      round(global_df$lower, 3), ", ",
-      round(global_df$upper, 3), "]",
-      "<extra></extra>"
-      ),
-    showlegend = FALSE
-    ) %>%
-    plotly::add_lines(
-      data = global_df,
-      x = ~time,
-      y = ~fit,
-      mode = "lines+markers",
-      line = list(color = "#2C7FB8", width = 3),
-      marker = list(
-        color = "#2C7FB8",
-        size  = 9,
-        line  = list(color = "black", width = 1.1)
-        ),
+  model <- lmm_country_model()
+  req(model)
+  
+  # -------------------------------
+  # Data actually used by the model
+  # -------------------------------
+  df <- model.frame(model)
+  
+  # Identify time variable used by the model
+  time_var <- intersect(
+    c("time_model", "year", "year_c"),
+    names(df)
+  )[1]
+  req(time_var)
+  
+  # -------------------------------
+  # Optional country filtering
+  # -------------------------------
+  if (!is.null(input$lmm_countries) && length(input$lmm_countries) > 0) {
+    df <- df %>% dplyr::filter(country %in% input$lmm_countries)
+  }
+  # -------------------------------
+  # GLOBAL AVERAGE (fixed effects + 95% CI)
+  # -------------------------------
+  if (input$lmm_pred_type == "fixed") {
+    
+    time_vals <- sort(unique(df[[time_var]]))
+    
+    # Fixed effects and covariance matrix
+    beta <- lme4::fixef(model)
+    V    <- vcov(model)
+    
+    # Extract coefficients
+    b0 <- beta["(Intercept)"]
+    b1 <- beta["time_model"]
+    
+    # Predicted mean
+    fit <- b0 + b1 * time_vals
+    
+    # Standard error of prediction
+    se <- sqrt(
+      V["(Intercept)", "(Intercept)"] +
+        2 * time_vals * V["(Intercept)", "time_model"] +
+        (time_vals^2) * V["time_model", "time_model"]
+    )
+    
+    # 95% confidence interval
+    lower <- fit - 1.96 * se
+    upper <- fit + 1.96 * se
+    
+    ci_df <- data.frame(
+      time  = time_vals,
+      fit   = fit,
+      lower = lower,
+      upper = upper
+    )
+    
+    plotly::plot_ly() %>%
+      
+      # Confidence band
+      plotly::add_ribbons(
+        data = ci_df,
+        x = ~time,
+        ymin = ~lower,
+        ymax = ~upper,
+        fillcolor = "rgba(44,127,184,0.25)",
+        line = list(width = 0),
+        hoverinfo = "skip",
+        showlegend = FALSE
+      ) %>%
+      
+      # Mean trajectory
+      plotly::add_lines(
+        data = ci_df,
+        x = ~time,
+        y = ~fit,
+        mode = "lines+markers",
+        line = list(color = "#2C7FB8", width = 3),
+        
+        marker = list(size = 8, color = "#2C7FB8"),
+        
         hovertemplate = paste(
-          "<b>Global average</b>",
-          "<br><b>Time:</b> %{x}",
+          "<b>Time:</b> %{x}",
           "<br><b>Predicted HDI:</b> %{y:.3f}",
           "<extra></extra>"
         ),
         showlegend = FALSE
       ) %>%
-
+      
       plotly::layout(
-        title = "Predicted HDI trajectory (global fixed effects)",
-        xaxis = list(title = ifelse(time_var == "year_c", "Year (centred)", "Year")),
-        yaxis = list(title = "Predicted HDI"),
-        showlegend = FALSE
+        title = "Predicted HDI trajectory (global average, fixed effects)",
+        xaxis = list(title = "Time"),
+        yaxis = list(title = "Predicted HDI")
       )
   } else {
-
-    data$pred <- predict(model)  # includes random effects
+    
+    # -------------------------------
+    # COUNTRY-SPECIFIC (conditional)
+    # -------------------------------
+    
+    # Conditional predictions (fixed + random effects)
+    df$pred <- predict(model, re.form = NULL)
+    
+    # Hard proof predictions exist
+    stopifnot(any(is.finite(df$pred)))
     
     plotly::plot_ly() %>%
-      
       plotly::add_lines(
-        data = data,
+        data = df,
         x = ~.data[[time_var]],
         y = ~pred,
         group = ~country,
         color = ~country,
-        colors = RColorBrewer::brewer.pal(8, "Dark2"),
         opacity = 0.35,
         line = list(width = 1),
         showlegend = FALSE
       ) %>%
-      
       plotly::layout(
-        title = list(text = "Country-specific predicted HDI trajectories"),
-        xaxis = list(title = "Year"),
+        title = "Country-specific predicted HDI trajectories",
+        xaxis = list(title = "Time"),
         yaxis = list(title = "Predicted HDI")
       )
-
   }
-
 })
 
 
 
 
+
 # ==========================================================
-# STEP X — Country-level Intercept–Slope correlation (RI+RS)
+# STEP X - Country-level Intercept–Slope correlation (RI+RS)
 # ==========================================================
 output$lmm_country_ranef_correlation <- renderText({
 
@@ -6602,6 +6487,20 @@ observe({
 # ==========================================================
 
 # ==========================================================
+output$download_hdr_tables_excelWorkbook <- downloadHandler(
+
+  filename = function() {
+    "Human Development Index and its components_HDR25_Statistical_Annex_Tables_1-7.xlsx"
+  },
+
+  content = function(file) {
+    file.copy(
+      "www/instructions/Human Development Index and its components_HDR25_Statistical_Annex_Tables_1-7.xlsx",
+      file
+    )
+  }
+)
+
 
 
 

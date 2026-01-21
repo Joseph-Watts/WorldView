@@ -33,7 +33,7 @@ countries_table2 <- readxl::read_excel(
   here::here("Support_Files", "countries_table2.xlsx")
 )
 
-#View(countries_table2)
+View(countries_table2)
 # ----------------------------------------------------------
 # Pivot wide table into long table2
 # ----------------------------------------------------------
@@ -48,7 +48,7 @@ hdr_table2_ctry_long <- countries_table2 %>%
   ) %>%
   filter(!is.na(hdi))
 
-#View(hdr_table2_ctry_long)
+View(hdr_table2_ctry_long)
 
 
 # ----------------------------------------------------------
@@ -79,7 +79,8 @@ hdr_table2_ctry_long <- hdr_table2_ctry_long %>%
         hdr_region,
         is_oecd,
         is_sids,
-        is_ldc
+        is_ldc,
+        is_dc
       ),
     by = "country"
   )

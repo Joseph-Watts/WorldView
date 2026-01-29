@@ -188,56 +188,54 @@ build_ggtree_multi_bar_plot <- function(
   #   )
   # }
   
-  # Blank mode (no variables)
-  if (length(outcome_vars) == 0) {
-    return(p + ggplot2::ggtitle("Language Phylogeny (Base)"))
-  }
-  
-  # Multi-variable bars: one panel per variable, each with its own fill scale + legend
-  bar_long <- make_long_bar_data(tip_anno, outcome_vars)
-  
   offset <- bar_panel_gap
-  for (i in seq_along(outcome_vars)) {
-    var <- outcome_vars[i]
-    pal <- palettes_by_var[[var]] %||% "viridis"
-    
-    df_var <- bar_long[bar_long$variable == var, , drop = FALSE]
-    
-    p <- p +
-      ggtreeExtra::geom_fruit(
-        data = df_var,
-        geom = geom_col,
-        mapping = ggplot2::aes(
-          y = label,     # y is tip key
-          x = value,
-          fill = value   # fill mapped to value => per-variable continuous legend
-        ),
-        orientation = "y",
-        offset = offset,
-        pwidth = bar_panel_width,
-        axis.params = list(
-          axis = "x",
-          text.size = 2.5,
-          title = var,
-          title.size = 3
-        ),
-        grid.params = list()
-      ) +
-      viridis_scale_for_option(
-        option = pal,
-        name = var,
-        legend_order = i,      # <-- keep legend order same as variable order
-        show_legend = show_legends
-      )
-    
-    # Separate legends/scales for next variable
-    if (i < length(outcome_vars)) {
-      p <- p + ggnewscale::new_scale_fill()
-    }
-    
-    offset <- offset + bar_panel_gap
-  }
   
+  if(length(outcome_vars) > 0){
+    # Multi-variable bars: one panel per variable, each with its own fill scale + legend
+    bar_long <- make_long_bar_data(tip_anno, outcome_vars)
+    
+    for (i in seq_along(outcome_vars)) {
+      var <- outcome_vars[i]
+      pal <- palettes_by_var[[var]] %||% "viridis"
+      
+      df_var <- bar_long[bar_long$variable == var, , drop = FALSE]
+      
+      p <- p +
+        ggtreeExtra::geom_fruit(
+          data = df_var,
+          geom = geom_col,
+          mapping = ggplot2::aes(
+            y = label,     # y is tip key
+            x = value,
+            fill = value   # fill mapped to value => per-variable continuous legend
+          ),
+          orientation = "y",
+          offset = offset,
+          pwidth = bar_panel_width,
+          axis.params = list(
+            axis = "x",
+            text.size = 2.5,
+            title = var,
+            title.size = 3
+          ),
+          grid.params = list()
+        ) +
+        viridis_scale_for_option(
+          option = pal,
+          name = var,
+          legend_order = i,      # <-- keep legend order same as variable order
+          show_legend = show_legends
+        )
+      
+      # Separate legends/scales for next variable
+      if (i < length(outcome_vars)) {
+        p <- p + ggnewscale::new_scale_fill()
+      }
+      
+      offset <- offset + bar_panel_gap
+    }
+  }
+
   # ---- Add a final text panel for tip labels (prevents overlap with bars) ----
   if (show_tip_labels) {
     p <- p +
@@ -269,6 +267,9 @@ build_ggtree_multi_bar_plot <- function(
     }
   }
   
-
+  # Blank mode (no variables)
+  if (length(outcome_vars) == 0) {
+    return(p + ggplot2::ggtitle("Language Phylogeny (Base)"))
+  }
   p + ggplot2::ggtitle("Language Phylogeny (Multi-variable bars)")
 }

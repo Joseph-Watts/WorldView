@@ -153,14 +153,17 @@ phylo_lm_fit <- function(tree, data, formula, lower.bound = 1e-7, upper.bound = 
   mod
 }
 
-phylo_lm_r2 <- function(model) {
-  # Approx R^2 based on observed vs fitted
-  obs <- stats::model.response(stats::model.frame(model))
-  fit <- as.numeric(model$fitted.values)
-  sse <- sum((obs - fit)^2, na.rm = TRUE)
-  sst <- sum((obs - mean(obs, na.rm = TRUE))^2, na.rm = TRUE)
-  if (!is.finite(sst) || sst <= 0) return(NA_real_)
-  1 - (sse / sst)
+
+phylo_lm_r2 <- function(model, adjusted = FALSE) {
+  # Extract R^2 (or adjusted R^2) from phylolm/phyloglm model objects
+  # 1) Prefer package-provided fields when available (phylolm stores these)
+  #    phylolm returns r.squared and adj.r.squared in the fitted object.
+  if (!is.null(model$r.squared) || !is.null(model$adj.r.squared)) {
+    return(as.numeric(if (adjusted) model$adj.r.squared else model$r.squared))
+  }
+
+  # 2) If neither fields nor fallback are possible (e.g., phyloglm), return NA
+  NA_real_
 }
 
 phylo_lm_glance <- function(model) {
@@ -287,9 +290,13 @@ phylo_lm_plot_ovp_gg <- function(model, meta_df, dv_label) {
   
   df <- data.frame(observed = as.numeric(obs), predicted = pred, tooltip = tooltip)
   
+  # --- NEW: force same x/y limits ---
+  rng <- range(c(df$observed, df$predicted), na.rm = TRUE, finite = TRUE)
+  
   ggplot2::ggplot(df, ggplot2::aes(x = predicted, y = observed, text = tooltip)) +
-    ggplot2::geom_abline(slope = 1, intercept = 0, linetype = "dashed") +
+    ggplot2::geom_abline(slope = 1, intercept = 0, linetype = "dashed", col = "blue") +
     ggplot2::geom_point(size = 2, alpha = 0.85) +
+    ggplot2::coord_fixed(ratio = 1, xlim = rng, ylim = rng, expand = TRUE) +
     ggplot2::labs(x = "Predicted", y = dv_label) +
     ggplot2::theme_minimal()
 }

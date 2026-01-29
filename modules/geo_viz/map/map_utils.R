@@ -16,7 +16,8 @@ join_world_data <- function(world_shape, wvs_country, country_phylogeny) {
 }
 
 # ---- build per-country hover label (vectorized) ----
-build_country_labels <- function(world_sf, vars = character(), digits = 3) {
+build_country_labels <- function(world_sf, vars = character(), digits = 3, codebook_data = NULL, 
+                                 values_title = "Selected values (country-level summary):") {
   n <- nrow(world_sf)
   
   nm   <- world_sf$name %||% world_sf$iso_a3
@@ -45,11 +46,16 @@ build_country_labels <- function(world_sf, vars = character(), digits = 3) {
       vlines <- character()
       for (v in vars) {
         if (v %in% names(world_sf)) {
-          vlines <- c(vlines, paste0(v, ": ", fmt_num(world_sf[[v]][i])))
+          # use readable label if codebook_data provided
+          disp <- if (!is.null(codebook_data)) wvs_var_display(v, codebook_data) else v
+          
+          vlines <- c(vlines, paste0(htmltools::htmlEscape(disp), ": ", fmt_num(world_sf[[v]][i])))
         }
       }
       if (length(vlines)) {
-        parts <- c(parts, "<hr style='margin:6px 0;'/>", paste(vlines, collapse = "<br/>"))
+        parts <- c(parts, "<hr style='margin:6px 0;'/>", 
+                   paste0("<i>", htmltools::htmlEscape(values_title), "</i>"),
+                   paste(vlines, collapse = "<br/>"))
       }
     }
     

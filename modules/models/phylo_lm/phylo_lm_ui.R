@@ -131,12 +131,12 @@ models_phylo_lm_ui <- function(id) {
               "Diagnostics",
               shiny::h4("Observed vs Predicted"),
               shiny::helpText("Hover on a point to see country + language + family."),
-              plotly::plotlyOutput(ns("plot_ovp"), height = "360px"),
+              plotly::plotlyOutput(ns("plot_ovp"), height = "450px"),
               shiny::hr(),
               shiny::tags$details(
                 shiny::tags$summary("Advanced: Residual similarity vs phylogenetic distance"),
                 shiny::helpText("Exploratory: Are residuals more similar for countries closer on the language tree?"),
-                plotly::plotlyOutput(ns("plot_resid_dist"), height = "360px")
+                plotly::plotlyOutput(ns("plot_resid_dist"), height = "450px")
               )
             ),
             

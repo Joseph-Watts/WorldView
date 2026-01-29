@@ -11,10 +11,13 @@ geo_viz_map_server <- function(id,
     # --- 1) numeric variable choices ---
     observe({
       num_vars <- names(wvs_country)[vapply(wvs_country, is.numeric, logical(1))]
+      disp <- vapply(num_vars, function(v) wvs_var_display(v, codebook_data), FUN.VALUE = character(1))
+      # names = display text, values = real col_id (input$map_vars still returns col_id)
+      choices_named <- stats::setNames(num_vars, disp)
       updateSelectizeInput(
         session, "map_vars",
-        choices  = num_vars,
-        selected = head(num_vars, 3),
+        choices  = choices_named,
+        selected = head(num_vars, 2),
         server   = TRUE
       )
     })
@@ -44,8 +47,7 @@ geo_viz_map_server <- function(id,
     
     # --- 5) Variable description ---
     output$var_description <- renderUI({
-      s <- settings()
-      vars <- s$vars
+      vars <- input$map_vars %||% character(0)
       
       if (length(vars) == 0) return(HTML("<i>No variables selected.</i>"))
       
@@ -108,7 +110,7 @@ geo_viz_map_server <- function(id,
       s <- settings()
       sf0 <- world_sf()
       
-      sf0$label <- build_country_labels(sf0, vars = s$vars, digits = 3)
+      sf0$label <- build_country_labels(sf0, vars = s$vars, digits = 3, codebook_data = codebook_data)
       
       m <- leaflet::leaflet(sf0) %>%
         leaflet::addProviderTiles("CartoDB.Positron")

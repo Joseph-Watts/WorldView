@@ -42,3 +42,16 @@ path_phylogeny_dataset <- "WVS_Dataset/phylogeny"
 country_phylogeny <- read_csv(paste0(path_phylogeny_dataset,"/country_phylogeny.csv"),na="")
 
 country_phylogeny_tree <- read.tree(paste0(path_phylogeny_dataset, "/country_phylogeny_tree.tree"))
+
+
+wvs_country2 <- orig_country_data
+
+merge_NIR_to_GBR <- TRUE
+# merge_NIR_to_GBR <- FALSE
+if(merge_NIR_to_GBR){
+  wvs_country2[wvs_country2$B_COUNTRY_ALPHA=="GBR", 3:ncol(wvs_country2)] <-
+    (447*wvs_country2[wvs_country2$B_COUNTRY_ALPHA=="NIR", 3:ncol(wvs_country2)] +
+       2609*wvs_country2[wvs_country2$B_COUNTRY_ALPHA=="GBR", 3:ncol(wvs_country2)]) / (447+2609)
+  wvs_country2 <- dplyr::filter(wvs_country2, B_COUNTRY_ALPHA!="NIR")
+}
+

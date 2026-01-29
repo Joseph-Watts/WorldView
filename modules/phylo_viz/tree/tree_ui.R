@@ -38,7 +38,6 @@ phylo_viz_tree_ui <- function(id) {
             choices = c("WVS7 Data" = "wvs", "Base Tree" = "blank"),
             selected = "wvs"
           ),
-          
           # Select up to 5 numeric WVS variables
           selectizeInput(
             ns("outcome_vars"),

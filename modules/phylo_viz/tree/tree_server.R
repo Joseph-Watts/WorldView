@@ -13,7 +13,15 @@ phylo_viz_tree_server <- function(id,
     observe({
       if (input$data_type == "wvs") {
         num_vars <- names(wvs_data)[vapply(wvs_data, is.numeric, logical(1))]
-        updateSelectizeInput(session, "outcome_vars", choices = num_vars, server = TRUE)
+        disp <- vapply(num_vars, function(v) wvs_var_display(v, codebook_data), FUN.VALUE = character(1))
+        
+        # names = display text, values = real col_id (input$map_vars still returns col_id)
+        choices_named <- stats::setNames(num_vars, disp)
+        
+        updateSelectizeInput(session, "outcome_vars", 
+                             choices = choices_named, 
+                             selected = head(num_vars, 2),
+                             server = TRUE)
       } else {
         updateSelectizeInput(
           session, "outcome_vars",

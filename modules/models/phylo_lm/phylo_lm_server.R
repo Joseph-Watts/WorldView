@@ -292,7 +292,7 @@ models_phylo_lm_server <- function(id, wvs_country, codebook_data, lang_tree, la
       
       dv_lab <- phylo_lm_choice_label(codebook_data, input$dv)
       p <- phylo_lm_plot_ovp_gg(mod, meta_df = d, dv_label = dv_lab)
-      plotly::ggplotly(p, tooltip = "text")
+      plotly::ggplotly(p, tooltip = "text",width = 440) 
     })
     
     output$plot_resid_dist <- plotly::renderPlotly({

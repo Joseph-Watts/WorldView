@@ -189,7 +189,9 @@ phylo_glm_auc <- function(model, data, dv_bin_name) {
 
 phylo_glm_roc_df <- function(roc_obj) {
   if (is.null(roc_obj)) return(NULL)
-  data.frame(fpr = 1 - roc_obj$specificities, tpr = roc_obj$sensitivities)
+  df <- data.frame(fpr = 1 - roc_obj$specificities, tpr = roc_obj$sensitivities)
+  df <- df[order(df$fpr, df$tpr), , drop = FALSE]
+  df
 }
 
 phylo_glm_plot_roc_gg <- function(roc_df) {

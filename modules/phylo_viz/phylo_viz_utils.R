@@ -57,6 +57,7 @@ phylo_init_dataset <- function(path="WVS_Dataset/phylogeny"){
       left_join(phylo_langFamily %>% select(iso, langCode),
                 by = c("iso3166alpha2" = "iso"), na_matches = "never") %>% 
       mutate(iso639P3 = case_when(
+        ##  country/area missing language, find a proper language for each
         iso3166alpha3 == "ATA" ~ "eng",  # Antarctica - eng
         iso3166alpha3 == "BVT" ~ "nor",  # Bouvet Island - nor
         iso3166alpha3 == "ATF" ~ "fra",  # French Southern Territories - fra
@@ -64,6 +65,15 @@ phylo_init_dataset <- function(path="WVS_Dataset/phylogeny"){
         iso3166alpha3 == "SGS" ~ "eng",  # South Georgia and the South Sandwich Islands - eng
         iso3166alpha3 == "SJM" ~ "nor",  # Svalbard and Jan Mayen - nor
         iso3166alpha3 == "UMI" ~ "eng",  # United States Minor Outlying Islands - eng
+        
+        ## country/area language level is dialet, find the language level iso639P3, 
+        ## find in languoid dataset, all those 4 country/area parent language is 
+        ## east2821(Eastern Herzegovinian Shtokavian , dialect) and nearest language level language is 
+        ## east2821 -> news1236 -> shto1241 -> sout1528(hbs, Serbian-Croatian-Bosnian, language)
+        iso3166alpha3 == "BIH" ~ "hbs", 
+        iso3166alpha3 == "HRV" ~ "hbs",
+        iso3166alpha3 == "MNE" ~ "hbs",
+        iso3166alpha3 == "SRB" ~ "hbs",
         TRUE ~ langCode), langCode=NULL) %>% arrange(iso3166alpha3) %>%
       left_join(phylo_languoid %>% select(iso639P3code, glottocode = id,language_name=name, family_glottocode=family_id),
                 by = c("iso639P3" = "iso639P3code"), na_matches = "never") %>% 

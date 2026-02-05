@@ -415,26 +415,6 @@ world_shape <- world_shape %>%
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ###############################################################################
 # =============================================================================
 #                5. MASTER LIST OF ALL INDICATORS
@@ -456,6 +436,7 @@ ALL_HDR_INDICATORS <- unique(unlist(
 ALL_HDR_INDICATORS <- setdiff(ALL_HDR_INDICATORS, "country")
 
 #print(ALL_HDR_INDICATORS)
+
 
 
 
@@ -1040,98 +1021,41 @@ saveRDS(HDR_GROUP_BENCHMARKS, "Support_Files/HDR_GROUP_BENCHMARKS.rds")
 
 
 
-# # =====================================================
-# # DEFINE GROUP NAME VECTORS FROM HDR_GROUP_LOOKUP
-# # =====================================================
-# # Human Development Groups
-# hdi_group_names <- HDR_GROUP_LOOKUP$groups
-#  
-# # Regions
-# region_names <- HDR_GROUP_LOOKUP$regions
-# 
-# # Special Groups
-# special_group_names <- HDR_GROUP_LOOKUP$special
-
-
-
-
-
-#' ###############################################################################
-#' #==============================================================================
-#'           # Extract the list of indicator names for each table
-#' #==============================================================================
-#' ##############################################################################
-#' # Indicators Table 1
-#' TABLE1_INDICATORS <- setdiff(
-#'   # Get ALL column names from the Table 1 "countries" then remove the
-#'   #'country' column from the list because it is is an identifier, not an indicator to plot
-#'   #    because 'country' is an identifier,
-#'   names(HDR_DATA$`Table 1 - HDI & Components`$countries),
-#'   "country"
-#' )
-#' 
-#' 
-#' # Indicators Table 2
-#' TABLE2_INDICATORS <- setdiff(
-#'   names(HDR_DATA$`Table 2 - HDI Trends`$countries),
-#'   "country"
-#' )
-#' 
-#' 
-#' # Indicators Table 3
-#' TABLE3_INDICATORS <- setdiff(
-#'   names(HDR_DATA$`Table 3 - Inequality-adjusted HDI`$countries),
-#'   "country"
-#' )
-#' 
-#' 
-#' # Indicators Table 4
-#' TABLE4_INDICATORS <- setdiff(
-#'   names(HDR_DATA$`Table 4 - GDI`$countries),
-#'   "country"
-#' )
-#' 
-#' 
-#' # Indicators Table 5
-#' TABLE5_INDICATORS <- setdiff(
-#'   names(HDR_DATA$`Table 5 - GII`$countries),
-#'   "country"
-#' )
-#' 
-#' 
-#' # Indicators Table 7
-#' TABLE7_INDICATORS <- setdiff(
-#'   names(HDR_DATA$`Table 7 - PHDI`$countries),
-#'   "country"
-#' )
-
-
-
-# 
-
-
-
-
-
 ###############################################################################
 # =============================================================================
-#                 MASTER LIST OF ALL COUNTRIES & HDRs AREAS
+#        BUILD LABELLED HDR INDICATOR CHOICES (FOR SHINY UI)
 # =============================================================================
 ###############################################################################
-# List ALL countries
-# ALL_HDR_COUNTRIES <- unique(unlist(
-#   lapply(HDR_DATA, function(tbl){
-#     tbl$countries$country
-#   })
-# ))
-# 
-# 
-# # List ALL areas 
-# ALL_HDR_AREAS <- unique(unlist(
-#   lapply(HDR_DATA, function(tbl){
-#     tbl[c("groups", "regions", "special")]
-#   })
-# ))
+
+HDR_INDICATOR_CHOICES <- FULL_VARIABLE_DICTIONARY %>%
+  dplyr::filter(
+    source == "HDR",
+    var_code %in% ALL_HDR_INDICATORS
+  ) %>%
+  dplyr::select(var_code, label) %>%
+  dplyr::distinct() %>%
+  { setNames(.$var_code, .$label) }
+
+
+saveRDS(
+  HDR_INDICATOR_CHOICES,
+  "Support_Files/HDR_INDICATOR_CHOICES.rds"
+)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

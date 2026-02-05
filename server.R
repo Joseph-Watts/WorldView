@@ -17,6 +17,15 @@ session$onSessionEnded(function() {
 })
   
 
+#DEBUG
+observe({
+  print("DEBUG: country var choices (WVS7)")
+  print(get_country_var_choices("WVS7"))
+})
+######  
+  
+  
+  
 ############################-
 #### Read in data files ####
 ############################-
@@ -160,37 +169,6 @@ output$raw_filtered_country <- DT::renderDataTable({
                   dplyr::rename(Country = B_COUNTRY, `Country ISO` = B_COUNTRY_ALPHA),
                 options = list(pageLength = 10, scrollX = TRUE))
 })
-
-
-
-# Data table - Country aggregate responses
-# output$Table_country <- DT::renderDataTable({
-#   
-#   DT::datatable(
-#     data = get_C_data() |>
-#       
-#       # Round numeric variables EXCEPT rank variables
-#       dplyr::mutate(
-#         across(
-#           where(is.numeric) & !matches("rank"),
-#           ~ round(.x, 2)
-#         )
-#       ) |>
-#       
-#       # Rename identifiers for display
-#       dplyr::rename(
-#         Country     = B_COUNTRY,
-#         `Country ISO` = B_COUNTRY_ALPHA
-#       ),
-#     
-#     options = list(
-#       scrollX = TRUE
-#     )
-#   )
-#   
-# })
-
-
 
 
 
@@ -2284,7 +2262,6 @@ all_numeric_country_vars <- names(MASTER_COUNTRY_DATA)[
 # ===========================================================
 # Return valid numeric country-level variables by data source
 # ===========================================================
-
 get_country_vars_by_source <- function(source) {
   
   # Case 1: User selected ALL sources
@@ -2297,8 +2274,8 @@ get_country_vars_by_source <- function(source) {
   # Case 2: Filter variables using the variable dictionary
   # Extract variable codes whose source matches
   # the selected source (e.g. "HDR", "WVS7")
-  vars_from_dict <- FULL_VARIABLE_DICTIONARY$var_code[
-    FULL_VARIABLE_DICTIONARY$source == source
+  vars_from_dict <- FULL_COUNTRY_VAR_DICT$var_code[
+    FULL_COUNTRY_VAR_DICT$source == source
   ]
   
   # Final safeguard
@@ -2374,46 +2351,29 @@ observe({
 # ==========================================================
 ### Populate dropdowns VARIABLE1 reactively
 observeEvent(input$bivar_country_source1, {
-  
-  # Update the variable dropdown for the first bivariate variable
   updateSelectizeInput(
     session,
     "bivar_country_var1",
-    
-    # Recompute available variables based on selected source
-    # (e.g. ALL, HDR, WVS7)
-    choices = get_country_vars_by_source(input$bivar_country_source1),
-    
-    # Clear any previously selected variable to avoid
-    # invalid source–variable combinations
+    choices  = get_country_var_choices(input$bivar_country_source1),
     selected = NULL
   )
   
-  # Do not trigger this observer when the app first loads
 }, ignoreInit = TRUE)
-
 
 
 
 ### Populate dropdown VARIABLE2 reactively
 observeEvent(input$bivar_country_source2, {
   
-  # Update the variable dropdown for the first bivariate variable
   updateSelectizeInput(
     session,
     "bivar_country_var2",
-    
-    # Recompute available variables based on selected source
-    # (e.g. ALL, HDR, WVS7)
-    choices = get_country_vars_by_source(input$bivar_country_source2),
-    
-    # Clear any previously selected variable to avoid
-    # invalid source–variable combinations
+    choices  = get_country_var_choices(input$bivar_country_source2),
     selected = NULL
   )
   
-  # Do not trigger this observer when the app first loads
 }, ignoreInit = TRUE)
+
 
 
 
@@ -2522,7 +2482,6 @@ observeEvent(
   # Do not run this observer when the app first loads
   ignoreInit = TRUE
 )
-
 
 
 
@@ -2685,9 +2644,7 @@ observe({
     "bivar_group_type",
     choices = unique(HDR_GROUP_BENCHMARKS$group_type)
   )
-  
 })
-
 
 
 #===============================
@@ -2713,9 +2670,6 @@ observeEvent(input$bivar_group_type, {
   )
   
 })
-
-
-
 
 
 
@@ -2753,9 +2707,6 @@ observe({
     server   = TRUE
   )
 })
-
-
-
 
 
 
@@ -2849,11 +2800,6 @@ output$bivar_group_summary <- DT::renderDT({
     )
   )
 })
-
-
-
-
-
 
 
 
@@ -3660,9 +3606,6 @@ observe({
 
 
 
-
-
-
 # ==========================================================
 # Group-level scatter plot (Plotly)
 # =========================================================
@@ -3951,17 +3894,6 @@ country_regression_data <- eventReactive(input$country_reg_run, {
       dplyr::filter(iso3 %in% input$country_manual_list)
   }
   
-  # # ------------------------------------------
-  # # DEBUG (safe to keep or remove later)
-  # # ------------------------------------------
-  # cat("\n===== COUNTRY REGRESSION DEBUG =====\n")
-  # cat("Outcome:", dep_var, "\n")
-  # cat("Predictors:", paste(indep_vars, collapse = ", "), "\n")
-  # cat("Rows BEFORE na.omit():", nrow(data), "\n")
-  # cat("NA count per column:\n")
-  # print(colSums(is.na(data)))
-  # cat("===================================\n")
-  
   list(
     data       = data,
     dep_var    = dep_var,
@@ -3985,11 +3917,6 @@ country_regression_model <- reactive({
   # Drop incomplete cases
   # ------------------------------------------
   data <- stats::na.omit(data)
-  
-  # ------------------------------------------
-  # Safety check
-  # ------------------------------------------
-  #req(nrow(data) > 5)
   
   # ------------------------------------------
   # Build formula
@@ -4120,7 +4047,7 @@ output$country_reg_prediction <- renderPlotly({
     #Enforce equal scaling on both axes to ensure dashed line at true 45-degree angle
     coord_equal(xlim = lims, ylim = lims) +  
     ggplot2::labs(
-      title = "Observed vs Predicted Values",
+      title = "Observed vs Predicted values",
       subtitle = "Dashed line indicates perfect prediction (y = x)",
       x = "Predicted outcome",
       y = "Observed outcome"
@@ -4747,9 +4674,9 @@ output$lmm_diag_resid_qq <- plotly::renderPlotly({
 
 
 # ==========================================================
-# DIAGNOSTIC 3 - Random Effects Q–Q
+# DIAGNOSTIC 3 - Random Effects Q-Q
 # ==========================================================
-# Helper — Check if random-effect variance is non-zero
+# Helper - Check if random-effect variance is non-zero
 # ----------------------------------------------------------
 # Purpose:
 #   Determine whether a fitted mixed-effects model has
@@ -4785,12 +4712,6 @@ output$lmm_diag_ranef_qq <- plotly::renderPlotly({
   req(model)
   
   # ------------------------------------------
-  # Extract random intercepts
-  # ------------------------------------------
-  # re <- lme4::ranef(model)$country
-  # req("(Intercept)" %in% colnames(re))
-  
-  # ------------------------------------------
   # Decide WHICH random effect to extract
   #   - Intercept if present
   #   - Otherwise slope
@@ -4823,7 +4744,7 @@ output$lmm_diag_ranef_qq <- plotly::renderPlotly({
  
 
   # ------------------------------------------
-  # Q–Q data (same as qqnorm)
+  # Q-Q data (same as qqnorm)
   # ------------------------------------------
   qq <- qqnorm(r, plot.it = FALSE)
   
@@ -4833,7 +4754,7 @@ output$lmm_diag_ranef_qq <- plotly::renderPlotly({
   )
   
   # ------------------------------------------
-  # Q–Q reference line (IDENTICAL to qqline)
+  # Q-Q reference line (IDENTICAL to qqline)
   # ------------------------------------------
   q25 <- quantile(r, 0.25, na.rm = TRUE)
   q75 <- quantile(r, 0.75, na.rm = TRUE)
@@ -4927,7 +4848,7 @@ output$lmm_diag_ranef_qq <- plotly::renderPlotly({
 
 
 # ==========================================================
-# Diagnostic 4 - Scale–location plot
+# Diagnostic 4 - Scale-location plot
 # ==========================================================
 output$lmm_diag_scale_location <- plotly::renderPlotly({
   
@@ -5164,7 +5085,7 @@ output$lmm_country_ranef_correlation <- renderText({
 ########### SUMMARY TABLE GROUP-LEVEL########################
 
 # ==========================================================
-# STEP 1 — Group-level LMM data reactive
+# 1 - Group-level LMM data reactive
 # ----------------------------------------------------------
 # Uses aggregate-only HDR Table 2 data
 # ==========================================================
@@ -5219,7 +5140,7 @@ lmm_group_data <- reactive({
 
 
 # ==========================================================
-# STEP 2 - Build group-level random-effects term
+# 2 - Build group-level random-effects term
 # ==========================================================
 build_group_random_effect <- function(input) {
   
@@ -5247,7 +5168,7 @@ build_group_random_effect <- function(input) {
 
 
 # ==========================================================
-# STEP 3 - Assemble full group-level LMM formula
+# 3 - Assemble full group-level LMM formula
 # Combine fixed effects and random effects
 #  Return a valid model formula
 # ==========================================================
@@ -5276,7 +5197,7 @@ lmm_group_formula <- reactive({
 
 
 # ==========================================================
-# STEP 4 - EVENTREACTIVE TO Fit group-level LMM
+# 4 - EVENTREACTIVE TO Fit group-level LMM
 # Fit the group-level linear mixed model
 # Triggered ONLY by the Run button
 # ==========================================================
@@ -5305,7 +5226,7 @@ lmm_group_model <- eventReactive(input$lmm_group_run, {
 
 
 # ==========================================================
-# STEP 5 - Group-level LMM: Model summary UI
+# 5 - Group-level LMM: Model summary UI
 # Display the fitted group-level LMM summary
 # Triggered only after the model is fitted
 # ==========================================================
@@ -5347,15 +5268,13 @@ output$lmm_group_model_summary <- renderPrint({
   # Existing behaviour: model summary
   # --------------------------------------------------
   print(summary(model))
-  #print(lme4::fixef(model))
-  
 })
 
 
 
 
 # ==========================================================
-# STEP 6A - Group-level Random Intercept Plot (with CI)
+# S6A - Group-level Random Intercept Plot (with CI)
 # ==========================================================
 output$lmm_group_random_intercept_plot <- plotly::renderPlotly({
   
@@ -5430,7 +5349,7 @@ output$lmm_group_random_intercept_plot <- plotly::renderPlotly({
 
 
 # ==========================================================
-# STEP 6B - Group-level Random Slope Plot (with CI)
+# 6B - Group-level Random Slope Plot (with CI)
 # ==========================================================
 output$lmm_group_random_slope_plot <- plotly::renderPlotly({
   
@@ -5506,7 +5425,7 @@ output$lmm_group_random_slope_plot <- plotly::renderPlotly({
 
 
 # ==========================================================
-# STEP 7c - OUTPUT Intercept–slope correlation (RI+RS only)
+# 6c - OUTPUT Intercept–slope correlation (RI+RS only)
 # ==========================================================
 output$lmm_group_ranef_correlation <- renderPrint({
   
@@ -5530,7 +5449,7 @@ output$lmm_group_ranef_correlation <- renderPrint({
 
 ################# DIAGNOSTIC GROUP-LEVEL  ###################################
 # ==========================================================
-# DIAGNOSTICS - Residuals vs fitted (group-level)
+# DIAGNOSTIC 1 - Residuals vs fitted (group-level)
 # ==========================================================
 output$lmm_group_diag_resid_fitted <- plotly::renderPlotly({
   
@@ -6485,7 +6404,7 @@ observe({
 
 
 # ==========================================================
-
+# Download cleaned raw HDR tables
 # ==========================================================
 output$download_hdr_tables_excelWorkbook <- downloadHandler(
 
@@ -6500,23 +6419,6 @@ output$download_hdr_tables_excelWorkbook <- downloadHandler(
     )
   }
 )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

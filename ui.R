@@ -903,25 +903,10 @@ shinyUI(fluidPage(
             selectInput(
               inputId  = "indicator_hdr",      
               label    = "Select an indicator",
-              choices  = ALL_HDR_INDICATORS, 
+              choices  = HDR_INDICATOR_CHOICES, 
               selected = "hdi_2023"
             ),  
-             
-            #Variable selector WVS7
-            # selectInput(
-            #   inputId  = "wvs_var",
-            #   label    = "WVS worldview indicator",
-            #   choices  = ALL_VARS_WVS7,
-            #   selected = "Q1"
-            # ),
 
-            # Variable selector WVS7
-            # selectInput(
-            #   inputId =  "wvs_var",
-            #   label   = "WVS worldview indicator",
-            #   choices = grouped_minus_ignored,          
-            #   selected = grouped_minus_ignored[1][1]  # default selection   
-            # ),
             
             conditionalPanel(
               condition= "input.map_mode == 'alignment'",

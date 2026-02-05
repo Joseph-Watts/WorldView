@@ -77,7 +77,7 @@ HDR_DATA <- list(
     countries = countries_table1
   ),
   
-  "Table 2 - HDI Trends" = list(
+  "Table 2 - HDI Trends, 1990-2023" = list(
     groups    = hdi_groups_table2,
     regions   = regions_table2,
     special   = special_groups_table2,
@@ -92,7 +92,7 @@ HDR_DATA <- list(
   ),
   
   
-  "Table 4 - GDI" = list(
+  "Table 4 - Gender Development Index" = list(
     groups    = hdi_groups_table4,
     regions   = regions_table4,
     special   = special_groups_table4,
@@ -100,7 +100,7 @@ HDR_DATA <- list(
   ),
   
   
-  "Table 5 - GII" = list(
+  "Table 5 - Gender Inequality Index" = list(
     groups    = hdi_groups_table5,
     regions   = regions_table5,
     special   = special_groups_table5,
@@ -108,7 +108,7 @@ HDR_DATA <- list(
   ),
   
   
-  "Table 7 - PHDI" = list(
+  "Table 7 - Planetary Pressures-adjusted HDI" = list(
     groups    = hdi_groups_table7,
     regions   = regions_table7,
     special   = special_groups_table7,

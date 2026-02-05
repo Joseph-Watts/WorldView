@@ -102,7 +102,6 @@ grouped_minus_ignored <- lapply(grouped_questions, function(x)
 
 
 
-
 ################################################################################
                       ###   global.R for HDRs ### 
 ################################################################################
@@ -127,7 +126,6 @@ library(tidyr)
 
 
 
-
 # ============================================
 # Load MASTER dataset (HDR + WVS, classified)
 # Country-level dataset used by the Shiny app
@@ -136,8 +134,6 @@ MASTER_COUNTRY_DATA <- readRDS(
   here::here("Support_Files/MASTER_HDR_WVS7_CLASSIFIED.rds"
              )
  )
-
-
 
 
 #Load "MASTER_HDR_WVS7_CLASSIFIED""
@@ -173,11 +169,6 @@ FULL_VARIABLE_DICTIONARY <- FULL_VARIABLE_DICTIONARY %>%
 
 
 
-
-
-
-
-
 # ================================
 # Load HDR_GROUP_BENCHMARK
 # ================================
@@ -208,14 +199,12 @@ MASTER_HDR_WVS7_CLASSIFIED <- MASTER_COUNTRY_DATA
 # Load HDR_GROUP_LOOKUP 
 # ======================================
 HDR_GROUP_LOOKUP <- readRDS("Support_Files/HDR_GROUP_LOOKUP.rds")
-View(HDR_GROUP_LOOKUP)
 
 
 # ======================================
 # Load HDR_AREA_LOOKUP 
 # ======================================
 HDR_AREA_LOOKUP <- readRDS("Support_Files/HDR_AREA_LOOKUP.rds")
-
 
 
 
@@ -293,7 +282,7 @@ hdr_table2_aggregates_long <- readRDS("Support_Files/hdr_table2_aggregates_long.
 
 
 # ============================================================
-# HDR country-level outcome choices (UI-safe)
+# HDR country-level outcome choices 
 # ============================================================
 HDR_var_choices <- FULL_COUNTRY_VAR_DICT %>%
   
@@ -312,7 +301,10 @@ HDR_var_choices <- FULL_COUNTRY_VAR_DICT %>%
 
 
 
-
+# ============================================================
+# HDR indicators variables names
+# ============================================================
+HDR_INDICATOR_CHOICES <- readRDS("Support_Files/HDR_INDICATOR_CHOICES.rds")
 
 
 

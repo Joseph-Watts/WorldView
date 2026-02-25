@@ -6,7 +6,9 @@
 
 required_packages <- c("shiny", "markdown", "haven", "here", "labelled", "sjlabelled", "DT", "ggplot2", "naniar",
                        "readxl", "writexl", "tm", "shinyBS", "shinycssloaders", "shinydashboard", "shinyWidgets",
-                       "tidyverse", "corrplot", "broom", "viridis", "plotly", "psych", "car", "randomForest")
+                       "tidyverse", "corrplot", "broom", "viridis", "plotly", "psych", "car", "randomForest",
+                       "openxlsx", "janitor", "sf", "rnaturalearthdata", "rnaturalearth", "leaflet", "countrycode", "purrr", "tidyr")
+
 
 # for (packageName in required_packages) {
 #   if (!requireNamespace(packageName)) {

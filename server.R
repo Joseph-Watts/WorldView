@@ -17,12 +17,12 @@ session$onSessionEnded(function() {
 })
   
 
-#DEBUG
-observe({
-  print("DEBUG: country var choices (WVS7)")
-  print(get_country_var_choices("WVS7"))
-})
-######  
+# #DEBUG
+# observe({
+#   print("DEBUG: country var choices (WVS7)")
+#   print(get_country_var_choices("WVS7"))
+# })
+# ######  
   
   
   

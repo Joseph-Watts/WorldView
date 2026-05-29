@@ -64,23 +64,30 @@ shinyUI(fluidPage(
                        
                        ############## VARIABLE DOCUMENTATION ##############
                        menuItem(
-                         "Dataset Documentation",
-                         tabName = "dummy",
-                         icon = icon('info-sign', lib = "glyphicon"),
-                         startExpanded = F,
-                         
-                         menuSubItem(
-                           "Master Survey Questionnaire",
-                           tabName = "surveyview",
-                           icon = icon("comment", lib = "glyphicon")
-                         ),
-                         
-                         menuSubItem(
-                           "Questionnaire Codebook",
-                           tabName = "codebookview",
-                           icon = icon("book", lib = "glyphicon")
-                         )
+                         "Codebook",
+                         tabName = "codebook",
+                         icon = icon('info-sign', lib = "glyphicon")
                        ),
+                       
+                       
+                       # menuItem(
+                       #   "Dataset Documentation",
+                       #   tabName = "dummy",
+                       #   icon = icon('info-sign', lib = "glyphicon"),
+                       #   startExpanded = F,
+                       #   
+                       #   menuSubItem(
+                       #     "Master Survey Questionnaire",
+                       #     tabName = "surveyview",
+                       #     icon = icon("comment", lib = "glyphicon")
+                       #   ),
+                       #   
+                       #   menuSubItem(
+                       #     "Questionnaire Codebook",
+                       #     tabName = "codebookview",
+                       #     icon = icon("book", lib = "glyphicon")
+                       #   )
+                       # ),
                        ############## VARIABLE DOCUMENTATION ##############
                        
                        
@@ -101,13 +108,13 @@ shinyUI(fluidPage(
                            "Country-level Data",
                            tabName = "EDA_country",
                            icon = icon("globe", lib = "glyphicon")
-                         ),
-                         
-                         menuSubItem(
-                           "Missing Data Visualizations",
-                           tabName = "vis_miss",
-                           icon = icon("warning-sign", lib = "glyphicon")
-                         )
+                         ) #,
+                         # 
+                         # menuSubItem(
+                         #   "Missing Data Visualizations",
+                         #   tabName = "vis_miss",
+                         #   icon = icon("warning-sign", lib = "glyphicon")
+                         # )
                        ),
                        ################## RAW DATA TABLES #################
                        
@@ -233,13 +240,17 @@ shinyUI(fluidPage(
         
         
         ############## VARIABLE DOCUMENTATION ##############
-        tabItem(tabName = "surveyview",
-                fluidRow(column(12, shinycssloaders::withSpinner(uiOutput("surveyview"))))
+        tabItem(tabName = "codebook",
+                includeMarkdown("www/codebook.md")
         ),
         
-        tabItem(tabName = "codebookview",
-                fluidRow(column(12, shinycssloaders::withSpinner(uiOutput("codebookview"))))
-        ),
+        # tabItem(tabName = "surveyview",
+        #         fluidRow(column(12, shinycssloaders::withSpinner(uiOutput("surveyview"))))
+        # ),
+        # 
+        # tabItem(tabName = "codebookview",
+        #         fluidRow(column(12, shinycssloaders::withSpinner(uiOutput("codebookview"))))
+        # ),
         ############## VARIABLE DOCUMENTATION ##############
         
         
@@ -257,62 +268,62 @@ shinyUI(fluidPage(
                 fluidRow(column(12, DTOutput("Table_country")))
         ),
         
-        tabItem(tabName = "vis_miss",
-                includeMarkdown("www/instructions/miss_vars.md"),
-                
-                tabsetPanel(id = "MissingViews", type = "pills",
-                            tabPanel("Top 15 Missing", value = "top_miss",
-                                     fluidRow(column(12, shinycssloaders::withSpinner(plotOutput("Top_miss_indiv", height = "60vh")))),
-                                     fluidRow(column(12, shinycssloaders::withSpinner(plotOutput("Top_miss_country", height = "60vh"))))
-                            ),
-                            
-                            tabPanel("Missing data from Individual Responses", value = "indiv_miss",
-                                     fluidRow(column(3,
-                                       dropdownButton(
-                                         inputId = "indiv_miss_adv",
-                                         label = "Advanced Options",
-                                         icon = icon("sliders"),
-                                         status = "success",
-                                         circle = FALSE,
-                                         materialSwitch(
-                                           inputId = "cluster_indiv",
-                                           label = "Cluster missingness",
-                                           status = "success"
-                                         ),
-                                         materialSwitch(
-                                           inputId = "sort_indiv",
-                                           label = "Sort columns by missingness",
-                                           status = "success"
-                                         )
-                                       )
-                                     )),
-                                     fluidRow(column(12, shinycssloaders::withSpinner(plotOutput("Indiv_missing_with_ratio", height = "85vh"))))
-                            ),
-                            
-                            tabPanel("Missing data from Countries responses", value = "countries_miss",
-                                     fluidRow(column(3,
-                                       dropdownButton(
-                                         inputId = "ctry_miss_adv",
-                                         label = "Advanced Options",
-                                         icon = icon("sliders"),
-                                         status = "success",
-                                         circle = FALSE,
-                                         materialSwitch(
-                                           inputId = "cluster_ctry",
-                                           label = "Cluster missingness",
-                                           status = "success"
-                                         ),
-                                         materialSwitch(
-                                           inputId = "sort_ctry",
-                                           label = "Sort columns by missingness",
-                                           status = "success"
-                                         )
-                                       )
-                                     )),
-                                     fluidRow(column(12, shinycssloaders::withSpinner(plotOutput("Missing", height = "85vh"))))
-                            )
-                )
-        ),
+        # tabItem(tabName = "vis_miss",
+        #         includeMarkdown("www/instructions/miss_vars.md"),
+        #         
+        #         tabsetPanel(id = "MissingViews", type = "pills",
+        #                     tabPanel("Top 15 Missing", value = "top_miss",
+        #                              fluidRow(column(12, shinycssloaders::withSpinner(plotOutput("Top_miss_indiv", height = "60vh")))),
+        #                              fluidRow(column(12, shinycssloaders::withSpinner(plotOutput("Top_miss_country", height = "60vh"))))
+        #                     ),
+        #                     
+        #                     tabPanel("Missing data from Individual Responses", value = "indiv_miss",
+        #                              fluidRow(column(3,
+        #                                dropdownButton(
+        #                                  inputId = "indiv_miss_adv",
+        #                                  label = "Advanced Options",
+        #                                  icon = icon("sliders"),
+        #                                  status = "success",
+        #                                  circle = FALSE,
+        #                                  materialSwitch(
+        #                                    inputId = "cluster_indiv",
+        #                                    label = "Cluster missingness",
+        #                                    status = "success"
+        #                                  ),
+        #                                  materialSwitch(
+        #                                    inputId = "sort_indiv",
+        #                                    label = "Sort columns by missingness",
+        #                                    status = "success"
+        #                                  )
+        #                                )
+        #                              )),
+        #                              fluidRow(column(12, shinycssloaders::withSpinner(plotOutput("Indiv_missing_with_ratio", height = "85vh"))))
+        #                     ),
+        #                     
+        #                     tabPanel("Missing data from Countries responses", value = "countries_miss",
+        #                              fluidRow(column(3,
+        #                                dropdownButton(
+        #                                  inputId = "ctry_miss_adv",
+        #                                  label = "Advanced Options",
+        #                                  icon = icon("sliders"),
+        #                                  status = "success",
+        #                                  circle = FALSE,
+        #                                  materialSwitch(
+        #                                    inputId = "cluster_ctry",
+        #                                    label = "Cluster missingness",
+        #                                    status = "success"
+        #                                  ),
+        #                                  materialSwitch(
+        #                                    inputId = "sort_ctry",
+        #                                    label = "Sort columns by missingness",
+        #                                    status = "success"
+        #                                  )
+        #                                )
+        #                              )),
+        #                              fluidRow(column(12, shinycssloaders::withSpinner(plotOutput("Missing", height = "85vh"))))
+        #                     )
+        #         )
+        # ),
         ################## RAW DATA TABLES #################
         
         

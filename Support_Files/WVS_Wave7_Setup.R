@@ -227,10 +227,10 @@ country_sum <- function(data, country, cols = cols_to_sum_fun) {
   
   #' Adding in country column
   i_d_sum$B_COUNTRY <- country
-  i_d_sum <- dplyr::relocate(i_d_sum, B_COUNTRY, .before = Q1)
+  i_d_sum <- dplyr::relocate(i_d_sum, B_COUNTRY, .before = colnames(i_d_sum)[1])
   
   i_d_sum$B_COUNTRY_ALPHA <- unique(i_d$B_COUNTRY_ALPHA)
-  i_d_sum <- dplyr::relocate(i_d_sum, B_COUNTRY_ALPHA, .before = Q1)
+  i_d_sum <- dplyr::relocate(i_d_sum, B_COUNTRY_ALPHA, .before = colnames(i_d_sum)[1])
   
   return(i_d_sum)
   
@@ -246,8 +246,8 @@ country_sum_output <- lapply(countries, country_sum, data = d)
 country_sum_output <- plyr::ldply(country_sum_output , data.frame)
 
 #' Saving out the country level summary data
-# writexl::write_xlsx(country_sum_output, "WVS_Dataset/WVS7_Country.xlsx")
-# readr::write_rds(country_sum_output, "WVS_Dataset/WVS7_Country.rds")
+writexl::write_xlsx(country_sum_output, "WVS_Dataset/WVS7_Country.xlsx")
+readr::write_rds(country_sum_output, "WVS_Dataset/WVS7_Country.rds")
 #=================================================================================================================================
 #=================================================================================================================================
 #=================================================================================================================================

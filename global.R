@@ -88,7 +88,19 @@ source(file.path("Support_Files/functions.R"), local = TRUE)
 # Create global variable
 grouped_questions <- get_groupedQs_I()
 
+not_diplayed <- orig_codebook_data$Col_ID[
+  orig_codebook_data$Variable_Display_Logical == "F"
+  ]
+
+ignored_not_diplayed_questions <- c(ignored_questions, not_diplayed) %>%
+  unique()
 
 # list of questions grouped by their category minus ignored questions
-grouped_minus_ignored <- lapply(grouped_questions, function(x)
-  x[!grepl(paste0("\\b(", paste(ignored_questions, collapse = "|"), ")\\b"), x)])
+grouped_minus_ignored <- lapply(grouped_questions, 
+                                function(x)
+  x[!grepl(paste0("\\b(", paste(ignored_not_diplayed_questions, 
+                                collapse = "|"), ")\\b"), x)])
+
+
+
+

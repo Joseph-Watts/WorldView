@@ -2,6 +2,7 @@
 
 Still to do
 
+- Check the update of the code
 - Add link to pdfs here
 - Provide background information on the fact that these variables have been changed from how they are in the raw WVS data
 

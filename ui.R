@@ -231,8 +231,8 @@ shinyUI(fluidPage(
                 fluidRow(shinydashboard::box(width = 4, status = "primary",
                                              selectizeInput(inputId = "univar_question",
                                                             label = "Select Question:",
-                                                            choices = grouped_minus_ignored,
-                                                            selected = grouped_minus_ignored[[1]][1]),
+                                                            choices = grouped_questions,
+                                                            selected = grouped_questions[[1]][1]),
                                              pickerInput(inputId = "univar_countries",
                                                          label = "Select Countries:",
                                                          choices = picker_country_list,
@@ -257,13 +257,13 @@ shinyUI(fluidPage(
                                              status = "primary",
                                              selectizeInput(inputId = "bivariate_var1",
                                                             label = "Select Variable 1:",
-                                                            choices = grouped_minus_ignored,
-                                                            selected = grouped_minus_ignored[[1]][1]
+                                                            choices = grouped_questions,
+                                                            selected = grouped_questions[[1]][1]
                                                             ),
                                              selectizeInput(inputId = "bivariate_var2",
                                                             label = "Select Variable 2:",
-                                                            choices = grouped_minus_ignored,
-                                                            selected = grouped_minus_ignored[[1]][2]
+                                                            choices = grouped_questions,
+                                                            selected = grouped_questions[[1]][2]
                                                             ),
                                              pickerInput(inputId = "bivariate_countries",
                                                          label = "Select Countries:",
@@ -300,8 +300,8 @@ shinyUI(fluidPage(
                       selectizeInput(
                         inputId = "bar_question",
                         label = "Select Question:",
-                        choices = grouped_minus_ignored,
-                        selected = grouped_minus_ignored[[1]][1],
+                        choices = grouped_questions,
+                        selected = grouped_questions[[1]][1],
                         size = 30
                       ),
                       pickerInput(
@@ -338,14 +338,14 @@ shinyUI(fluidPage(
                       selectizeInput(
                         inputId = "scatter_x",
                         label = "X-axis Question:",
-                        choices = grouped_minus_ignored,
-                        selected = grouped_minus_ignored[[1]][1]
+                        choices = grouped_questions,
+                        selected = grouped_questions[[1]][1]
                       ),
                       selectizeInput(
                         inputId = "scatter_y",
                         label = "Y-axis Question:",
-                        choices = grouped_minus_ignored,
-                        selected = grouped_minus_ignored[[1]][2]
+                        choices = grouped_questions,
+                        selected = grouped_questions[[1]][2]
                       ),
                       pickerInput(
                         inputId = "scatter_countries",
@@ -381,8 +381,8 @@ shinyUI(fluidPage(
                     selectizeInput(
                       inputId = "hist_question",
                       label = "Select Question:",
-                      choices = grouped_minus_ignored,
-                      selected = grouped_minus_ignored[[1]][1],
+                      choices = grouped_questions,
+                      selected = grouped_questions[[1]][1],
                       size = 30
                     ),
                     pickerInput(
@@ -452,14 +452,14 @@ shinyUI(fluidPage(
                       selectizeInput(
                         inputId = "corr_model_var1",
                         label = "Select Variable 1:",
-                        choices = grouped_minus_ignored,
-                        selected = grouped_minus_ignored[[1]][1]
+                        choices = grouped_questions,
+                        selected = grouped_questions[[1]][1]
                       ),
                       selectizeInput(
                         inputId = "corr_model_var2",
                         label = "Select Variable 2:",
-                        choices = grouped_minus_ignored,
-                        selected = grouped_minus_ignored[[1]][2]
+                        choices = grouped_questions,
+                        selected = grouped_questions[[1]][2]
                       ),
                       pickerInput(
                         inputId = "corr_model_countries",
@@ -509,8 +509,8 @@ shinyUI(fluidPage(
                       selectizeInput(
                         inputId = "anova_var",
                         label = "Select Variable:",
-                        choices = grouped_minus_ignored,
-                        selected = grouped_minus_ignored[[1]][1]
+                        choices = grouped_questions,
+                        selected = grouped_questions[[1]][1]
                       ),
                       pickerInput(
                         inputId = "anova_countries",
@@ -553,15 +553,15 @@ shinyUI(fluidPage(
                       selectizeInput(
                         inputId = "regression_dep",
                         label = "Dependent Variable:",
-                        choices = grouped_minus_ignored,
-                        selected = grouped_minus_ignored[[1]][1]
+                        choices = grouped_questions,
+                        selected = grouped_questions[[1]][1]
                       ),
                       pickerInput(
                         inputId = "regression_indep",
                         label = "Independent Variables:",
-                        choices = grouped_minus_ignored,
+                        choices = grouped_questions,
                         multiple = TRUE,
-                        selected = grouped_minus_ignored[[1]][2:3],
+                        selected = grouped_questions[[1]][2:3],
                         options = list(`live-search` = TRUE)
                       ),
                       pickerInput(

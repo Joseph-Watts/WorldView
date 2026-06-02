@@ -84,27 +84,14 @@ set.seed(20241211)
 #################################-
 #### WAVE 7 - DATA WRANGLING ####
 #################################-
-# source(file.path("Support_Files/WVS_Wave7_Wrangling.R"), 
-#        local = TRUE)
-
 
 # load processed data
-orig_indiv_data <- readRDS("WVS_Dataset/WVS7_Individual.rds")
-orig_country_data <- readRDS("WVS_Dataset/WVS7_Country.rds")
-orig_codebook_data <- readxl::read_xlsx("WVS_Dataset/WVS7_Codebook_updated_labels.xlsx")
+indiv_data <- readRDS("WVS_Dataset/WVS7_Individual.rds")
+country_data <- readRDS("WVS_Dataset/WVS7_Country.rds")
+codebook_data <- readxl::read_xlsx("WVS_Dataset/WVS7_Codebook_updated_labels.xlsx")
 orig_UNSD_data <- readxl::read_excel("WVS_Dataset/UNSD — Methodology.xlsx")
-
 picker_country_list <- read_rds("WVS_Dataset/picker_country_list.rds")
 
-# # Ignored questions (given the number of factors they have or any other condition)
-ignored_questions <- c("Q223", # political parties for each country - almost 1000 different factors
-                       "Q266", # birth place - basically all countries ~ 200 factors
-                       "Q267", # birth place - basically all countries ~ 200 factors
-                       "Q268", # birth place - basically all countries ~ 200 factors
-                       "Q272", # language groupings - # different factors
-                       "Q290") # ethnic groupings - # different factors
-
-indiv_ordinal <- readRDS("WVS_Dataset/WVS7_Individual.rds")
 
 ###########################-
 #### SUPPORT FUNCTIONS ####
@@ -113,25 +100,8 @@ source(file.path("Support_Files/functions.R"),
        local = TRUE)
 
 
-# Create global variable
-grouped_questions <- get_groupedQs_I()
-
-not_diplayed <- orig_codebook_data$Col_ID[
-  orig_codebook_data$Variable_Display_Logical == "F"
-  ]
-
-ignored_not_diplayed_questions <- c(ignored_questions, 
-                                    not_diplayed) %>%
-  unique()
-
-# list of questions grouped by their category minus ignored questions
-grouped_minus_ignored <- lapply(grouped_questions, 
-                                function(x)
-  x[!grepl(paste0("\\b(", paste(ignored_not_diplayed_questions, 
-                                collapse = "|"), 
-                  ")\\b"), x)])
-
-
+# Create global list of questions to select from
+grouped_questions <- get_groupedQs_I(colnames(indiv_data))
 
 #### modules ####
 # source("modules/phylogeny/phylogeny_global.R")

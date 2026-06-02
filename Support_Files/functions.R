@@ -153,7 +153,7 @@
 
 #####
 # Identify factor variables and print the number of levels for each
-factor_info <- sapply(indiv_ordinal, function(x) {
+factor_info <- sapply(indiv_data, function(x) {
   if (is.factor(x)) {
     return(length(levels(x)))
   } else {
@@ -230,8 +230,8 @@ picker_Qs_list <- function(grouped_list) {
 
 #####
 # Function to get grouped questions
-get_groupedQs_I <- function() {
-  var_info <- orig_codebook_data
+get_groupedQs_I <- function(variables_used = NULL) {
+  var_info <- codebook_data
   sections <- as.list(unique(var_info$Section))
   sections_ord <- factor(var_info$Section, ordered = TRUE, levels = sections)
   testDD <- data.frame(group = sections_ord,
@@ -239,16 +239,27 @@ get_groupedQs_I <- function() {
   choicesgrpQ <- split(testDD$qvar, testDD$group, lex.order = FALSE)
   choicesgrpQ <- choicesgrpQ[-1] # remove IDs and sequencing
   choicesgrpQ <- head(choicesgrpQ, -1) # remove interviewer obs
-  choicesgrpQ
+  if(is.null(variables_used)){
+    return(choicesgrpQ)
+  }else{
+    choicesgrpQ <- lapply(choicesgrpQ,
+                   function(x){x[grepl(paste0("\\b(", 
+                                               paste(variables_used,
+                                                     collapse = "|"),
+                                               ")\\b"), x)]}
+                   )
+    
+    return(choicesgrpQ)
+  }
 }
 #####
-
+variables_used = colnames(indiv_data)
 
 #####
 # Question ID mapping function
 get_question_id <- function(label) {
   # Access the codebook data directly
-  var_info <- orig_codebook_data
+  var_info <- codebook_data
   var_info$Col_ID[var_info$ColLab == label]
 }
 #####

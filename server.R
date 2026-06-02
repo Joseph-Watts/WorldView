@@ -21,24 +21,24 @@ shinyServer(
     
     # WVS7_Individual.rds
     get_I_data <- reactive({
-      d <- orig_indiv_data
+      d <- indiv_data
       d
     })
     
     # WVS7_Country.rds
     get_C_data <- reactive({
-      d <- orig_country_data
+      d <- country_data
       d
     })
     
     # Codebook - with updated ColLab (concatenating Col_Id with label)
     get_var_info <- reactive({
-      d <- orig_codebook_data
+      d <- codebook_data
       d$Variable_Display_Logical <- as.logical(d$Variable_Display_Logical)
       d
     })
     
-    # orig_indiv_data modified to have full question as name of column
+    # indiv_data modified to have full question as name of column
     get_I_longID <- reactive({
       d.I <- get_I_data()
       d.var_info <- get_var_info()
@@ -49,7 +49,7 @@ shinyServer(
       d.I
     })
     
-    # orig_country_data modified to have full question as name of column - NEEDS REWORK
+    # country_data modified to have full question as name of column - NEEDS REWORK
     # get_C_longID <- reactive({
     #   d.C <- get_C_data()
     #   d.var_info <- get_var_info()
@@ -83,7 +83,7 @@ shinyServer(
     
     # Create Question text List and their 'ID'
     get_questions_List <- reactive({
-      d <- orig_codebook_data[, c(1, 2, 10)]
+      d <- codebook_data[, c(1, 2, 10)]
       d <- split(d, d$Section)
       c <- lapply(d, function(group) {
         stats::setNames(group$Col_ID, group$ColLab)
@@ -261,7 +261,7 @@ shinyServer(
         dplyr::select(country = B_COUNTRY, response = all_of(q_id)) %>%
         dplyr::mutate(country = as.character(country))
       
-      num_data <- indiv_ordinal %>%
+      num_data <- indiv_data %>%
         dplyr::filter(B_COUNTRY_ALPHA %in% input$univar_countries) %>% 
         dplyr::select(country = B_COUNTRY, response = all_of(q_id)) %>%
         dplyr::mutate(
@@ -365,7 +365,7 @@ shinyServer(
       var2_id <- get_question_id(input$bivariate_var2)
       
       # Prepare data
-      data <- orig_indiv_data
+      data <- indiv_data
       if (!is.null(input$bivariate_countries)) {
         data <- data %>% 
           dplyr::filter(B_COUNTRY_ALPHA %in% input$bivariate_countries)
@@ -434,7 +434,7 @@ shinyServer(
         
         q_id <- get_question_id(input$bar_question)
         
-        plot_data <- orig_indiv_data %>%
+        plot_data <- indiv_data %>%
           dplyr::filter(B_COUNTRY_ALPHA %in% input$bar_countries) %>%
           dplyr::select(country = B_COUNTRY, response = !!q_id) %>%
           dplyr::mutate(response = as.factor(response)) %>%
@@ -545,7 +545,7 @@ shinyServer(
     #   }, USE.NAMES = FALSE)
     #   
     #   # Prepare data
-    #   plot_data <- indiv_ordinal
+    #   plot_data <- indiv_data
     #   if (!is.null(input$corr_countries)) {
     #     plot_data <- plot_data %>%
     #       dplyr::filter(B_COUNTRY_ALPHA %in% input$corr_countries)
@@ -632,7 +632,7 @@ shinyServer(
       q_id <- get_question_id(input$hist_question)
 
       # Prepare data
-      plot_data <- orig_indiv_data %>%
+      plot_data <- indiv_data %>%
         dplyr::filter(B_COUNTRY_ALPHA %in% input$hist_countries) %>%
         dplyr::select(country = B_COUNTRY, response = !!q_id) %>%
         dplyr::mutate(
@@ -778,7 +778,7 @@ shinyServer(
       var2_id <- get_question_id(input$corr_model_var2)
       
       # Prepare data from preprocessed numeric dataset
-      data <- indiv_ordinal
+      data <- indiv_data
       
       # Apply country filter if selected
       if (!is.null(input$corr_model_countries)) {
@@ -945,7 +945,7 @@ shinyServer(
       var_id <- get_question_id(input$anova_var)
       
       # Prepare data from preprocessed numeric dataset
-      data <- indiv_ordinal
+      data <- indiv_data
       
       # Apply country filter if selected
       if (!is.null(input$anova_countries)) {
@@ -1104,13 +1104,13 @@ shinyServer(
       indep_ids <- sapply(input$regression_indep, get_question_id, USE.NAMES = FALSE)
 
 
-      if(!all(c(dep_id, indep_ids) %in% names(indiv_ordinal))) {
+      if(!all(c(dep_id, indep_ids) %in% names(indiv_data))) {
         showNotification("Selected variables not in dataset", type = "error")
         return(NULL)
       }
 
       # Prepare data from preprocessed numeric dataset
-      data <- indiv_ordinal
+      data <- indiv_data
 
       # Apply country filter if selected
       if (!is.null(input$regression_country)) {
@@ -1310,7 +1310,7 @@ shinyServer(
     models_phylo_lm_server(
       "models_phylo_lm",
       wvs_country = wvs_country2,
-      codebook_data = orig_codebook_data,
+      codebook_data = codebook_data,
       lang_tree = country_phylogeny_tree,
       lang_country_map = country_phylogeny
     )
@@ -1318,7 +1318,7 @@ shinyServer(
     models_phylo_glm_server(
       "models_phylo_glm",
       wvs_country = wvs_country2,
-      codebook_data = orig_codebook_data,
+      codebook_data = codebook_data,
       lang_tree = country_phylogeny_tree,
       lang_country_map = country_phylogeny
     )
@@ -1326,19 +1326,19 @@ shinyServer(
     geo_viz_map_server(
       "geo_viz_map",
       wvs_country       = wvs_country2,
-      codebook_data     = orig_codebook_data,
+      codebook_data     = codebook_data,
       world_shape       = world_shape,
       country_phylogeny = country_phylogeny,
-      grouped_vars      = grouped_minus_ignored
+      grouped_vars      = grouped_questions
     )
     
     phylo_viz_tree_server(
       "phylo_viz_tree",
       wvs_data = wvs_country2,           
-      codebook_data = orig_codebook_data,     
+      codebook_data = codebook_data,     
       lang_tree = country_phylogeny_tree,      
       lang_country_map = country_phylogeny,
-      grouped_vars = grouped_minus_ignored
+      grouped_vars = grouped_questions
     )
     
   }) # end server logic

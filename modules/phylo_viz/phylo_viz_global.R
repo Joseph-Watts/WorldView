@@ -44,7 +44,7 @@ country_phylogeny <- read_csv(paste0(path_phylogeny_dataset,"/country_phylogeny.
 country_phylogeny_tree <- read.tree(paste0(path_phylogeny_dataset, "/country_phylogeny_tree.tree"))
 
 
-wvs_country2 <- orig_country_data
+wvs_country2 <- country_data
 
 merge_NIR_to_GBR <- TRUE
 # merge_NIR_to_GBR <- FALSE

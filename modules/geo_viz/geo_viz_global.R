@@ -18,4 +18,4 @@ source("modules/geo_viz/map/map_server.R")
 ## data pre-process
 world_shape <- rnaturalearth::ne_countries(
   scale = "medium", returnclass = "sf"
-) %>% dplyr::filter(iso_a3 %in% orig_country_data$B_COUNTRY_ALPHA)
+) %>% dplyr::filter(iso_a3 %in% country_data$B_COUNTRY_ALPHA)

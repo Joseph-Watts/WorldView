@@ -23,6 +23,18 @@ d_vars_coded$Variable_Display_Logical <- as.logical(d_vars_coded$Variable_Displa
 #' Columns that will be displayed
 cols_display <- d_vars_coded$Col_ID[d_vars_coded$Variable_Display_Logical]
 
+#' Ignored questions (given the number of factors they have or any other condition)
+#' These will be dropped, even if included in the Variable_Display_Logical
+ignored_questions <- c("Q223", # political parties for each country - almost 1000 different factors
+                       "Q266", # birth place - basically all countries ~ 200 factors
+                       "Q267", # birth place - basically all countries ~ 200 factors
+                       "Q268", # birth place - basically all countries ~ 200 factors
+                       "Q272", # language groupings - # different factors
+                       "Q290") # ethnic groupings - # different factors
+
+cols_display <- cols_display[!cols_display %in% ignored_questions]
+
+
 #' These are manually coded classification of how the variable should be
 #' presented in the app
 table(d_vars_coded$Variable_Display_Type)
@@ -104,16 +116,7 @@ for(i in 1:nrow(d_vars_coded)){
 }
 
 #' -------------------------------------
-#' This sections is being shifted from data wrangling to here
-
-# Ignored questions (given the number of factors they have or any other condition)
-ignored_questions <- c("Q223", # political parties for each country - almost 1000 different factors
-                       "Q266", # birth place - basically all countries ~ 200 factors
-                       "Q267", # birth place - basically all countries ~ 200 factors
-                       "Q268", # birth place - basically all countries ~ 200 factors
-                       "Q272", # language groupings - # different factors
-                       "Q290") # ethnic groupings - # different factors
-
+#' Transforming the variables to simplify NA codes and to avoid reverse coding where necessary
 
 # transform into ordinal
 indiv_ordinal <- as.data.frame(lapply(indiv, function(col) {
@@ -386,6 +389,8 @@ indiv_ordinal <- indiv_ordinal[ , c("B_COUNTRY",
 readr::write_rds(indiv_ordinal, 
           "WVS_Dataset/WVS7_Individual.rds",
           compress = "gz")
+
+
 #=================================================================================================================================
 #=================================================================================================================================
 #=================================================================================================================================

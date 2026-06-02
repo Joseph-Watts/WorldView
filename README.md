@@ -23,5 +23,7 @@ To access data from other waves, use [THIS](https://www.worldvaluessurvey.org/WV
 ### Development of this Shiny Application
 
 -   Joseph Watts
--   Nicki Cartlidge
 -   André De Vito
+-   Nicki Cartlidge
+-   Kong Weiming (William)
+-   Prisca Mbikou

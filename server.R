@@ -1337,7 +1337,8 @@ shinyServer(
       wvs_data = wvs_country2,           
       codebook_data = orig_codebook_data,     
       lang_tree = country_phylogeny_tree,      
-      lang_country_map = country_phylogeny   
+      lang_country_map = country_phylogeny,
+      grouped_vars = grouped_minus_ignored
     )
     
   }) # end server logic

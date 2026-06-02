@@ -34,7 +34,7 @@ Prisca Mbikou, Developer
 
 ### What is the source of the data?
 
-The WVS is an international research program that investigates people’s values, beliefs, and cultural attitudes across different countries.<br> All data used in this app comes from the [**World Values Survey - Wave 7**](https://www.worldvaluessurvey.org/WVSDocumentationWV7.jsp).
+The WVS is an international research program that investigates people’s values, beliefs, and cultural attitudes across different countries.<br> All data used in this app comes from the [World Values Survey - Wave 7](https://www.worldvaluessurvey.org/WVSDocumentationWV7.jsp).
 
 This specific dataset was conducted between 2017 and 2022 and is the most recent completed wave.<br>
 

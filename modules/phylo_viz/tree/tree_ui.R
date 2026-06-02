@@ -6,96 +6,47 @@ phylo_viz_tree_ui <- function(id) {
     # --- shared CSS for scrollable boxes ---
     tags$style(HTML("
       .wv-box-scroll {
-        max-height: 420px;     /* unified max height */
+        max-height: 420px;
         overflow-y: auto;
         overflow-x: hidden;
-        padding-right: 6px;    /* avoid scrollbar covering content */
+        padding-right: 6px;
       }
-      .wv-update-row {
+      .wv-action-row {
         display: flex;
-        justify-content: flex-start;
+        justify-content: center;
         align-items: center;
+        gap: 10px;
+        margin-top: 12px;
         margin-bottom: 8px;
       }
     ")),
     
     fluidRow(
-      # -------------------------
-      # Left: Data Controls
-      # -------------------------
       box(
-        width = 4,
-        title = "Data Controls",
+        width = 12,
+        title = "Options",
         status = "warning",
         solidHeader = TRUE,
         
         div(
           class = "wv-box-scroll",
           
-          selectInput(
-            ns("data_type"),
-            "Data Type:",
-            choices = c("WVS7 Data" = "wvs", "Base Tree" = "blank"),
-            selected = "wvs"
-          ),
-          # Select up to 5 numeric WVS variables
+          # Select up to 3 numeric WVS variables
           selectizeInput(
             ns("outcome_vars"),
-            "WVS7 Variables (max 5):",
+            "WVS7 Variables (max 3):",
             choices = NULL,
             multiple = TRUE,
             options = list(
-              placeholder = "Select up to 5 numeric variables",
-              maxItems = 5
+              placeholder = "Select up to 3 numeric variables",
+              maxItems = 3,
+              plugins = list("remove_button")
             )
           ),
           
           # Per-variable palette selectors (generated dynamically)
           uiOutput(ns("var_palette_ui")),
           
-          # Tip label fields (max 3)
-          selectizeInput(
-            ns("tip_label_fields"),
-            "Tip label fields (max 3):",
-            choices = c(
-              "Country name"  = "country_name",
-              "ISO3"          = "iso3166alpha3",
-              "ISO2"          = "iso3166alpha2",
-              "Language name" = "language_name",
-              "ISO639P3"      = "iso639P3",
-              "Glottocode"    = "glottocode"
-            ),
-            selected = c("country_name"),
-            multiple = TRUE,
-            options = list(maxItems = 3)
-          ),
-          
-          textInput(ns("tip_label_sep"), "Tip label separator:", value = " | ")
-        )
-      ),
-      
-      # -------------------------
-      # Middle: Tree Controls
-      # -------------------------
-      box(
-        width = 4,
-        title = "Tree Controls",
-        status = "info",
-        solidHeader = TRUE,
-        
-        div(
-          class = "wv-box-scroll",
-          
-          sliderInput(
-            ns("plot_height"),
-            "Plot Height (px):",
-            min = 500,
-            max = 5000,
-            value = 1100,
-            step = 100
-          ),
-          
-          # Remove "unrooted" (not needed)
           selectInput(
             ns("tree_layout"),
             "Tree Layout:",
@@ -110,6 +61,27 @@ phylo_viz_tree_ui <- function(id) {
           ),
           
           checkboxInput(ns("show_tip_labels"), "Show tip labels", value = TRUE),
+          
+          selectizeInput(
+            ns("tip_label_fields"),
+            "Tip label fields (max 3):",
+            choices = c(
+              "Country name"  = "country_name",
+              "ISO3"          = "iso3166alpha3",
+              "ISO2"          = "iso3166alpha2",
+              "Language name" = "language_name",
+              "ISO639P3"      = "iso639P3",
+              "Glottocode"    = "glottocode"
+            ),
+            selected = c("country_name"),
+            multiple = TRUE,
+            options = list(
+              maxItems = 3,
+              plugins = list("remove_button")
+            )
+          ),
+          
+          textInput(ns("tip_label_sep"), "Tip label separator:", value = " | "),
           
           sliderInput(
             ns("tip_label_size"),
@@ -139,28 +111,16 @@ phylo_viz_tree_ui <- function(id) {
           ),
           
           checkboxInput(ns("show_legends"), "Show legends", value = TRUE)
-        )
-      ),
-      
-      # -------------------------
-      # Right: Variable Description
-      # (Update Plot button is here, first row)
-      # -------------------------
-      box(
-        width = 4,
-        title = "Variable Description",
-        status = "success",
-        solidHeader = TRUE,
+        ),
         
         div(
-          class = "wv-box-scroll",
-          
-          div(
-            class = "wv-update-row",
-            actionButton(ns("update_plot"), "Update Plot", class = "btn-primary")
-          ),
-          
-          htmlOutput(ns("var_description"))
+          class = "wv-action-row",
+          actionButton(
+            ns("update_plot"),
+            "Generate Plot",
+            class = "btn-primary btn-block",
+            style = "width: 100%;"
+          )
         )
       )
     ),
@@ -171,7 +131,56 @@ phylo_viz_tree_ui <- function(id) {
         title = "Language Phylogeny Tree",
         status = "primary",
         solidHeader = TRUE,
-        plotOutput(ns("tree_plot"), height = "auto")
+        div(
+          style = "width:100%; overflow-x:auto; text-align:center;",
+          plotOutput(ns("tree_plot"), width = "100%", height = "auto")
+        )
+      )
+    ),
+
+    fluidRow(
+      box(
+        width = 12,
+        title = "Download",
+        status = "success",
+        solidHeader = TRUE,
+        fluidRow(
+          column(
+            width = 12,
+            div(
+              class = "wv-action-row",
+              downloadButton(ns("download_tree_image"), "Download image", class = "btn-success")
+            )
+          )
+        ),
+        fluidRow(
+          column(
+            width = 6,
+            sliderInput(
+              ns("download_width"),
+              "Download image width (px):",
+              min = 800,
+              max = 2400,
+              value = 1400,
+              step = 100
+            )
+          ),
+          column(
+            width = 6,
+            sliderInput(
+              ns("download_height"),
+              "Download image height (px):",
+              min = 600,
+              max = 3000,
+              value = 1200,
+              step = 100
+            )
+          )
+        ),
+        tags$small(
+          style = "display:block; margin-top:4px; color:#666;",
+          "Image width is capped at 2400 px and image height at 3000 px to keep rendering responsive."
+        )
       )
     ),
     

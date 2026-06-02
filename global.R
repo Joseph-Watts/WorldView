@@ -4,7 +4,8 @@
 
 required_packages <- c("shiny", "markdown", "haven", "here", "labelled", "sjlabelled", "DT", "ggplot2", "naniar",
                        "readxl", "writexl", "tm", "shinyBS", "shinycssloaders", "shinydashboard", "shinyWidgets",
-                       "tidyverse", "corrplot", "broom", "viridis", "plotly", "psych", "car", "randomForest")
+                       "tidyverse", "corrplot", "broom", "viridis", "plotly", "psych", "car", "randomForest",
+                       "ape", "phylolm", "pROC", "phytools", "leaflet.minicharts")
 
 for (packageName in required_packages) {
   if (!requireNamespace(packageName)) {
@@ -96,11 +97,13 @@ ignored_not_diplayed_questions <- c(ignored_questions, not_diplayed) %>%
   unique()
 
 # list of questions grouped by their category minus ignored questions
-grouped_minus_ignored <- lapply(grouped_questions, 
-                                function(x)
-  x[!grepl(paste0("\\b(", paste(ignored_not_diplayed_questions, 
-                                collapse = "|"), ")\\b"), x)])
+grouped_minus_ignored <- lapply(grouped_questions, function(x)
+  x[!grepl(paste0("\\b(", paste(ignored_questions, collapse = "|"), ")\\b"), x)])
 
 
 
-
+#### modules ####
+# source("modules/phylogeny/phylogeny_global.R")
+source("modules/phylo_viz/phylo_viz_global.R")
+source("modules/geo_viz/geo_viz_global.R")
+source("modules/models/models_global.R")

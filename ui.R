@@ -199,9 +199,47 @@ shinyUI(fluidPage(
                            "Linear Regression",
                            tabName = "regressionTab",
                            icon = icon("line-chart")
+                         ),
+                         menuSubItem(
+                           "PhyloLM",
+                           tabName = "models_phylo_lm",
+                           icon = icon("fullscreen", lib = "glyphicon")
+                         ),
+                         menuSubItem(
+                           "PhyloGLM",
+                           tabName = "models_phylo_glm",
+                           icon = icon("random", lib = "glyphicon")
                          )
                        ),
                        ###################### MODELS ######################
+                       
+                       ###########Geographic Visualisation#################
+                       menuItem("Geographic Visualisation", tabName = "geographic", 
+                                icon = icon("map-marker"),
+                                startExpanded = F,
+                                menuSubItem(
+                                  "Map",
+                                  tabName = "geo_viz_map",
+                                  icon = icon("map-marker", lib = "glyphicon")
+                                )
+                                
+                       ),
+                       
+                       ###########Geographic Visualisation#################
+                       
+                       #############Phylogenetic Visualisation#############
+                       menuItem("Phylogenetic Visualisation", tabName = "phylogeny", 
+                                icon = icon("sitemap"),
+                                startExpanded = F,
+                                menuSubItem(
+                                  "Tree",
+                                  tabName = "phylo_viz_tree",
+                                  icon = icon("tree-conifer", lib = "glyphicon")
+                                )
+                                
+                       ),
+                       
+                       #############Phylogenetic Visualisation#############
                        
                        
                        ######################## FAQ #######################
@@ -780,10 +818,18 @@ shinyUI(fluidPage(
                   )
                 )
         ),
-        
+        tabItem(tabName = "models_phylo_lm",models_phylo_lm_ui("models_phylo_lm")),
+        tabItem(tabName = "models_phylo_glm",models_phylo_glm_ui("models_phylo_glm")),
         
         ###################### MODELS ######################
         
+        ###########Geographic Visualisation#################
+        tabItem(tabName = "geo_viz_map",geo_viz_map_ui("geo_viz_map")),
+        ###########Geographic Visualisation#################
+        
+        #############Phylogenetic Visualisation#############
+        tabItem(tabName = "phylo_viz_tree",phylo_viz_tree_ui("phylo_viz_tree")),
+        #############Phylogenetic Visualisation#############
  
         ######################## FAQ #######################
         # tabItem(tabName = "faq",

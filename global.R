@@ -2,10 +2,14 @@
 #### REQUIRED PACKAGES ####
 ###########################-
 
-required_packages <- c("shiny", "markdown", "haven", "here", "labelled", "sjlabelled", "DT", "ggplot2", "naniar",
-                       "readxl", "writexl", "tm", "shinyBS", "shinycssloaders", "shinydashboard", "shinyWidgets",
-                       "tidyverse", "corrplot", "broom", "viridis", "plotly", "psych", "car", "randomForest",
-                       "ape", "phylolm", "pROC", "phytools", "leaflet.minicharts")
+required_packages <- c("shiny", "markdown", "haven", "here", "labelled", 
+                       "sjlabelled", "DT", "ggplot2", "naniar",
+                       "readxl", "writexl", "tm", "shinyBS", 
+                       "shinycssloaders", "shinydashboard", "shinyWidgets",
+                       "tidyverse", "corrplot", "broom", "viridis", 
+                       "plotly", "psych", "car", "randomForest",
+                       "ape", "phylolm", "pROC", "phytools", 
+                       "leaflet.minicharts")
 
 for (packageName in required_packages) {
   if (!requireNamespace(packageName)) {
@@ -77,13 +81,15 @@ set.seed(20241211)
 #################################-
 #### WAVE 7 - DATA WRANGLING ####
 #################################-
-source(file.path("Support_Files/WVS_Wave7_Wrangling.R"), local = TRUE)
+source(file.path("Support_Files/WVS_Wave7_Wrangling.R"), 
+       local = TRUE)
 
 
 ###########################-
 #### SUPPORT FUNCTIONS ####
 ###########################-
-source(file.path("Support_Files/functions.R"), local = TRUE)
+source(file.path("Support_Files/functions.R"), 
+       local = TRUE)
 
 
 # Create global variable
@@ -93,12 +99,16 @@ not_diplayed <- orig_codebook_data$Col_ID[
   orig_codebook_data$Variable_Display_Logical == "F"
   ]
 
-ignored_not_diplayed_questions <- c(ignored_questions, not_diplayed) %>%
+ignored_not_diplayed_questions <- c(ignored_questions, 
+                                    not_diplayed) %>%
   unique()
 
 # list of questions grouped by their category minus ignored questions
-grouped_minus_ignored <- lapply(grouped_questions, function(x)
-  x[!grepl(paste0("\\b(", paste(ignored_questions, collapse = "|"), ")\\b"), x)])
+grouped_minus_ignored <- lapply(grouped_questions, 
+                                function(x)
+  x[!grepl(paste0("\\b(", paste(ignored_not_diplayed_questions, 
+                                collapse = "|"), 
+                  ")\\b"), x)])
 
 
 

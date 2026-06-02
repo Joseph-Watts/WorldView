@@ -1,6 +1,17 @@
 # Kia ora and welcome
 
-Welcome to the WorldView app, designed to explore data from the [World Values Survey (WVS)](https://www.worldvaluessurvey.org). 
+This is the WorldView app, designed to help you explore and visualise data from the [World Values Survey (WVS)](https://www.worldvaluessurvey.org).
+
+WorldView has been specifically developed for PSYC382: Culture and Cognition at the University of Canterbury. 
+The app is designed to make WVS data easier to use in teaching and learning by allowing you to visualise patterns across countries without needing to process the raw data yourself or directly run R code.
+
+---
+
+### About this app
+
+With WorldView, you can explore cultural values, beliefs, attitudes, and demographic patterns using processed data from Wave 7 of the WVS. The app provides interactive tools for visualising data, comparing countries, and examining relationships between variables.
+
+WorldView runs in [R Shiny](https://shiny.posit.co/), a framework for building interactive web applications with R. If you are interested in research, data analysis, or building your own interactive tools, learning to code in R is strongly recommended.
 
 ---
 
@@ -11,14 +22,17 @@ The WVS is a global research project spanning more than 100 countries that inves
 - Relationships between values and social and political development  
 - The impact of values on economic development and democracy  
 
-This app is based on Wave 7 (2017-2022) of the WVS - the most recent completed wave currently available for research use.
-The data included here have been processed and simplified from the raw WVS data. See the Codebook page for more information.
+This app is based on Wave 7 (2017-2022) of the WVS. The data included here have been processed and simplified from the raw WVS data. See the Codebook page for more information.
+
+The WVS data are [subject to copyright](https://www.worldvaluessurvey.org/WVSEventsShow.jsp?ID=362) and are used here for non-commercial educational purposes.
+
+Citation of WVS data: Haerpfer, C., Inglehart, R., Moreno, A., Welzel, C., Kizilova, K., Diez-Medrano J., M. Lagos, P. Norris, E. Ponarin & B. Puranen et al. (eds.). 2020. World Values Survey: Round Seven – Country-Pooled Datafile. Madrid, Spain & Vienna, Austria: JD Systems Institute & WVSA Secretariat. doi.org/10.14281/18241.1
 
 ---
 
-### WVS data usage
-- The data used here are subject to copyright and are provided strictly for educational purposes.
-- These data are not for redistribution or commercial use.
+### Feedback
+
+WorldView is still in development, and your feedback is welcome. Please share comments, suggestions, or problems using the [feedback form](https://forms.office.com/r/fbQWv0DVTc).
 
 ---
 

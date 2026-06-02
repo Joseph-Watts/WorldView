@@ -32,33 +32,7 @@ shinyUI(fluidPage(
     type = "text/css",
     ".shiny-output-error { visibility: hidden; }", # remove shiny "red" warning messages on GUI
     ".shiny-output-error:before { visibility: hidden; }",
-    HTML("
-      .app-footer {
-        margin-top: 30px;
-        padding: 16px 20px;
-        border-top: 1px solid #ddd;
-        color: #555;
-        background: #f9f9f9;
-        font-size: 13px;
-      }
-      .app-footer-inner {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px 18px;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-      }
-      .app-footer a {
-        color: #008749;
-        font-weight: 600;
-      }
-      .app-footer a:hover,
-      .app-footer a:focus {
-        color: #005f34;
-        text-decoration: underline;
-      }
-    ")
+    HTML("")
   ),
   
   dashboardPage(
@@ -131,11 +105,11 @@ shinyUI(fluidPage(
                            icon = icon("stats", lib = "glyphicon")
                          ),
                          
-                         menuSubItem(
-                           "Scatterplot",
-                           tabName = "scatterParticipants",
-                           icon = icon("move", lib = "glyphicon")
-                         ),
+                         # menuSubItem(
+                         #   "Scatterplot",
+                         #   tabName = "scatterParticipants",
+                         #   icon = icon("move", lib = "glyphicon")
+                         # ),
                          
                          menuSubItem(
                            "Histogram",
@@ -199,23 +173,6 @@ shinyUI(fluidPage(
                        ###################### MODELS ######################
                       
                        
-                       ######################## FAQ #######################
-                       # menuItem(
-                       #   "FAQ",
-                       #   tabName = "faq",
-                       #   icon = icon("question-sign", lib = "glyphicon")
-                       # ),
-                       ######################## FAQ #######################
-                       
-                       
-                       ###################### ABOUT #######################
-                       # menuItem(
-                       #   "About the Team",
-                       #   tabName = "team",
-                       #   icon = icon("user", lib = "glyphicon")
-                       # )
-                       ###################### ABOUT #######################
-                       
                        ###################### ABOUT #######################
                        menuItem(
                          "About WorldView",
@@ -249,7 +206,6 @@ shinyUI(fluidPage(
         ############## VARIABLE DOCUMENTATION ##############
         
       
-        
         ################ SUMMARY STATISTICS ################
         # Univariate Stats tab
         tabItem(tabName = "univariateStats",
@@ -357,46 +313,46 @@ shinyUI(fluidPage(
                 )
         ),
         
-        tabItem(tabName = "scatterParticipants",
-                includeMarkdown("www/instructions/scatter_instruction.md"),
-                fluidRow(
-                  shinydashboard::box(width = 3, status = "primary",
-                      selectizeInput(
-                        inputId = "scatter_x",
-                        label = "X-axis Question:",
-                        choices = grouped_questions,
-                        selected = grouped_questions[[1]][1]
-                      ),
-                      selectizeInput(
-                        inputId = "scatter_y",
-                        label = "Y-axis Question:",
-                        choices = grouped_questions,
-                        selected = grouped_questions[[1]][2]
-                      ),
-                      pickerInput(
-                        inputId = "scatter_countries",
-                        label = "Select Countries:",
-                        choices = picker_country_list,
-                        multiple = TRUE,
-                        options = list(
-                          `actions-box` = TRUE,
-                          `live-search` = TRUE,
-                          `size` = 30,
-                          `max-options` = 5
-                        ),
-                        selected = c("NZL", "AUS", "GBR")
-                      ),
-                      sliderInput(
-                        "scatter_sample",
-                        "Sample Size (as % of data):",
-                        min = 10, max = 100, value = 25, step = 1
-                      )
-                  ),
-                  shinydashboard::box(width = 9, title = "Participant Scatterplot", status = "primary",
-                      shinycssloaders::withSpinner(plotlyOutput("scatter_plot", height = "600px"))
-                  )
-                )
-        ),
+        # tabItem(tabName = "scatterParticipants",
+        #         includeMarkdown("www/instructions/scatter_instruction.md"),
+        #         fluidRow(
+        #           shinydashboard::box(width = 3, status = "primary",
+        #               selectizeInput(
+        #                 inputId = "scatter_x",
+        #                 label = "X-axis Question:",
+        #                 choices = grouped_questions,
+        #                 selected = grouped_questions[[1]][1]
+        #               ),
+        #               selectizeInput(
+        #                 inputId = "scatter_y",
+        #                 label = "Y-axis Question:",
+        #                 choices = grouped_questions,
+        #                 selected = grouped_questions[[1]][2]
+        #               ),
+        #               pickerInput(
+        #                 inputId = "scatter_countries",
+        #                 label = "Select Countries:",
+        #                 choices = picker_country_list,
+        #                 multiple = TRUE,
+        #                 options = list(
+        #                   `actions-box` = TRUE,
+        #                   `live-search` = TRUE,
+        #                   `size` = 30,
+        #                   `max-options` = 5
+        #                 ),
+        #                 selected = c("NZL", "AUS", "GBR")
+        #               ),
+        #               sliderInput(
+        #                 "scatter_sample",
+        #                 "Sample Size (as % of data):",
+        #                 min = 10, max = 100, value = 25, step = 1
+        #               )
+        #           ),
+        #           shinydashboard::box(width = 9, title = "Participant Scatterplot", status = "primary",
+        #               shinycssloaders::withSpinner(plotlyOutput("scatter_plot", height = "600px"))
+        #           )
+        #         )
+        # ),
         
         tabItem(tabName = "histogramView",
                 includeMarkdown("www/instructions/histogram_instruction.md"),
@@ -643,40 +599,7 @@ shinyUI(fluidPage(
         ######################## ABOUT #######################
         
         
-      ), #end tabItems
-      
-      tags$footer(
-        class = "app-footer",
-        tags$div(
-          class = "app-footer-inner",
-          tags$span(
-            "Content licensed under ",
-            tags$a(
-              href = "https://creativecommons.org/licenses/by/4.0/",
-              target = "_blank",
-              rel = "noopener noreferrer",
-              "Creative Commons Attribution 4.0 International (CC BY 4.0)"
-            ),
-            "."
-          ),
-          tags$span(
-            tags$a(
-              href = "https://github.com/Joseph-Watts/WorldView",
-              target = "_blank",
-              rel = "noopener noreferrer",
-              "GitHub"
-            )
-          ),
-          tags$span(
-            tags$a(
-              href = "https://forms.office.com/r/fbQWv0DVTc",
-              target = "_blank",
-              rel = "noopener noreferrer",
-              "Feedback form"
-            )
-          )
-        )
-      )
+      ) #end tabItems
     ) #end dashboardBody
     
   ) #end dashboardPage

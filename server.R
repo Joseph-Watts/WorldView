@@ -49,24 +49,6 @@ shinyServer(
       d.I
     })
     
-    # country_data modified to have full question as name of column - NEEDS REWORK
-    # get_C_longID <- reactive({
-    #   d.C <- get_C_data()
-    #   d.var_info <- get_var_info()
-    #   
-    #   for (i in 3:421) { # from Q1 to Q290
-    #     # names(d.C)[i] <- d.var_info$ColLab[i]
-    #     names(d.C) <- sapply(names(d.C), function(name) {
-    #       if (name %in% names(d.var_info$ColLab[i]) && !grepl("\\.", name)) {
-    #         title_lookup[name]
-    #       } else {
-    #         name
-    #       }
-    #     })
-    #   }
-    #   d.C
-    # })
-    
     # Extract Country names in Individual dataset
     get_countries <- reactive({
       d.I <- get_I_data()
@@ -485,51 +467,51 @@ shinyServer(
     #####################-
     #### Scatterplot ####
     #####################-
-    
-    output$scatter_plot <- renderPlotly({
-      req(input$scatter_x, input$scatter_y, input$scatter_countries)
-      
-      req(input$scatter_x, input$scatter_y)
-      
-      # Get question IDs
-      var_info <- get_var_info()
-      x_id <- var_info$Col_ID[var_info$ColLab == input$scatter_x]
-      y_id <- var_info$Col_ID[var_info$ColLab == input$scatter_y]
-      
-      # Prepare data
-      plot_data <- get_I_data()
-      if (!is.null(input$scatter_countries)) {
-        plot_data <- plot_data %>%
-          dplyr::filter(B_COUNTRY_ALPHA %in% input$scatter_countries)
-      }
-      
-      # Sample data for performance
-      if (nrow(plot_data) > input$scatter_sample) {
-        plot_data <- plot_data %>% dplyr::sample_frac((input$scatter_sample) / 100)
-      }
-      
-      plot_data <- plot_data %>%
-        dplyr::select(x = !!x_id,
-                      y = !!y_id,
-                      country = B_COUNTRY_ALPHA)
-      
-      # Create plot
-      p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = x, y = y, color = country)) +
-        ggplot2::geom_point(alpha = 0.6) +
-        ggplot2::geom_jitter(width = 0.2,
-                             alpha = 0.3,
-                             size = 1.5) +
-        ggplot2::geom_smooth(method = "lm", se = FALSE) +
-        ggplot2::labs(
-          title = paste(input$scatter_x, "vs", input$scatter_y),
-          x = input$scatter_x,
-          y = input$scatter_y
-        ) +
-        ggplot2::theme_minimal()
-      
-      plotly::ggplotly(p)
-    })
-    
+    # 
+    # output$scatter_plot <- renderPlotly({
+    #   req(input$scatter_x, input$scatter_y, input$scatter_countries)
+    #   
+    #   req(input$scatter_x, input$scatter_y)
+    #   
+    #   # Get question IDs
+    #   var_info <- get_var_info()
+    #   x_id <- var_info$Col_ID[var_info$ColLab == input$scatter_x]
+    #   y_id <- var_info$Col_ID[var_info$ColLab == input$scatter_y]
+    #   
+    #   # Prepare data
+    #   plot_data <- get_I_data()
+    #   if (!is.null(input$scatter_countries)) {
+    #     plot_data <- plot_data %>%
+    #       dplyr::filter(B_COUNTRY_ALPHA %in% input$scatter_countries)
+    #   }
+    #   
+    #   # Sample data for performance
+    #   if (nrow(plot_data) > input$scatter_sample) {
+    #     plot_data <- plot_data %>% dplyr::sample_frac((input$scatter_sample) / 100)
+    #   }
+    #   
+    #   plot_data <- plot_data %>%
+    #     dplyr::select(x = !!x_id,
+    #                   y = !!y_id,
+    #                   country = B_COUNTRY_ALPHA)
+    #   
+    #   # Create plot
+    #   p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = x, y = y, color = country)) +
+    #     ggplot2::geom_point(alpha = 0.6) +
+    #     ggplot2::geom_jitter(width = 0.2,
+    #                          alpha = 0.3,
+    #                          size = 1.5) +
+    #     ggplot2::geom_smooth(method = "lm", se = FALSE) +
+    #     ggplot2::labs(
+    #       title = paste(input$scatter_x, "vs", input$scatter_y),
+    #       x = input$scatter_x,
+    #       y = input$scatter_y
+    #     ) +
+    #     ggplot2::theme_minimal()
+    #   
+    #   plotly::ggplotly(p)
+    # })
+    # 
     
     ##################-
     #### Corrplot ####

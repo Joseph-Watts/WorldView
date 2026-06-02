@@ -2,6 +2,7 @@
 
 ## packages
 library("leaflet")
+library("leaflet.minicharts")
 library("sf")
 library("rnaturalearth")
 library("viridisLite")

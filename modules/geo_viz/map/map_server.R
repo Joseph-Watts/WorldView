@@ -1,159 +1,176 @@
 # modules/geo_viz/map/map_server.R
 
-geo_viz_map_server <- function(id,
-                             wvs_country,
-                             codebook_data,
-                             world_shape,
-                             country_phylogeny) {
-  
+geo_viz_map_server <- function(id, wvs_country, codebook_data, world_shape, country_phylogeny,
+                               grouped_vars = NULL) {
   moduleServer(id, function(input, output, session) {
-    
-    # --- 1) numeric variable choices ---
-    observe({
-      num_vars <- names(wvs_country)[vapply(wvs_country, is.numeric, logical(1))]
-      disp <- vapply(num_vars, function(v) wvs_var_display(v, codebook_data), FUN.VALUE = character(1))
-      # names = display text, values = real col_id (input$map_vars still returns col_id)
-      choices_named <- stats::setNames(num_vars, disp)
-      updateSelectizeInput(
-        session, "map_vars",
-        choices  = choices_named,
-        selected = head(num_vars, 2),
-        server   = TRUE
-      )
-    })
-    
-    # --- 2) join once ---
-    world_sf <- reactive({
+    world_data <- shiny::reactive({
       join_world_data(world_shape, wvs_country, country_phylogeny)
     })
     
-    # --- 3) Update button: only update after click ---
-    settings <- eventReactive(input$btn_update, {
-      list(
-        vars        = input$map_vars %||% character(),
-        bg_mode     = input$bg_mode %||% "none",
-        show_charts = isTRUE(input$show_charts),
-        chart_type  = input$chart_type %||% "bar",
-        chart_size  = input$chart_size %||% 38
-      )
-    }, ignoreNULL = FALSE)
-    
-    # --- 4) background legend in Data control (full list, scrollable) ---
-    output$bg_legend_full <- renderUI({
-      req(world_sf())
-      s <- settings()
-      build_bg_legend_full_ui(world_sf(), s$bg_mode)
+    numeric_vars <- shiny::reactive({
+      sf1 <- world_data()
+      cols <- names(sf1)[vapply(sf1, is.numeric, logical(1))]
+      cols <- setdiff(cols, c("scalerank", "labelrank", "pop_est", "gdp_md", "pop_year", "lastcensus"))
+      cols[vapply(sf1[cols], function(x) any(!is.na(x)), logical(1))]
     })
     
-    # --- 5) Variable description ---
-    output$var_description <- renderUI({
-      vars <- input$map_vars %||% character(0)
+    make_grouped_map_choices <- function(grouped_vars, world_sf, codebook_data) {
+      # Fallback: use all numeric variables if no grouped variable list is supplied.
+      if (is.null(grouped_vars)) {
+        vars <- numeric_vars()
+        return(stats::setNames(
+          vars,
+          vapply(vars, map_var_display, character(1), codebook_data = codebook_data)
+        ))
+      }
       
-      if (length(vars) == 0) return(HTML("<i>No variables selected.</i>"))
-      
-      disp <- vapply(
-        vars,
-        function(v) wvs_var_display(v, codebook_data),
-        FUN.VALUE = character(1)
-      )
-      
-      items <- lapply(seq_along(vars), function(i) {
-        tags$li(tags$b(htmltools::htmlEscape(disp[i])))
+      # grouped_minus_ignored is expected to be a list, usually grouped by section.
+      # Each element may contain Col_ID values, ColLab labels, or a mix of both.
+      choices <- lapply(grouped_vars, function(x) {
+        x <- as.character(x)
+        
+        ids <- ifelse(
+          x %in% codebook_data$Col_ID,
+          x,
+          codebook_data$Col_ID[match(x, codebook_data$ColLab)]
+        )
+        
+        ids <- stats::na.omit(ids)
+        ids <- ids[ids %in% names(world_sf)]
+        ids <- ids[vapply(world_sf[ids], is.numeric, logical(1))]
+        ids <- ids[vapply(world_sf[ids], function(z) any(!is.na(z)), logical(1))]
+        ids <- unique(ids)
+        
+        stats::setNames(
+          ids,
+          vapply(ids, map_var_display, character(1), codebook_data = codebook_data)
+        )
       })
       
-      tagList(
-        tags$div(
-          style = "margin-bottom:6px;",
-          tags$small(
-            style = "opacity:.8;",
-            "Hover a country to see ISO3, glottocode, language/family and selected values."
-          )
-        ),
-        tags$ul(items)
-      )
-    })
-    
-    # --- 6) chart legend plot (outside map), always Category10 ---
-    output$charts_legend <- renderPlot({
-      s <- settings()
-      req(world_sf())
+      choices <- choices[lengths(choices) > 0]
       
-      if (!isTRUE(s$show_charts) || length(s$vars) == 0) {
-        graphics::plot.new()
-        graphics::text(0.5, 0.5, "Charts hidden or no variables selected.")
-        return(invisible())
-      }
-      
-      cols <- rep(palette_category10(), length.out = length(s$vars))
-      df <- make_chart_legend_df(world_sf(), s$vars, cols)
-      
-      op <- par(mar = c(3, 2, 2, 1))
-      on.exit(par(op), add = TRUE)
-      
-      plot.new()
-      plot.window(xlim = c(0, 1), ylim = c(0, 1))
-      title(main = "Chart legend (Category10 + value ranges)", cex.main = 0.9)
-      
-      y0 <- seq(0.85, 0.15, length.out = nrow(df))
-      for (i in seq_len(nrow(df))) {
-        rect(0.03, y0[i] - 0.03, 0.08, y0[i] + 0.03, col = df$col[i], border = "grey40")
-        txt <- sprintf("%s  (min=%.3f, max=%.3f)", df$var[i], df$vmin[i], df$vmax[i])
-        text(0.10, y0[i], labels = txt, adj = 0, cex = 0.85)
-      }
-      
-      # mtext("Note: chart values are scaled per variable (0–1) for comparability.", side = 1, cex = 0.75)
-    })
-    
-    # --- 7) map ---
-    output$map <- renderLeaflet({
-      req(world_sf())
-      s <- settings()
-      sf0 <- world_sf()
-      
-      sf0$label <- build_country_labels(sf0, vars = s$vars, digits = 3, codebook_data = codebook_data)
-      
-      m <- leaflet::leaflet(sf0) %>%
-        leaflet::addProviderTiles("CartoDB.Positron")
-      
-      # background polygons (no map legend; legend is in Data control)
-      m <- add_background_polygons(m, sf0, s$bg_mode)
-      
-      # transparent overlay for hover/highlight (keeps background visible)
-      m <- m %>% leaflet::addPolygons(
-        data        = sf0,
-        fillColor   = "transparent",
-        fillOpacity = 0,
-        weight      = 1,
-        color       = "white",
-        label       = ~lapply(label, htmltools::HTML),
-        highlight   = leaflet::highlightOptions(
-          weight = 2,
-          color  = "#666",
-          bringToFront = TRUE
+      # If none of the grouped variables are available in the joined map data,
+      # fall back to all numeric country-level variables so the selector is not empty.
+      if (length(choices) == 0) {
+        vars <- numeric_vars()
+        choices <- stats::setNames(
+          vars,
+          vapply(vars, map_var_display, character(1), codebook_data = codebook_data)
         )
-      )
-      
-      # charts (Category10 fixed)
-      if (isTRUE(s$show_charts) && length(s$vars) > 0) {
-        prep <- prepare_minicharts_data(sf0, s$vars)
-        pal_vec <- palette_category10()
-        
-        m <- m %>%
-          leaflet.minicharts::addMinicharts(
-            lng          = prep$lng,
-            lat          = prep$lat,
-            chartdata    = prep$chart_mat,
-            type         = s$chart_type,
-            colorPalette = pal_vec,
-            width        = s$chart_size,
-            height       = s$chart_size,
-            opacity      = 0.95,
-            showLabels   = FALSE,
-            legend       = FALSE
-          )
       }
       
-      m
+      choices
+    }
+    
+    shiny::observe({
+      sf1 <- world_data()
+      choices <- make_grouped_map_choices(
+        grouped_vars  = grouped_vars,
+        world_sf      = sf1,
+        codebook_data = codebook_data
+      )
+      
+      first_choice <- unname(unlist(choices, recursive = FALSE, use.names = FALSE))[1]
+      if (is.na(first_choice)) {
+        first_choice <- character(0)
+      }
+      
+      shiny::updateSelectizeInput(
+        session,
+        "map_var",
+        choices = choices,
+        selected = first_choice,
+        server = TRUE
+      )
     })
+    
+    output$var_description <- shiny::renderUI({
+      req(input$map_var)
+      selected_var_ui <- htmltools::tags$div(
+        htmltools::tags$span("Selected variable: "),
+        htmltools::tags$b(map_var_display(input$map_var, codebook_data))
+      )
+      
+      if (!is.null(codebook_data) && all(c("Col_ID", "Question") %in% names(codebook_data))) {
+        row <- codebook_data[codebook_data$Col_ID == input$map_var, , drop = FALSE]
+        if (nrow(row) > 0) {
+          return(htmltools::tagList(
+            selected_var_ui,
+            htmltools::tags$p(row$Question[[1]])
+          ))
+        }
+      }
+      
+      selected_var_ui
+    })
+    
+    output$map <- leaflet::renderLeaflet({
+      sf1 <- world_data()
+      req(nrow(sf1) > 0)
+      
+      leaflet::leaflet(sf1, options = leaflet::leafletOptions(worldCopyJump = TRUE)) %>%
+        leaflet::addProviderTiles(leaflet::providers$CartoDB.Positron) %>%
+        add_variable_polygons(
+          sf1 = sf1,
+          var = input$map_var,
+          codebook_data = codebook_data,
+          palette_option = input$map_palette %||% "viridis"
+        ) %>%
+        leaflet::setView(lng = 0, lat = 20, zoom = 2)
+    })
+    
+
+    output$map_legend <- shiny::renderUI({
+      sf1 <- world_data()
+      req(nrow(sf1) > 0, input$map_var)
+      legend_ui <- build_map_legend_ui(
+        world_sf = sf1,
+        var = input$map_var,
+        codebook_data = codebook_data,
+        palette_option = input$map_palette %||% "viridis"
+      )
+      shiny::validate(shiny::need(!is.null(legend_ui), "No finite values available for the selected variable."))
+      legend_ui
+    })
+    
+    output$download_map <- shiny::downloadHandler(
+      filename = function() {
+        var_stub <- gsub("[^A-Za-z0-9_-]+", "_", input$map_var %||% "map")
+        paste0("world_map_", var_stub, "_", Sys.Date(), ".png")
+      },
+      content = function(file) {
+        sf1 <- world_data()
+        req(nrow(sf1) > 0, input$map_var)
+        p <- build_static_map_plot(
+          world_sf = sf1,
+          var = input$map_var,
+          codebook_data = codebook_data,
+          palette_option = input$map_palette %||% "viridis"
+        )
+        ggplot2::ggsave(
+          filename = file,
+          plot = p,
+          width = 12,
+          height = 7,
+          dpi = 300,
+          bg = "white"
+        )
+      }
+    )
+
+    shiny::observeEvent(list(input$map_var, input$map_palette), {
+      sf1 <- world_data()
+      req(nrow(sf1) > 0)
+      
+      leaflet::leafletProxy("map", session = session, data = sf1) %>%
+        leaflet::clearShapes() %>%
+        leaflet::clearControls() %>%
+        add_variable_polygons(
+          sf1 = sf1,
+          var = input$map_var,
+          codebook_data = codebook_data,
+          palette_option = input$map_palette %||% "viridis"
+        )
+    }, ignoreInit = TRUE)
   })
 }

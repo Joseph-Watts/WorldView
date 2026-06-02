@@ -1328,7 +1328,8 @@ shinyServer(
       wvs_country       = wvs_country2,
       codebook_data     = orig_codebook_data,
       world_shape       = world_shape,
-      country_phylogeny = country_phylogeny
+      country_phylogeny = country_phylogeny,
+      grouped_vars      = grouped_minus_ignored
     )
     
     phylo_viz_tree_server(

@@ -39,16 +39,14 @@ shinyUI(fluidPage(
     
     skin = "green", # green palette for specific buttons -> #00a65a
     
-    dashboardHeader(title = "World Values Survey", titleWidth = 300),
+    dashboardHeader(title = "WorldView", titleWidth = 300),
     
     dashboardSidebar(width = 300,
                      sidebarMenu(
                        HTML(
                          paste0(
                            "<br>",
-                           "<a href='https://www.worldvaluessurvey.org' target='_blank'><img style = 'display: block; margin-left: auto; margin-right: auto;' src='images/logo_v1.png' width = '186'></a>",
-                           "<br>",
-                           "<p style = 'text-align: center;'><small>Data visualisation tool for <br> PSYC382: Culture and Cognition</small></p>",
+                           "<a href='https://www.worldvaluessurvey.org' target='_blank'><img style = 'display: block; margin-left: auto; margin-right: auto;' src='images/WorldView_Logo.png' width = '186'></a>",
                            "<br>"
                          ) # sidebar bg color -> #222d32
                        ),
@@ -69,54 +67,7 @@ shinyUI(fluidPage(
                          icon = icon('info-sign', lib = "glyphicon")
                        ),
                        
-                       
-                       # menuItem(
-                       #   "Dataset Documentation",
-                       #   tabName = "dummy",
-                       #   icon = icon('info-sign', lib = "glyphicon"),
-                       #   startExpanded = F,
-                       #   
-                       #   menuSubItem(
-                       #     "Master Survey Questionnaire",
-                       #     tabName = "surveyview",
-                       #     icon = icon("comment", lib = "glyphicon")
-                       #   ),
-                       #   
-                       #   menuSubItem(
-                       #     "Questionnaire Codebook",
-                       #     tabName = "codebookview",
-                       #     icon = icon("book", lib = "glyphicon")
-                       #   )
-                       # ),
                        ############## VARIABLE DOCUMENTATION ##############
-                       
-                       
-                       ################## RAW DATA TABLES #################
-                       # menuItem(
-                       #   "Raw Data Tables",
-                       #   tabName = "dummy",
-                       #   icon = icon('list', lib = "glyphicon"),
-                       #   startExpanded = F,
-                       #   
-                       #   menuSubItem(
-                       #     "Participant-level Data",
-                       #     tabName = "EDA_indiv",
-                       #     icon = icon("user", lib = "glyphicon")
-                       #   ),
-                       #   
-                       #   menuSubItem(
-                       #     "Country-level Data",
-                       #     tabName = "EDA_country",
-                       #     icon = icon("globe", lib = "glyphicon")
-                       #   ) ,
-                         # 
-                         # menuSubItem(
-                         #   "Missing Data Visualizations",
-                         #   tabName = "vis_miss",
-                         #   icon = icon("warning-sign", lib = "glyphicon")
-                         # )
-                       # ),
-                       ################## RAW DATA TABLES #################
                        
                        
                        ################ SUMMARY STATISTICS ################
@@ -160,18 +111,23 @@ shinyUI(fluidPage(
                            icon = icon("move", lib = "glyphicon")
                          ),
                          
-                         # menuSubItem(
-                         #   "Correlation", 
-                         #   tabName = "correlationView",
-                         #   icon = icon("equalizer", lib = "glyphicon")
-                         # ),
-                         
                          menuSubItem(
                            "Histogram",
                            tabName = "histogramView",
                            icon = icon("signal")
-                           # icon = icon("bi-soundwave", lib = "glyphicon")
+                         ),
+                         
+                         menuSubItem("World Map", 
+                                     tabName = "geo_viz_map", 
+                                  icon = icon("map-marker")
+                         ),
+                         
+                         menuSubItem(
+                                    "Phylogeny (Advanced)", 
+                                     tabName = "phylo_viz_tree", 
+                                     icon = icon("tree-conifer", lib = "glyphicon")
                          )
+                         
                        ),
                        ################## VISUALISATIONS ##################
                        
@@ -200,47 +156,22 @@ shinyUI(fluidPage(
                            tabName = "regressionTab",
                            icon = icon("line-chart")
                          ),
+                         
                          menuSubItem(
-                           "PhyloLM",
+                           "PhyloLM (Advanced)",
                            tabName = "models_phylo_lm",
                            icon = icon("fullscreen", lib = "glyphicon")
                          ),
+                         
                          menuSubItem(
-                           "PhyloGLM",
+                           "PhyloGLM (Advanced)",
                            tabName = "models_phylo_glm",
                            icon = icon("random", lib = "glyphicon")
                          )
+                         
                        ),
                        ###################### MODELS ######################
-                       
-                       ###########Geographic Visualisation#################
-                       menuItem("Geographic Visualisation", tabName = "geographic", 
-                                icon = icon("map-marker"),
-                                startExpanded = F,
-                                menuSubItem(
-                                  "Map",
-                                  tabName = "geo_viz_map",
-                                  icon = icon("map-marker", lib = "glyphicon")
-                                )
-                                
-                       ),
-                       
-                       ###########Geographic Visualisation#################
-                       
-                       #############Phylogenetic Visualisation#############
-                       menuItem("Phylogenetic Visualisation", tabName = "phylogeny", 
-                                icon = icon("sitemap"),
-                                startExpanded = F,
-                                menuSubItem(
-                                  "Tree",
-                                  tabName = "phylo_viz_tree",
-                                  icon = icon("tree-conifer", lib = "glyphicon")
-                                )
-                                
-                       ),
-                       
-                       #############Phylogenetic Visualisation#############
-                       
+                      
                        
                        ######################## FAQ #######################
                        # menuItem(
@@ -521,86 +452,6 @@ shinyUI(fluidPage(
                 )
         ),
         
-        # tabItem(tabName = "correlationView",
-        #         includeMarkdown("www/instructions/corr_instruction.md"),
-        #         fluidRow(
-        #           shinydashboard::box(width = 3, status = "primary",
-        #               pickerInput(
-        #                 inputId = "corr_questions",
-        #                 label = "Select Questions:",
-        #                 choices = grouped_minus_ignored,
-        #                 multiple = TRUE,
-        #                 options = list(`actions-box` = TRUE,
-        #                                `live-search` = TRUE,
-        #                                `max-options` = 8),
-        #                 selected = grouped_minus_ignored[[1]][1:5]
-        #               ),
-        #               pickerInput(
-        #                 inputId = "corr_countries",
-        #                 label = "Select Countries:",
-        #                 choices = picker_country_list,
-        #                 multiple = TRUE,
-        #                 options = list(
-        #                   `actions-box` = TRUE,
-        #                   `live-search` = TRUE,
-        #                   `size` = 30,
-        #                   `max-options` = 5
-        #                 ),
-        #                 selected = c("NZL", "AUS", "GBR")
-        #               ),
-        #               radioGroupButtons(
-        #                 inputId = "corr_method",
-        #                 label = "Correlation Method:",
-        #                 choices = c("Pearson", "Spearman", "Kendall"),
-        #                 selected = "Pearson",
-        #                 status = "success"
-        #               ),
-        #               
-        #               # Advanced controls
-        #               dropdownButton(
-        #                 inputId = "corr_advanced",
-        #                 label = "Advanced Options",
-        #                 icon = icon("sliders"),
-        #                 status = "success",
-        #                 circle = FALSE,
-        #                 materialSwitch(inputId = "corr_method_type", label = "Ellipse / Color", status = "success"),
-        #                 prettyRadioButtons(inputId = "corr_order", label = "Order", 
-        #                                    choices = c("FPC", "alphabet", "AOE", "hclust"),
-        #                                    selected = "FPC"),
-        #                 noUiSliderInput(inputId = "corr_tl_cex", label = "Text Size", min = 0.5, max = 2, value = 1),
-        #                 materialSwitch(inputId = "corr_type", label = "Type", status = "success"),
-        #                 prettyCheckbox(inputId = "corr_diag", label = "Show Diagonal", value = FALSE),
-        #                 prettyCheckbox(inputId = "corr_addCoef", label = "Show Coefficients", value = TRUE),
-        #                 prettyRadioButtons(inputId = "corr_coef_color", label = "Coefficient Color", 
-        #                                    choices = c("Black", "Blue", "Red"), selected = "Black"),
-        #                 sliderInput("corr_tl_srt", "Text Rotation:", min = 0, max = 90, value = 45),
-        #                 materialSwitch(inputId = "corr_bg", label = "Background Color", status = "success"),
-        #                 
-        #                 # Color palette selector
-        #                 prettyRadioButtons(
-        #                   inputId = "corr_palette",
-        #                   label = "Color Palette:",
-        #                   choices = c("Red-Blue", "Viridis"),
-        #                   selected = "Red-Blue",
-        #                   status = "success"
-        #                 )
-        #               ),
-        #               
-        #               # Download button
-        #               div(
-        #                 style = "margin-top: 20px; display: flex; justify-content: space-between;",
-        #                 downloadButton("corr_download", "Download Plot", 
-        #                                class = "btn btn-success",
-        #                                style = "background-color: #4CAF50; color: white; border: none;")
-        #               )
-        #           ),
-        #           
-        #           shinydashboard::box(width = 9, title = "Correlation Matrix", status = "primary",
-        #               shinycssloaders::withSpinner(plotOutput("corr_plot", height = "600px"))
-        #           )
-        #         )
-        # ),
-        
         tabItem(tabName = "histogramView",
                 includeMarkdown("www/instructions/histogram_instruction.md"),
                 fluidRow(
@@ -663,6 +514,13 @@ shinyUI(fluidPage(
                   )
                 )
         ),
+        
+        tabItem(tabName = "geo_viz_map",
+                geo_viz_map_ui("geo_viz_map")),
+        
+        tabItem(tabName = "phylo_viz_tree",
+                phylo_viz_tree_ui("phylo_viz_tree")),
+        
         ################## VISUALISATIONS ##################
         
         
@@ -802,9 +660,13 @@ shinyUI(fluidPage(
                       #   "Sample Size:",
                       #   min = 100, max = 5000, value = 1000, step = 100
                       # ),
-                      actionButton("regression_run", "Run Regression", class = "green-button")
+                      actionButton("regression_run", 
+                                   "Run Regression", 
+                                   class = "green-button")
                   ),
-                  shinydashboard::box(width = 9, title = "Regression Analysis", status = "primary",
+                  shinydashboard::box(width = 9, 
+                                      title = "Regression Analysis", 
+                                      status = "primary",
                       tabsetPanel(
                         tabPanel("Model Summary",
                                  verbatimTextOutput("regression_summary")),
@@ -818,115 +680,21 @@ shinyUI(fluidPage(
                   )
                 )
         ),
-        tabItem(tabName = "models_phylo_lm",models_phylo_lm_ui("models_phylo_lm")),
-        tabItem(tabName = "models_phylo_glm",models_phylo_glm_ui("models_phylo_glm")),
+        
+        tabItem(tabName = "models_phylo_lm",
+                models_phylo_lm_ui("models_phylo_lm")),
+        
+        tabItem(tabName = "models_phylo_glm",
+                models_phylo_glm_ui("models_phylo_glm")),
         
         ###################### MODELS ######################
         
-        ###########Geographic Visualisation#################
-        tabItem(tabName = "geo_viz_map",geo_viz_map_ui("geo_viz_map")),
-        ###########Geographic Visualisation#################
-        
-        #############Phylogenetic Visualisation#############
-        tabItem(tabName = "phylo_viz_tree",phylo_viz_tree_ui("phylo_viz_tree")),
-        #############Phylogenetic Visualisation#############
  
-        ######################## FAQ #######################
-        # tabItem(tabName = "faq",
-        #         includeMarkdown("www/faq.md")
-        # ),
-        ######################## FAQ #######################
-        
-        
-        ###################### ABOUT #######################
-        # tabItem(tabName = "team",
-        #         fluidRow(
-        #           column(12, h1("Meet Our Team", style = "text-align: center; color: #2c3e50;"))
-        #         ),
-        #         
-        #         # Team Leadership Section
-        #         fluidRow(
-        #           column(12, h3("Team Leadership", style = "color: #2c3e50; border-bottom: 2px solid #00a65a; padding-bottom: 10px;"))
-        #         ),
-        #         fluidRow(
-        #           column(4, 
-        #                  div(class = "team-card",
-        #                      img(src = "images/JW.png", style = "width: 150px; height: 150px; object-fit: cover; border-radius: 50%; border: 4px solid #f1f8ff; margin: 0 auto 20px; display: block;"),
-        #                      div(style = "text-align: center;",
-        #                          h4("Joseph W. H. Watts", style = "color: #2c3e50; font-weight: 700; margin-top: 15px;"),
-        #                          h5("Project Lead", style = "color: #3498db; font-weight: 600; margin-bottom: 15px;"),
-        #                          p("Senior Lecturer Above the Bar, School of Psychology, Speech and Hearing", style = "color: #34495e; line-height: 1.6;"),
-        #                          a(href = "https://profiles.canterbury.ac.nz/Joseph-William-Harry-Watts", 
-        #                            target = "_blank", class = "btn btn-primary", 
-        #                            style = "background-color: #00a65a; color: white; border: none; padding: 8px 16px; border-radius: 4px; text-decoration: none;",
-        #                            "View Full Bio")
-        #                      )
-        #                  )
-        #           )
-        #         ),
-        #         
-        #         # Data Science Section
-        #         fluidRow(
-        #           column(12, h3("Data Science", style = "color: #2c3e50; border-bottom: 2px solid #00a65a; padding-bottom: 10px; margin-top: 40px;"))
-        #         ),
-        #         fluidRow(
-        #           column(4, #copy this entire column to add another member
-        #                  div(class = "team-card",
-        #                      img(src = "images/AV.png", style = "width: 150px; height: 150px; object-fit: cover; border-radius: 50%; border: 4px solid #f1f8ff; margin: 0 auto 20px; display: block;"),
-        #                      div(style = "text-align: center;",
-        #                          h4("André De Vito", style = "color: #2c3e50; font-weight: 700; margin-top: 15px;"),
-        #                          h5("Lead Developer", style = "color: #3498db; font-weight: 600; margin-bottom: 15px;"),
-        #                          p("Master in Applied Data Science, Data Visualization Specialist", style = "color: #34495e; line-height: 1.6;"),
-        #                          a(href = "https://www.linkedin.com/in/andre-de-vito/", 
-        #                            target = "_blank", class = "btn btn-primary", 
-        #                            style = "background-color: #00a65a; color: white; border: none; padding: 8px 16px; border-radius: 4px; text-decoration: none;",
-        #                            "LinkedIn Profile")
-        #                      )
-        #                  )
-        #           )
-        #         ),
-        #         
-        #         # Past Members Section
-        #         fluidRow(
-        #           column(12, h3("Past Members", style = "color: #2c3e50; border-bottom: 2px solid #00a65a; padding-bottom: 10px; margin-top: 40px;"))
-        #         ),
-        #         fluidRow(
-        #           column(4,
-        #                  div(class = "team-card", style = "background-color: #f8f9fa; border: 1px solid #eee;",
-        #                      img(src = "images/NC.png", style = "width: 150px; height: 150px; object-fit: cover; border-radius: 50%; border: 4px solid #f1f8ff; margin: 0 auto 20px; display: block;",
-        #                          alt = "Nicki Cartlidge profile photo"),
-        #                      div(style = "text-align: center;",
-        #                          h4("Nicki Cartlidge", style = "color: #2c3e50; font-weight: 700; margin-top: 15px;"),
-        #                          h5("Past Developer", style = "color: #7f8c8d; font-weight: 600; margin-bottom: 15px;"),
-        #                          p("Master in Applied Data Science, Survey Data Processing Specialist", style = "color: #34495e; line-height: 1.6;"),
-        #                          a(href = "https://www.linkedin.com/in/nicki-cartlidge-571b3b51/", 
-        #                            target = "_blank", class = "btn btn-primary", 
-        #                            style = "background-color: #7f8c8d; color: white; border: none; padding: 8px 16px; border-radius: 4px; text-decoration: none;",
-        #                            "LinkedIn Profile")
-        #                      )
-        #                  )
-        #           )
-        #         ),
-        #         
-        #         # Project Information
-        #         fluidRow(
-        #           column(12,
-        #                  div(style = "margin-top: 40px; padding: 20px; background-color: #f8f9fa; border-radius: 8px;",
-        #                      h4("Project Information", style = "color: #2c3e50;"),
-        #                      p(HTML("<strong>World Values Survey Explorer</strong> Version 1.0.0")),
-        #                      p("Last Updated: June 2025"),
-        #                      p("This application was developed using R Shiny.")
-        #                  )
-        #           )
-        #         )
-        # )
-        ###################### ABOUT #######################
-
-        ######################## FAQ #######################
+        ######################## ABOUT #######################
         tabItem(tabName = "about",
                 includeMarkdown("www/about.md")
         )
-        ######################## FAQ #######################
+        ######################## ABOUT #######################
         
         
       ) #end tabItems

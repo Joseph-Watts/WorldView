@@ -2,10 +2,37 @@
 #### REQUIRED PACKAGES ####
 ###########################-
 
-required_packages <- c("shiny", "markdown", "haven", "here", "labelled", "sjlabelled", "DT", "ggplot2", "naniar",
-                       "readxl", "writexl", "tm", "shinyBS", "shinycssloaders", "shinydashboard", "shinyWidgets",
-                       "tidyverse", "corrplot", "broom", "viridis", "plotly", "psych", "car", "randomForest",
-                       "ape", "phylolm", "pROC", "phytools", "leaflet.minicharts")
+required_packages <- c("shiny", 
+                       "markdown", 
+                       "haven", 
+                       "here", 
+                       "labelled", 
+                       "sjlabelled", 
+                       "DT", 
+                       "ggplot2", 
+                       "naniar",
+                       "readxl", 
+                       "writexl", 
+                       "tm", 
+                       "shinyBS", 
+                       "shinycssloaders", 
+                       "shinydashboard", 
+                       "shinyWidgets",
+                       "tidyverse", 
+                       "corrplot", 
+                       "broom", 
+                       "viridis", 
+                       "plotly", 
+                       "psych", 
+                       "car", 
+                       "randomForest",
+                       "rnaturalearth",
+                       "rnaturalearthdata",
+                       "ape", 
+                       "phylolm", 
+                       "pROC", 
+                       "phytools", 
+                       "leaflet.minicharts")
 
 for (packageName in required_packages) {
   if (!requireNamespace(packageName)) {
@@ -50,7 +77,7 @@ library(randomForest)
 
 # library(gtsummary)
 # library(leaflet)
-# library(rnaturalearth)
+library(rnaturalearth)
 # library(sf)
 # library(dplyr)
 # library(rstatix)

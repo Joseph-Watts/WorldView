@@ -3,19 +3,23 @@
     "path": "~/GitHub/PSYC382_WVS7_Shiny/server.R",
     "project_path": "server.R",
     "type": "r_source",
-    "hash": "1212685049",
+    "hash": "2519709163",
     "contents": "",
     "dirty": false,
     "created": 1719443254107.0,
     "source_on_save": false,
     "relative_order": 3,
-    "properties": {},
+    "properties": {
+        "Source": "Source",
+        "cursorPosition": "290,32",
+        "scrollLine": "55"
+    },
     "folds": "",
-    "lastKnownWriteTime": 1719305761,
+    "lastKnownWriteTime": 1780360830,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1719305761,
+    "last_content_update": 1780360830,
     "read_only": false,
     "read_only_alternatives": []
 }

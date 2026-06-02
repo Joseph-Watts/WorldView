@@ -8,6 +8,7 @@ required_packages <- c("shiny", "markdown", "haven", "here", "labelled",
                        "shinycssloaders", "shinydashboard", "shinyWidgets",
                        "tidyverse", "corrplot", "broom", "viridis", 
                        "plotly", "psych", "car", "randomForest",
+                       "leaflet", "rnaturalearth", "rnaturalearthdata",
                        "ape", "phylolm", "pROC", "phytools")
 
 for (packageName in required_packages) {
@@ -76,13 +77,34 @@ set.seed(20241211)
 ##########################################################-
 # source(file.path("Support_Files/WVS_Wave7_Setup.R"), local = TRUE)
 
+#' JW TO DO: check whether there have been changes or whether there is data and run above if needed
+
+
 
 #################################-
 #### WAVE 7 - DATA WRANGLING ####
 #################################-
-source(file.path("Support_Files/WVS_Wave7_Wrangling.R"), 
-       local = TRUE)
+# source(file.path("Support_Files/WVS_Wave7_Wrangling.R"), 
+#        local = TRUE)
 
+
+# load processed data
+orig_indiv_data <- readRDS("WVS_Dataset/WVS7_Individual.rds")
+orig_country_data <- readRDS("WVS_Dataset/WVS7_Country.rds")
+orig_codebook_data <- readxl::read_xlsx("WVS_Dataset/WVS7_Codebook_updated_labels.xlsx")
+orig_UNSD_data <- readxl::read_excel("WVS_Dataset/UNSD — Methodology.xlsx")
+
+picker_country_list <- read_rds("WVS_Dataset/picker_country_list.rds")
+
+# # Ignored questions (given the number of factors they have or any other condition)
+ignored_questions <- c("Q223", # political parties for each country - almost 1000 different factors
+                       "Q266", # birth place - basically all countries ~ 200 factors
+                       "Q267", # birth place - basically all countries ~ 200 factors
+                       "Q268", # birth place - basically all countries ~ 200 factors
+                       "Q272", # language groupings - # different factors
+                       "Q290") # ethnic groupings - # different factors
+
+indiv_ordinal <- readRDS("WVS_Dataset/WVS7_Individual.rds")
 
 ###########################-
 #### SUPPORT FUNCTIONS ####

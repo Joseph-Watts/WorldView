@@ -16,6 +16,7 @@ d_vars_coded <- readxl::read_xlsx("WVS_Dataset/Codebook manual coded index.xlsx"
 
 #' Reading in variable information
 d_vars_coded <- readxl::read_xlsx("WVS_Dataset/Codebook manual coded index.xlsx")
+
 #' Converting character to logical
 d_vars_coded$Variable_Display_Logical <- as.logical(d_vars_coded$Variable_Display_Logical)
 
@@ -362,24 +363,6 @@ dplyr::mutate(H_URBRURAL = dplyr::case_when(
   H_URBRURAL == "Urban" ~ 1, H_URBRURAL == "Rural" ~ 0, 
   TRUE ~ NA_real_))
 
-# # picker lists
-# WVS7_part_countries <- WVS7_part_countries %>%
-#   dplyr::left_join(
-#     UNSD_countries_list %>% 
-#       dplyr::select(`ISO-alpha3 Code`, `Region Name`),
-#     by = c("B_COUNTRY_ALPHA" = "ISO-alpha3 Code")
-#   ) %>%
-#   dplyr::mutate(`Region Name` = coalesce(`Region Name`, "Not defined"))
-# 
-# 
-# picker_country_list <- WVS7_part_countries %>% 
-#   dplyr::arrange('Region Name', 'B_COUNTRY') %>%
-#   dplyr::group_by('Region Name') %>%
-#   dplyr::summarise(
-#     Countries = list(stats::setNames(B_COUNTRY_ALPHA, B_COUNTRY)), 
-#     .groups = "drop") %>%
-#   tibble::deframe()
-
 
 #' -------------------------------------
 #' Quick tidy up of data
@@ -534,8 +517,10 @@ country_sum_output <- lapply(countries, country_sum, data = d)
 country_sum_output <- plyr::ldply(country_sum_output , data.frame)
 
 #' Saving out the country level summary data
-writexl::write_xlsx(country_sum_output, "WVS_Dataset/WVS7_Country.xlsx")
+#writexl::write_xlsx(country_sum_output, "WVS_Dataset/WVS7_Country.xlsx")
 readr::write_rds(country_sum_output, "WVS_Dataset/WVS7_Country.rds")
+
+
 #=================================================================================================================================
 #=================================================================================================================================
 #=================================================================================================================================
@@ -566,3 +551,43 @@ CB_var_info$ColLab <- paste0(CB_var_info$Col_ID, "-", CB_var_info$Col_Label)
 # Save new codebook updated with labels
 writexl::write_xlsx(CB_var_info,
                     "WVS_Dataset/WVS7_Codebook_updated_labels.xlsx")
+
+
+#=================================================================================================================================
+#=================================================================================================================================
+#=================================================================================================================================
+
+
+orig_country_data <- readRDS("WVS_Dataset/WVS7_Country.rds")
+orig_UNSD_data <- readxl::read_excel("WVS_Dataset/UNSD — Methodology.xlsx")
+
+# load intermediaries
+WVS7_part_countries <- orig_country_data[c(1:2)]
+UNSD_countries_list <- orig_UNSD_data[,c(4,6,8,12)]
+
+# countries and questions simple lists
+WVS7_countries_list <- levels(orig_country_data$B_COUNTRY)
+WVS7_iso_list <- levels(orig_country_data$B_COUNTRY_ALPHA)
+
+# picker lists
+WVS7_part_countries <- WVS7_part_countries %>%
+  dplyr::left_join(
+    UNSD_countries_list %>%
+      dplyr::select(`ISO-alpha3 Code`, `Region Name`),
+    by = c("B_COUNTRY_ALPHA" = "ISO-alpha3 Code")
+  ) %>%
+  dplyr::mutate(`Region Name` = coalesce(`Region Name`, 
+                                         "Not defined"))
+
+
+picker_country_list <- WVS7_part_countries %>%
+  dplyr::arrange('Region Name', 'B_COUNTRY') %>%
+  dplyr::group_by('Region Name') %>%
+  dplyr::summarise(
+    Countries = list(stats::setNames(B_COUNTRY_ALPHA, 
+                                     B_COUNTRY)),
+    .groups = "drop") %>%
+  tibble::deframe()
+
+write_rds(picker_country_list, "WVS_Dataset/picker_country_list.rds")
+

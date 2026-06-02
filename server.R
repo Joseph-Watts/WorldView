@@ -105,144 +105,144 @@ shinyServer(
     #### PDF & CODEBOOK VIEW ####
     #############################-
     
-    # Master Survey Questionnaire PDF
-    output$surveyview <- renderUI({
-      tags$iframe(style = "height:100vh; width:100%; scrolling=yes",
-                  src = "F00011012-WVS_WAVE_7_MASTER_QUESTIONNAIRE_2017-2021_ENGLISH.pdf")
-    })
-    
-    # Codebook PDF
-    output$codebookview <- renderUI({
-      tags$iframe(style = "height:100vh; width:100%; scrolling=yes",
-                  src = "F00011055-WVS7_Codebook_Variables_report_V6.0.pdf")
-    })
+    # # Master Survey Questionnaire PDF
+    # output$surveyview <- renderUI({
+    #   tags$iframe(style = "height:100vh; width:100%; scrolling=yes",
+    #               src = "F00011012-WVS_WAVE_7_MASTER_QUESTIONNAIRE_2017-2021_ENGLISH.pdf")
+    # })
+    # 
+    # # Codebook PDF
+    # output$codebookview <- renderUI({
+    #   tags$iframe(style = "height:100vh; width:100%; scrolling=yes",
+    #               src = "F00011055-WVS7_Codebook_Variables_report_V6.0.pdf")
+    # })
     
     
     ####################-
     #### DataTables ####
     ####################-
     
-    # Reactive control for selecting country
-    output$raw_selectCountry <- renderUI({
-     shinyWidgets::pickerInput(
-        inputId = "raw_country",
-        label = "Select Country",
-        choices = picker_country_list,
-        multiple = FALSE,
-        selected = NULL,
-        options = list(
-          `live-search` = TRUE,
-          `size` = 20
-        )
-      )
-    })
-    
-    raw_filtering <- reactive({
-        if(is.null(input$raw_country)) {
-          get_I_longID() |> dplyr::select(-S007)
-        } else {
-          get_I_longID() |>
-            dplyr::filter(B_COUNTRY_ALPHA == input$raw_country) |>
-            dplyr::select(-S007)
-          # currently, filtering does not work for multiples countries as expected, reverted back to single country selection
-        }
-    })
-    
-    output$raw_filtered_country <- DT::renderDataTable({
-      DT::datatable(data = raw_filtering()|>
-                      dplyr::rename(Country = B_COUNTRY, `Country ISO` = B_COUNTRY_ALPHA),
-                    options = list(pageLength = 10, scrollX = TRUE))
-    })
-    
-    # Data table - Country aggregate responses
-    output$Table_country <- DT::renderDataTable({
-      DT::datatable(data = get_C_data() |>
-                      dplyr::mutate(across(where(is.numeric), ~ round(., 2))) |>
-                      dplyr::rename(Country = B_COUNTRY, `Country ISO` = B_COUNTRY_ALPHA),
-                    options = list(scrollX = TRUE))
-    })
+    # # Reactive control for selecting country
+    # output$raw_selectCountry <- renderUI({
+    #  shinyWidgets::pickerInput(
+    #     inputId = "raw_country",
+    #     label = "Select Country",
+    #     choices = picker_country_list,
+    #     multiple = FALSE,
+    #     selected = NULL,
+    #     options = list(
+    #       `live-search` = TRUE,
+    #       `size` = 20
+    #     )
+    #   )
+    # })
+    # 
+    # raw_filtering <- reactive({
+    #     if(is.null(input$raw_country)) {
+    #       get_I_longID() |> dplyr::select(-S007)
+    #     } else {
+    #       get_I_longID() |>
+    #         dplyr::filter(B_COUNTRY_ALPHA == input$raw_country) |>
+    #         dplyr::select(-S007)
+    #       # currently, filtering does not work for multiples countries as expected, reverted back to single country selection
+    #     }
+    # })
+    # 
+    # output$raw_filtered_country <- DT::renderDataTable({
+    #   DT::datatable(data = raw_filtering()|>
+    #                   dplyr::rename(Country = B_COUNTRY, `Country ISO` = B_COUNTRY_ALPHA),
+    #                 options = list(pageLength = 10, scrollX = TRUE))
+    # })
+    # 
+    # # Data table - Country aggregate responses
+    # output$Table_country <- DT::renderDataTable({
+    #   DT::datatable(data = get_C_data() |>
+    #                   dplyr::mutate(across(where(is.numeric), ~ round(., 2))) |>
+    #                   dplyr::rename(Country = B_COUNTRY, `Country ISO` = B_COUNTRY_ALPHA),
+    #                 options = list(scrollX = TRUE))
+    # })
     
     
     #################-
     #### Missing ####
     #################-
     
-    # TODO add vis_miss_ly code provided by Nick
-    output$Missing <- renderPlot({
-      naniar::vis_miss(get_C_data(), cluster = input$cluster_ctry, sort = input$sort_ctry) +
-        ggplot2::theme(axis.text.x = element_blank())
-    })
-    
-    output$Indiv_missing_with_ratio <- renderPlot({
-      d <- sample_with_missing_ratio(get_I_data(), sample_size = 2500)
-      
-      naniar::vis_miss(d, cluster = input$cluster_indiv, sort = input$sort_indiv) +
-        ggplot2::theme(axis.text.x = element_blank())
-    })
-    
-    output$Top_miss_indiv <- renderPlot({
-      top_miss <- naniar::miss_var_summary(get_I_data()) %>%
-        dplyr::slice_head(n = 15) %>%
-        dplyr::mutate(
-          pct_miss = as.numeric(pct_miss),
-          variable = forcats::fct_reorder(variable, pct_miss, .desc = TRUE)
-        )
-      
-      top_miss %>%
-        ggplot2::ggplot(aes(x = variable, y = pct_miss, fill = variable)) +
-        ggplot2::geom_bar(stat = "identity") +
-        ggplot2::geom_text(
-          ggplot2::aes(label = round(pct_miss, 1)),
-          vjust = -0.5,
-          size = 4.5,
-          fontface = "bold"
-        ) +
-        ggplot2::scale_fill_viridis_d(option = "viridis") +
-        ggplot2::labs(
-          title = "Percentage of Missing Data of Individual Responses",
-          x = "Variable",
-          y = "Percentage Missing",
-          fill = "Variable"
-        ) +
-        ggplot2::theme_minimal() +
-        ggplot2::theme(
-          plot.title = ggplot2::element_text(face = "bold", size = 16),
-          axis.text.x = ggplot2::element_text(angle = 45, hjust = 1, size = 12),
-          legend.position = "none"
-        )
-    })
-    
-    output$Top_miss_country <- renderPlot({
-      top_miss <- naniar::miss_var_summary(get_C_data()) %>%
-        dplyr::slice_head(n = 15) %>%
-        dplyr::mutate(
-          pct_miss = as.numeric(pct_miss),
-          variable = forcats::fct_reorder(variable, pct_miss, .desc = TRUE)
-        )
-      
-      top_miss %>%
-        ggplot2::ggplot(aes(x = variable, y = pct_miss, fill = variable)) +
-        ggplot2::geom_bar(stat = "identity") +
-        ggplot2::geom_text(
-          ggplot2::aes(label = round(pct_miss, 1)),
-          vjust = -0.5,
-          size = 4.5,
-          fontface = "bold"
-        ) +
-        ggplot2::scale_fill_viridis_d(option = "viridis") +
-        ggplot2::labs(
-          title = "Percentage of Missing Data in Country Data Consolidation",
-          x = "Variable",
-          y = "Percentage Missing",
-          fill = "Variable"
-        ) +
-        ggplot2::theme_minimal() +
-        ggplot2::theme(
-          plot.title = ggplot2::element_text(face = "bold", size = 16),
-          axis.text.x = ggplot2::element_text(angle = 45, hjust = 1, size = 12),
-          legend.position = "none"
-        )
-    })
+    # # TODO add vis_miss_ly code provided by Nick
+    # output$Missing <- renderPlot({
+    #   naniar::vis_miss(get_C_data(), cluster = input$cluster_ctry, sort = input$sort_ctry) +
+    #     ggplot2::theme(axis.text.x = element_blank())
+    # })
+    # 
+    # output$Indiv_missing_with_ratio <- renderPlot({
+    #   d <- sample_with_missing_ratio(get_I_data(), sample_size = 2500)
+    # 
+    #   naniar::vis_miss(d, cluster = input$cluster_indiv, sort = input$sort_indiv) +
+    #     ggplot2::theme(axis.text.x = element_blank())
+    # })
+    # 
+    # output$Top_miss_indiv <- renderPlot({
+    #   top_miss <- naniar::miss_var_summary(get_I_data()) %>%
+    #     dplyr::slice_head(n = 15) %>%
+    #     dplyr::mutate(
+    #       pct_miss = as.numeric(pct_miss),
+    #       variable = forcats::fct_reorder(variable, pct_miss, .desc = TRUE)
+    #     )
+    # 
+    #   top_miss %>%
+    #     ggplot2::ggplot(aes(x = variable, y = pct_miss, fill = variable)) +
+    #     ggplot2::geom_bar(stat = "identity") +
+    #     ggplot2::geom_text(
+    #       ggplot2::aes(label = round(pct_miss, 1)),
+    #       vjust = -0.5,
+    #       size = 4.5,
+    #       fontface = "bold"
+    #     ) +
+    #     ggplot2::scale_fill_viridis_d(option = "viridis") +
+    #     ggplot2::labs(
+    #       title = "Percentage of Missing Data of Individual Responses",
+    #       x = "Variable",
+    #       y = "Percentage Missing",
+    #       fill = "Variable"
+    #     ) +
+    #     ggplot2::theme_minimal() +
+    #     ggplot2::theme(
+    #       plot.title = ggplot2::element_text(face = "bold", size = 16),
+    #       axis.text.x = ggplot2::element_text(angle = 45, hjust = 1, size = 12),
+    #       legend.position = "none"
+    #     )
+    # })
+    # 
+    # output$Top_miss_country <- renderPlot({
+    #   top_miss <- naniar::miss_var_summary(get_C_data()) %>%
+    #     dplyr::slice_head(n = 15) %>%
+    #     dplyr::mutate(
+    #       pct_miss = as.numeric(pct_miss),
+    #       variable = forcats::fct_reorder(variable, pct_miss, .desc = TRUE)
+    #     )
+    # 
+    #   top_miss %>%
+    #     ggplot2::ggplot(aes(x = variable, y = pct_miss, fill = variable)) +
+    #     ggplot2::geom_bar(stat = "identity") +
+    #     ggplot2::geom_text(
+    #       ggplot2::aes(label = round(pct_miss, 1)),
+    #       vjust = -0.5,
+    #       size = 4.5,
+    #       fontface = "bold"
+    #     ) +
+    #     ggplot2::scale_fill_viridis_d(option = "viridis") +
+    #     ggplot2::labs(
+    #       title = "Percentage of Missing Data in Country Data Consolidation",
+    #       x = "Variable",
+    #       y = "Percentage Missing",
+    #       fill = "Variable"
+    #     ) +
+    #     ggplot2::theme_minimal() +
+    #     ggplot2::theme(
+    #       plot.title = ggplot2::element_text(face = "bold", size = 16),
+    #       axis.text.x = ggplot2::element_text(angle = 45, hjust = 1, size = 12),
+    #       legend.position = "none"
+    #     )
+    # })
     
     
     ####################-
@@ -535,89 +535,89 @@ shinyServer(
     #### Corrplot ####
     ##################-
     
-    generate_corr_plot <- reactive({
-      req(input$corr_questions, length(input$corr_questions) > 1)
-      
-      # Get question IDs
-      var_info <- get_var_info()
-      q_ids <- sapply(input$corr_questions, function(q) {
-        var_info$Col_ID[var_info$ColLab == q]
-      }, USE.NAMES = FALSE)
-      
-      # Prepare data
-      plot_data <- indiv_ordinal
-      if (!is.null(input$corr_countries)) {
-        plot_data <- plot_data %>%
-          dplyr::filter(B_COUNTRY_ALPHA %in% input$corr_countries)
-      }
-      
-      plot_data <- plot_data %>%
-        dplyr::select(all_of(q_ids))
-      
-      # Compute correlation matrix
-      cor_matrix <- stats::cor(plot_data,
-                               use = "pairwise.complete.obs",
-                               method = tolower(input$corr_method))
-      
-      # Create color palette based on selection
-      if(input$corr_palette == "Viridis") {
-        col <- viridis::viridis(100)
-      } else {
-        # Red-to-blue gradient palette
-        col <- colorRampPalette(c("red", "white", "blue"))(100)
-      }
-      
-      # Create plot with advanced options
-      corrplot::corrplot(
-        cor_matrix,
-        method = if (input$corr_method_type)
-          "color"
-        else
-          "ellipse",
-        order = input$corr_order,
-        tl.cex = input$corr_tl_cex,
-        type = if (input$corr_type)
-          "full"
-        else
-          "upper",
-        diag = input$corr_diag,
-        addCoef.col = if (input$corr_addCoef)
-          tolower(input$corr_coef_color)
-        else
-          NULL,
-        tl.srt = input$corr_tl_srt,
-        col = col,
-        bg = if (input$corr_bg)
-          "darkgrey"
-        else
-          "white"
-      )
-    }
-    )
-    
-    # Render the correlation plot
-    output$corr_plot <- renderPlot({
-      input$corr_update
-      generate_corr_plot()
-    })
-    
-    # Download handler for correlation plot
-    output$corr_download <- downloadHandler(
-      filename = function() {
-        paste("correlation-plot-", Sys.Date(), ".png", sep = "")
-      },
-      content = function(file) {
-        # Set up PNG device with appropriate dimensions
-        png(file,
-            width = 1200,
-            height = 900,
-            res = 300)
-        
-        # Generate the plot
-        generate_corr_plot()
-        dev.off()
-      }
-    )
+    # generate_corr_plot <- reactive({
+    #   req(input$corr_questions, length(input$corr_questions) > 1)
+    #   
+    #   # Get question IDs
+    #   var_info <- get_var_info()
+    #   q_ids <- sapply(input$corr_questions, function(q) {
+    #     var_info$Col_ID[var_info$ColLab == q]
+    #   }, USE.NAMES = FALSE)
+    #   
+    #   # Prepare data
+    #   plot_data <- indiv_ordinal
+    #   if (!is.null(input$corr_countries)) {
+    #     plot_data <- plot_data %>%
+    #       dplyr::filter(B_COUNTRY_ALPHA %in% input$corr_countries)
+    #   }
+    #   
+    #   plot_data <- plot_data %>%
+    #     dplyr::select(all_of(q_ids))
+    #   
+    #   # Compute correlation matrix
+    #   cor_matrix <- stats::cor(plot_data,
+    #                            use = "pairwise.complete.obs",
+    #                            method = tolower(input$corr_method))
+    #   
+    #   # Create color palette based on selection
+    #   if(input$corr_palette == "Viridis") {
+    #     col <- viridis::viridis(100)
+    #   } else {
+    #     # Red-to-blue gradient palette
+    #     col <- colorRampPalette(c("red", "white", "blue"))(100)
+    #   }
+    #   
+    #   # Create plot with advanced options
+    #   corrplot::corrplot(
+    #     cor_matrix,
+    #     method = if (input$corr_method_type)
+    #       "color"
+    #     else
+    #       "ellipse",
+    #     order = input$corr_order,
+    #     tl.cex = input$corr_tl_cex,
+    #     type = if (input$corr_type)
+    #       "full"
+    #     else
+    #       "upper",
+    #     diag = input$corr_diag,
+    #     addCoef.col = if (input$corr_addCoef)
+    #       tolower(input$corr_coef_color)
+    #     else
+    #       NULL,
+    #     tl.srt = input$corr_tl_srt,
+    #     col = col,
+    #     bg = if (input$corr_bg)
+    #       "darkgrey"
+    #     else
+    #       "white"
+    #   )
+    # }
+    # )
+    # 
+    # # Render the correlation plot
+    # output$corr_plot <- renderPlot({
+    #   input$corr_update
+    #   generate_corr_plot()
+    # })
+    # 
+    # # Download handler for correlation plot
+    # output$corr_download <- downloadHandler(
+    #   filename = function() {
+    #     paste("correlation-plot-", Sys.Date(), ".png", sep = "")
+    #   },
+    #   content = function(file) {
+    #     # Set up PNG device with appropriate dimensions
+    #     png(file,
+    #         width = 1200,
+    #         height = 900,
+    #         res = 300)
+    #     
+    #     # Generate the plot
+    #     generate_corr_plot()
+    #     dev.off()
+    #   }
+    # )
     
     
     ###################-

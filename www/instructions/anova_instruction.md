@@ -1,5 +1,8 @@
-## ANOVA model Instructions
+## ANOVA
 
-#### Compare response differences across multiple countries.
+This ANOVA model sets countries as the predictor variable and the 
+selected variable is the outcome variable. This allows you to test 
+whether people in two or more countries differ in their responses to a variable. 
 
-#### Test whether attitudes significantly vary between nations, identify where differences occur through post-hoc tests, and validate model assumptions with diagnostic plots.
+You can identify where differences occur through post-hoc tests, 
+and check model assumptions with diagnostic plots.

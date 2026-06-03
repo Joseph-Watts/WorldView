@@ -2,66 +2,50 @@
 #### REQUIRED PACKAGES ####
 ###########################-
 
-required_packages <- c("shiny", "markdown", "haven", "here", "labelled", 
-                       "sjlabelled", "DT", "ggplot2", "naniar",
-                       "readxl", "writexl", "tm", "shinyBS", 
-                       "shinycssloaders", "shinydashboard", "shinyWidgets",
-                       "tidyverse", "corrplot", "broom", "viridis", 
-                       "plotly", "psych", "car", "randomForest",
-                       "leaflet", "rnaturalearth", "rnaturalearthdata",
-                       "ape", "phylolm", "pROC", "phytools")
+# Packages should be installed in the deployment environment, not during app
+# startup. This check fails fast with a clear message instead of trying to run
+# install.packages() or BiocManager::install() while users are waiting.
+required_packages <- c(
+  "shiny", "markdown", "DT", "ggplot2", "dplyr", "tidyr", "readr", "readxl",
+  "sjlabelled", "shinycssloaders", "shinydashboard", "shinyWidgets",
+  "broom", "viridis", "viridisLite", "plotly", "psych", "car",
+  "leaflet", "sf", "rnaturalearth", "htmltools", "ape", "phylolm", "pROC",
+  "ggtree", "ggtreeExtra", "ggnewscale"
+)
 
-for (packageName in required_packages) {
-  if (!requireNamespace(packageName)) {
-    install.packages(packageName)
-  }
+missing_packages <- required_packages[
+  !vapply(required_packages, requireNamespace, logical(1), quietly = TRUE)
+]
+
+if (length(missing_packages) > 0) {
+  stop(
+    "Missing required packages: ", paste(missing_packages, collapse = ", "),
+    ". Install these before launching the app."
+  )
 }
-
-
-###########################-
-#### SETUP.R LIBRARIES ####
-###########################-
-library(haven)
-library(here)
-library(labelled)
-library(sjlabelled)
-library(readxl)
-library(writexl)
-library(tm)
-library(plyr)
 
 
 ############################-
 #### LIBRARY COLLECTION ####
 ############################-
+# Keep attached packages lean. Most calls in the app use package::function()
+# already, which reduces namespace conflicts and startup overhead.
 library(shiny)
 library(markdown)
 library(DT)
-library(ggplot2) #covered by tidyverse, remove later, maybe?
-library(naniar)
-library(shinyBS)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(readr)
+library(readxl)
 library(shinycssloaders)
 library(shinydashboard)
 library(shinyWidgets)
-library(tidyverse)
-library(corrplot)
 library(broom)
 library(viridis)
 library(plotly)
 library(psych)
 library(car)
-library(randomForest)
-
-# library(gtsummary)
-# library(leaflet)
-# library(rnaturalearth)
-# library(sf)
-# library(dplyr)
-# library(rstatix)
-# library(scales)
-# library(skimr)
-# library(visdat)
-
 
 ##########################################-
 #### SETTING SEED FOR REPRODUCIBILITY ####
@@ -89,6 +73,13 @@ set.seed(20241211)
 indiv_data <- readRDS("WVS_Dataset/WVS7_Individual.rds")
 country_data <- readRDS("WVS_Dataset/WVS7_Country.rds")
 codebook_data <- readxl::read_xlsx("WVS_Dataset/WVS7_Codebook_updated_labels.xlsx")
+codebook_data$Variable_Display_Logical <- as.logical(codebook_data$Variable_Display_Logical)
+
+# Fast lookup vectors used throughout the app. These avoid repeatedly scanning
+# the codebook for every plot/model render.
+question_id_by_label <- stats::setNames(codebook_data$Col_ID, codebook_data$ColLab)
+question_label_by_id <- stats::setNames(codebook_data$ColLab, codebook_data$Col_ID)
+
 orig_UNSD_data <- readxl::read_excel("WVS_Dataset/UNSD — Methodology.xlsx")
 picker_country_list <- read_rds("WVS_Dataset/picker_country_list.rds")
 

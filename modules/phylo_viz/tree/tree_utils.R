@@ -52,15 +52,22 @@ extract_tip_keys <- function(tree) {
 
 # Build tip annotation table: (tip keys) + (language/country map) + (WVS variables)
 make_tip_annotation <- function(tree, wvs_data, lang_country_map, outcome_vars) {
-  tip_keys <- extract_tip_keys(tree)
-  
-  # Join mapping by ISO3 (country_code)
-  tip_anno <- dplyr::left_join(
-    tip_keys,
-    lang_country_map,
-    by = c("country_code" = "iso3166alpha3"),
-    keep = TRUE
-  )
+  # Use the startup cache created in phylo_viz_global.R when available. This
+  # avoids rebuilding the static tip/country/language join for every tree render.
+  if (exists("country_phylogeny_base_tip_anno", inherits = TRUE) &&
+      exists("country_phylogeny_tree", inherits = TRUE) &&
+      identical(tree$tip.label, country_phylogeny_tree$tip.label)) {
+    tip_anno <- country_phylogeny_base_tip_anno
+  } else {
+    tip_keys <- extract_tip_keys(tree)
+    
+    tip_anno <- dplyr::left_join(
+      tip_keys,
+      lang_country_map,
+      by = c("country_code" = "iso3166alpha3"),
+      keep = TRUE
+    )
+  }
   
   # Join WVS by ISO3 (B_COUNTRY_ALPHA)
   if (length(outcome_vars) > 0) {

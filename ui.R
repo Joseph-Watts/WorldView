@@ -72,7 +72,7 @@ shinyUI(fluidPage(
                        HTML(
                          paste0(
                            "<br>",
-                           "<a href='https://www.worldvaluessurvey.org' target='_blank'><img style = 'display: block; margin-left: auto; margin-right: auto;' src='images/WorldView_Logo.png' width = '186'></a>",
+                           "<img style = 'display: block; margin-left: auto; margin-right: auto;' src='images/WorldView_Logo.png' width = '186'>",
                            "<br>"
                          ) # sidebar bg color -> #222d32
                        ),
@@ -131,11 +131,11 @@ shinyUI(fluidPage(
                            icon = icon("stats", lib = "glyphicon")
                          ),
                          
-                         menuSubItem(
-                           "Scatterplot",
-                           tabName = "scatterParticipants",
-                           icon = icon("move", lib = "glyphicon")
-                         ),
+                         # menuSubItem(
+                         #   "Scatterplot",
+                         #   tabName = "scatterParticipants",
+                         #   icon = icon("move", lib = "glyphicon")
+                         # ),
                          
                          menuSubItem(
                            "Histogram",
@@ -224,7 +224,13 @@ shinyUI(fluidPage(
                        )
                        ###################### ABOUT #######################
                        
-                     ) # end sidebarMenu
+                     ), # end sidebarMenu
+                     
+                     tags$div(
+                       style = "position: absolute; bottom: 0; font-size: 0.8em; width: 100%; padding: 15px; text-align: center; color: #b8c7ce; background-color: #222d32;",
+                       "WorldView app licensed under Creative Commons Attribution 4.0 International (CC BY 4.0), data copyrighted by the World Values Survey"
+                     )
+                     
     ), # end dashboardSidebar
     
     dashboardBody(
@@ -267,7 +273,7 @@ shinyUI(fluidPage(
                                                            `actions-box` = TRUE,
                                                            `live-search` = TRUE
                                                            ),
-                                                         selected = c("NZL", "AUS", "GBR")
+                                                         selected = c("NZL", "KAZ", "THA")
                                                          )
                                              ),
                          shinydashboard::box(width = 8, title = "Univariate Summary", status = "primary",
@@ -299,7 +305,7 @@ shinyUI(fluidPage(
                                                                         `live-search` = TRUE,
                                                                         `max-options` = 5
                                                                         ),
-                                                         selected = c("NZL", "AUS", "GBR")
+                                                         selected = c("NZL", "KAZ", "THA")
                                                          ),
                                              radioGroupButtons(inputId = "bivariate_type",
                                                                label = "Table Type:",
@@ -341,7 +347,7 @@ shinyUI(fluidPage(
                           `size` = 30,
                           `max-options` = 5
                         ),
-                        selected = c("NZL", "AUS", "GBR")
+                        selected = c("NZL", "KAZ", "THA")
                       ),
                       radioGroupButtons(
                         inputId = "bar_type",
@@ -357,46 +363,46 @@ shinyUI(fluidPage(
                 )
         ),
         
-        tabItem(tabName = "scatterParticipants",
-                includeMarkdown("www/instructions/scatter_instruction.md"),
-                fluidRow(
-                  shinydashboard::box(width = 3, status = "primary",
-                      selectizeInput(
-                        inputId = "scatter_x",
-                        label = "X-axis Question:",
-                        choices = grouped_questions,
-                        selected = grouped_questions[[1]][1]
-                      ),
-                      selectizeInput(
-                        inputId = "scatter_y",
-                        label = "Y-axis Question:",
-                        choices = grouped_questions,
-                        selected = grouped_questions[[1]][2]
-                      ),
-                      pickerInput(
-                        inputId = "scatter_countries",
-                        label = "Select Countries:",
-                        choices = picker_country_list,
-                        multiple = TRUE,
-                        options = list(
-                          `actions-box` = TRUE,
-                          `live-search` = TRUE,
-                          `size` = 30,
-                          `max-options` = 5
-                        ),
-                        selected = c("NZL", "AUS", "GBR")
-                      ),
-                      sliderInput(
-                        "scatter_sample",
-                        "Sample Size (as % of data):",
-                        min = 10, max = 100, value = 25, step = 1
-                      )
-                  ),
-                  shinydashboard::box(width = 9, title = "Participant Scatterplot", status = "primary",
-                      shinycssloaders::withSpinner(plotlyOutput("scatter_plot", height = "600px"))
-                  )
-                )
-        ),
+        # tabItem(tabName = "scatterParticipants",
+        #         includeMarkdown("www/instructions/scatter_instruction.md"),
+        #         fluidRow(
+        #           shinydashboard::box(width = 3, status = "primary",
+        #               selectizeInput(
+        #                 inputId = "scatter_x",
+        #                 label = "X-axis Question:",
+        #                 choices = grouped_questions,
+        #                 selected = grouped_questions[[1]][1]
+        #               ),
+        #               selectizeInput(
+        #                 inputId = "scatter_y",
+        #                 label = "Y-axis Question:",
+        #                 choices = grouped_questions,
+        #                 selected = grouped_questions[[1]][2]
+        #               ),
+        #               pickerInput(
+        #                 inputId = "scatter_countries",
+        #                 label = "Select Countries:",
+        #                 choices = picker_country_list,
+        #                 multiple = TRUE,
+        #                 options = list(
+        #                   `actions-box` = TRUE,
+        #                   `live-search` = TRUE,
+        #                   `size` = 30,
+        #                   `max-options` = 5
+        #                 ),
+        #                 selected = c("NZL", "KAZ", "THA")
+        #               ),
+        #               sliderInput(
+        #                 "scatter_sample",
+        #                 "Sample Size (as % of data):",
+        #                 min = 10, max = 100, value = 25, step = 1
+        #               )
+        #           ),
+        #           shinydashboard::box(width = 9, title = "Participant Scatterplot", status = "primary",
+        #               shinycssloaders::withSpinner(plotlyOutput("scatter_plot", height = "600px"))
+        #           )
+        #         )
+        # ),
         
         tabItem(tabName = "histogramView",
                 includeMarkdown("www/instructions/histogram_instruction.md"),
@@ -422,7 +428,7 @@ shinyUI(fluidPage(
                         `size` = 30,
                         `max-options` = 5
                       ),
-                      selected = c("NZL", "AUS", "GBR")
+                      selected = c("NZL", "KAZ", "THA")
                     ),
                     sliderInput(
                       "hist_bins",
@@ -496,7 +502,7 @@ shinyUI(fluidPage(
                           `actions-box` = TRUE,
                           `live-search` = TRUE
                         ),
-                        selected = c("NZL", "AUS")
+                        selected = c("NZL", "KAZ", "THA")
                       ),
                       radioGroupButtons(
                         inputId = "corr_choice",
@@ -547,7 +553,7 @@ shinyUI(fluidPage(
                           `actions-box` = TRUE,
                           `live-search` = TRUE
                         ),
-                        selected = c("NZL", "AUS")
+                        selected = c("NZL", "KAZ", "THA")
                       ),
                       # sliderInput(
                       #   "anova_sample",
@@ -578,13 +584,13 @@ shinyUI(fluidPage(
                   shinydashboard::box(width = 3, status = "primary",
                       selectizeInput(
                         inputId = "regression_dep",
-                        label = "Dependent Variable:",
+                        label = "Outcome Variable:",
                         choices = grouped_questions,
                         selected = grouped_questions[[1]][1]
                       ),
                       pickerInput(
                         inputId = "regression_indep",
-                        label = "Independent Variables:",
+                        label = "Predictor Variables:",
                         choices = grouped_questions,
                         multiple = TRUE,
                         selected = grouped_questions[[1]][2:3],
@@ -643,40 +649,8 @@ shinyUI(fluidPage(
         ######################## ABOUT #######################
         
         
-      ), #end tabItems
+      ) #end tabItems
       
-      tags$footer(
-        class = "app-footer",
-        tags$div(
-          class = "app-footer-inner",
-          tags$span(
-            "Content licensed under ",
-            tags$a(
-              href = "https://creativecommons.org/licenses/by/4.0/",
-              target = "_blank",
-              rel = "noopener noreferrer",
-              "Creative Commons Attribution 4.0 International (CC BY 4.0)"
-            ),
-            "."
-          ),
-          tags$span(
-            tags$a(
-              href = "https://github.com/Joseph-Watts/WorldView",
-              target = "_blank",
-              rel = "noopener noreferrer",
-              "GitHub"
-            )
-          ),
-          tags$span(
-            tags$a(
-              href = "https://forms.office.com/r/fbQWv0DVTc",
-              target = "_blank",
-              rel = "noopener noreferrer",
-              "Feedback form"
-            )
-          )
-        )
-      )
     ) #end dashboardBody
     
   ) #end dashboardPage

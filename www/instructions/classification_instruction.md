@@ -1,4 +1,4 @@
-## Classification Analysis Instructions
+## Classification Analysis
 
 1. **Select Target Variable**: Choose the categorical variable you want to predict
    - Country: Predict respondent's country

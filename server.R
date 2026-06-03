@@ -19,24 +19,12 @@ shinyServer(
     #### Read in data files ####
     ############################-
     
-    # WVS7_Individual.rds
-    get_I_data <- reactive({
-      d <- indiv_data
-      d
-    })
-    
-    # WVS7_Country.rds
-    get_C_data <- reactive({
-      d <- country_data
-      d
-    })
-    
-    # Codebook - with updated ColLab (concatenating Col_Id with label)
-    get_var_info <- reactive({
-      d <- codebook_data
-      d$Variable_Display_Logical <- as.logical(d$Variable_Display_Logical)
-      d
-    })
+    # WVS data are loaded once in global.R. These lightweight accessors are kept
+    # for compatibility with existing server code, but avoid copying/mutating the
+    # full objects on every reactive call.
+    get_I_data <- reactive(indiv_data)
+    get_C_data <- reactive(country_data)
+    get_var_info <- reactive(codebook_data)
     
     # indiv_data modified to have full question as name of column
     get_I_longID <- reactive({
@@ -48,6 +36,24 @@ shinyServer(
       }
       d.I
     })
+    
+    # country_data modified to have full question as name of column - NEEDS REWORK
+    # get_C_longID <- reactive({
+    #   d.C <- get_C_data()
+    #   d.var_info <- get_var_info()
+    #   
+    #   for (i in 3:421) { # from Q1 to Q290
+    #     # names(d.C)[i] <- d.var_info$ColLab[i]
+    #     names(d.C) <- sapply(names(d.C), function(name) {
+    #       if (name %in% names(d.var_info$ColLab[i]) && !grepl("\\.", name)) {
+    #         title_lookup[name]
+    #       } else {
+    #         name
+    #       }
+    #     })
+    #   }
+    #   d.C
+    # })
     
     # Extract Country names in Individual dataset
     get_countries <- reactive({
@@ -237,24 +243,19 @@ shinyServer(
       # Get question ID
       q_id <- get_question_id(input$univar_question)
       
-      # Prepare data - convert country to character
-      orig_data <- get_I_data() %>%
+      # Filter once, then derive the numeric copy from the same subset.
+      orig_data <- indiv_data %>%
         dplyr::filter(B_COUNTRY_ALPHA %in% input$univar_countries) %>%
-        dplyr::select(country = B_COUNTRY, response = all_of(q_id)) %>%
+        dplyr::select(country = B_COUNTRY, response = dplyr::all_of(q_id)) %>%
         dplyr::mutate(country = as.character(country))
       
-      num_data <- indiv_data %>%
-        dplyr::filter(B_COUNTRY_ALPHA %in% input$univar_countries) %>% 
-        dplyr::select(country = B_COUNTRY, response = all_of(q_id)) %>%
-        dplyr::mutate(
-          country = as.character(country),
-          response = as.numeric(response)
-        )
+      num_data <- orig_data %>%
+        dplyr::mutate(response = suppressWarnings(as.numeric(response)))
       
       # Determine variable type
       is_factor <- is.factor(orig_data$response)
       is_numeric <- is.numeric(num_data$response)
-      n_unique <- length(unique(stats::na.omit(orig_data$response)))
+      n_unique <- dplyr::n_distinct(stats::na.omit(orig_data$response))
       
       list(
         orig = orig_data,
@@ -341,18 +342,18 @@ shinyServer(
     # Reactive data preparation for bivariate summary
     bivariate_data <- reactive({
       req(input$bivariate_var1, input$bivariate_var2)
-      
+
       # Get question IDs
       var1_id <- get_question_id(input$bivariate_var1)
       var2_id <- get_question_id(input$bivariate_var2)
-      
+
       # Prepare data
       data <- indiv_data
       if (!is.null(input$bivariate_countries)) {
-        data <- data %>% 
+        data <- data %>%
           dplyr::filter(B_COUNTRY_ALPHA %in% input$bivariate_countries)
       }
-      
+
       # Select relevant columns
       data %>%
         dplyr::select(var1 = !!var1_id, var2 = !!var2_id) %>%
@@ -362,27 +363,27 @@ shinyServer(
         ) %>%
         stats::na.omit()
     })
-    
+
     # Render bivariate table
     output$bivariate_table <- renderDT({
       data <- bivariate_data()
       if (is.null(data) || nrow(data) == 0) return(NULL)
-      
+
       # Create contingency table
       tab <- table(data$var1, data$var2)
-      
+
       # Apply percentages if requested
       if (input$bivariate_type == "Row Percentages") {
         tab <- prop.table(tab, 1) * 100
       } else if (input$bivariate_type == "Column Percentages") {
         tab <- prop.table(tab, 2) * 100
       }
-      
+
       # Convert to data frame for nice display
       df <- as.data.frame.matrix(tab)
       df <- cbind(`Var1 v /Var2 >` = rownames(df), df)
       rownames(df) <- NULL
-      
+
       # Create datatable
       DT::datatable(
         df,
@@ -400,10 +401,11 @@ shinyServer(
         caption = paste("Cross-tabulation of", input$bivariate_var1, "and", input$bivariate_var2)
       ) %>%
         DT::formatRound(
-          columns = 2:ncol(df), 
+          columns = 2:ncol(df),
           digits = ifelse(input$bivariate_type == "Counts", 0, 1)
         )
     })
+    
     
     
     ###################-
@@ -467,39 +469,38 @@ shinyServer(
     #####################-
     #### Scatterplot ####
     #####################-
-    # 
+    
     # output$scatter_plot <- renderPlotly({
     #   req(input$scatter_x, input$scatter_y, input$scatter_countries)
     #   
     #   req(input$scatter_x, input$scatter_y)
     #   
-    #   # Get question IDs
-    #   var_info <- get_var_info()
-    #   x_id <- var_info$Col_ID[var_info$ColLab == input$scatter_x]
-    #   y_id <- var_info$Col_ID[var_info$ColLab == input$scatter_y]
+    #   # Get question IDs via precomputed lookup
+    #   x_id <- get_question_id(input$scatter_x)
+    #   y_id <- get_question_id(input$scatter_y)
     #   
-    #   # Prepare data
-    #   plot_data <- get_I_data()
+    #   # Prepare only the columns needed, then sample by row count for Plotly.
+    #   plot_data <- indiv_data
     #   if (!is.null(input$scatter_countries)) {
     #     plot_data <- plot_data %>%
     #       dplyr::filter(B_COUNTRY_ALPHA %in% input$scatter_countries)
     #   }
     #   
-    #   # Sample data for performance
-    #   if (nrow(plot_data) > input$scatter_sample) {
-    #     plot_data <- plot_data %>% dplyr::sample_frac((input$scatter_sample) / 100)
-    #   }
-    #   
     #   plot_data <- plot_data %>%
-    #     dplyr::select(x = !!x_id,
-    #                   y = !!y_id,
-    #                   country = B_COUNTRY_ALPHA)
+    #     dplyr::select(x = dplyr::all_of(x_id),
+    #                   y = dplyr::all_of(y_id),
+    #                   country = B_COUNTRY_ALPHA) %>%
+    #     stats::na.omit()
+    #   
+    #   if (nrow(plot_data) > input$scatter_sample) {
+    #     plot_data <- plot_data %>% dplyr::slice_sample(n = input$scatter_sample)
+    #   }
     #   
     #   # Create plot
     #   p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = x, y = y, color = country)) +
-    #     ggplot2::geom_point(alpha = 0.6) +
     #     ggplot2::geom_jitter(width = 0.2,
-    #                          alpha = 0.3,
+    #                          height = 0.2,
+    #                          alpha = 0.35,
     #                          size = 1.5) +
     #     ggplot2::geom_smooth(method = "lm", se = FALSE) +
     #     ggplot2::labs(
@@ -922,35 +923,39 @@ shinyServer(
     anova_data <- eventReactive(input$anova_run, {
       req(input$anova_var, input$anova_countries)
       
-      # Get variable information
-      var_info <- get_var_info()
       var_id <- get_question_id(input$anova_var)
       
-      # Prepare data from preprocessed numeric dataset
       data <- indiv_data
-      
-      # Apply country filter if selected
       if (!is.null(input$anova_countries)) {
         data <- data %>%
           dplyr::filter(B_COUNTRY_ALPHA %in% input$anova_countries)
       }
       
-      # # Apply sampling for performance - MOMENTARILY DISABLED
-      # if (nrow(data) > input$anova_sample) {
-      #   data <- data %>% sample_n(input$anova_sample)
-      # }
-      
-      # Select relevant columns and omit missing values
       data %>%
-        dplyr::select(value = !!var_id, country = B_COUNTRY) %>%
-        stats::na.omit()  # Remove any rows with missing values
+        dplyr::select(value = dplyr::all_of(var_id), country = B_COUNTRY) %>%
+        stats::na.omit()
+    })
+    
+    # Fit the ANOVA once per Run Analysis click, then share the model across
+    # the summary, post-hoc test, assumptions, and diagnostics outputs.
+    anova_fit <- eventReactive(input$anova_run, {
+      data <- anova_data()
+      
+      if (nrow(data) < 10 || length(unique(data$country)) < 2) {
+        return(list(data = data, model = NULL))
+      }
+      
+      list(
+        data = data,
+        model = stats::aov(value ~ country, data = data)
+      )
     })
     
     # Render ANOVA results
     output$anova_results <- renderPrint({
-      data <- anova_data()
+      fit <- anova_fit()
+      data <- fit$data
       
-      # Check for sufficient data and groups
       if (nrow(data) < 10) {
         return("Insufficient data: Need at least 10 observations.")
       }
@@ -959,31 +964,21 @@ shinyServer(
         return("Insufficient groups: Need at least 2 countries.")
       }
       
-      # Run ANOVA
-      model <- stats::aov(value ~ country, data = data)
-      
-      # Display results
       cat("Analysis of Variance (ANOVA)\n")
       cat("============================\n")
       cat("Variable: ", input$anova_var, "\n")
       cat("Countries: ", paste(unique(data$country), collapse = ", "), "\n")
       cat("Number of complete observations: ", nrow(data), "\n\n")
       
-      summary(model)
+      summary(fit$model)
     })
     
     # Render post-hoc test results
     output$posthoc_results <- renderPrint({
-      data <- anova_data()
+      fit <- anova_fit()
+      if (is.null(fit$model)) return(NULL)
       
-      # Check for sufficient data and groups
-      if (nrow(data) < 10 || length(unique(data$country)) < 2) {
-        return(NULL)
-      }
-      
-      # Run ANOVA and Tukey HSD
-      model <- stats::aov(value ~ country, data = data)
-      tukey <- stats::TukeyHSD(model)
+      tukey <- stats::TukeyHSD(fit$model)
       
       cat("Tukey Honest Significant Differences\n")
       cat("====================================\n")
@@ -994,12 +989,10 @@ shinyServer(
     output$anova_plot <- renderPlotly({
       data <- anova_data()
       
-      # Check for sufficient data
       if (nrow(data) < 10 || length(unique(data$country)) < 2) {
         return(NULL)
       }
       
-      # Create boxplot
       p <- ggplot2::ggplot(data, ggplot2::aes(x = country, y = value, fill = country)) +
         ggplot2::geom_boxplot(alpha = 0.8, outlier.shape = NA) +
         ggplot2::geom_jitter(width = 0.2,
@@ -1020,20 +1013,22 @@ shinyServer(
     
     # Render assumptions check
     output$assumptions_check <- renderPrint({
-      data <- anova_data()
+      fit <- anova_fit()
+      data <- fit$data
+      model <- fit$model
       
-      # Check for sufficient data
-      if (nrow(data) < 10 || length(unique(data$country)) < 2) {
-        return(NULL)
-      }
-      
-      model <- stats::aov(value ~ country, data = data)
+      if (is.null(model)) return(NULL)
       
       cat("ANOVA Assumptions Check\n")
       cat("=======================\n\n")
       
-      # Normality of residuals
-      shapiro_test <- stats::shapiro.test(stats::residuals(model))
+      residual_values <- stats::residuals(model)
+      if (length(residual_values) > 5000) {
+        residual_values <- sample(residual_values, 5000)
+        cat("Note: Shapiro-Wilk test sampled 5,000 residuals because the test is limited to 5,000 values.\n\n")
+      }
+      
+      shapiro_test <- stats::shapiro.test(residual_values)
       cat("1. Normality of Residuals (Shapiro-Wilk test):\n")
       cat("   W =", round(shapiro_test$statistic, 4), 
           "p-value =", format.pval(shapiro_test$p.value, digits = 4), "\n")
@@ -1043,7 +1038,6 @@ shinyServer(
         cat("   -> WARNING: Residuals are not normally distributed (p < 0.05)\n\n")
       }
       
-      # Homogeneity of variances
       levene_test <- car::leveneTest(value ~ as.factor(country), data = data)
       cat("2. Homogeneity of Variances (Levene's test):\n")
       cat("   F(", levene_test$Df[1], ",", levene_test$Df[2], ") =", 
@@ -1058,18 +1052,11 @@ shinyServer(
     
     # Render diagnostic plots
     output$assumptions_plot <- renderPlot({
-      data <- anova_data()
+      fit <- anova_fit()
+      if (is.null(fit$model)) return(NULL)
       
-      # Check for sufficient data
-      if (nrow(data) < 10 || length(unique(data$country)) < 2) {
-        return(NULL)
-      }
-      
-      model <- stats::aov(value ~ country, data = data)
-      
-      # Set up 2x2 grid
       par(mfrow = c(2, 2))
-      plot(model, ask = FALSE)
+      plot(fit$model, ask = FALSE)
     })
     
     
@@ -1081,36 +1068,24 @@ shinyServer(
     regression_data <- eventReactive(input$regression_run, {
       req(input$regression_dep, input$regression_indep)
 
-      # Get question IDs
       dep_id <- get_question_id(input$regression_dep)
       indep_ids <- sapply(input$regression_indep, get_question_id, USE.NAMES = FALSE)
-
 
       if(!all(c(dep_id, indep_ids) %in% names(indiv_data))) {
         showNotification("Selected variables not in dataset", type = "error")
         return(NULL)
       }
 
-      # Prepare data from preprocessed numeric dataset
       data <- indiv_data
-
-      # Apply country filter if selected
       if (!is.null(input$regression_country)) {
         data <- data %>%
           dplyr::filter(B_COUNTRY_ALPHA %in% input$regression_country)
       }
 
-      # # Apply sampling for performance - MOMENTARILY DISABLED
-      # if (nrow(data) > input$regression_sample) {
-      #   data <- data %>% sample_n(input$regression_sample)
-      # }
-
-      # Select relevant columns and omit missing values
       data <- data %>%
-        dplyr::select(all_of(c(dep_id, indep_ids))) %>%
+        dplyr::select(dplyr::all_of(c(dep_id, indep_ids))) %>%
         stats::na.omit()
 
-      # Store labels for display
       list(
         data = data,
         dep_label = input$regression_dep,
@@ -1120,12 +1095,33 @@ shinyServer(
       )
     })
 
-    # Render model summary
-    output$regression_summary <- renderPrint({
+    # Fit the full regression model once per Run Regression click and share it
+    # between all model summary/coefficient/diagnostic outputs.
+    regression_fit <- eventReactive(input$regression_run, {
       result <- regression_data()
+      if (is.null(result)) return(NULL)
       data <- result$data
 
-      # Check for sufficient data
+      if (nrow(data) < 10 || ncol(data) < 2) {
+        return(c(result, list(model = NULL, formula = NULL)))
+      }
+
+      formula <- stats::as.formula(
+        paste(names(data)[1], "~", paste(names(data)[-1], collapse = " + "))
+      )
+
+      c(result, list(
+        model = stats::lm(formula, data = data),
+        formula = formula
+      ))
+    })
+
+    # Render model summary
+    output$regression_summary <- renderPrint({
+      fit <- regression_fit()
+      if (is.null(fit)) return(NULL)
+      data <- fit$data
+
       if (nrow(data) < 10) {
         return("Insufficient data: Need at least 10 complete observations.")
       }
@@ -1134,51 +1130,34 @@ shinyServer(
         return("Insufficient variables: Need at least one independent variable.")
       }
 
-      # Build formula using IDs
-      formula <- stats::as.formula(paste(names(data)[1], "~", paste(names(data)[-1], collapse = " + ")))
-
-      # Run regression
-      model <- stats::lm(formula, data = data)
-
-      # Display results with labels
       cat("Linear Regression Model Summary\n")
       cat("==============================\n")
       cat("Country: ", input$regression_country, "\n")
-      cat("Dependent variable: ", result$dep_label, "\n")
-      cat("Independent variables: ", paste(result$indep_labels, collapse = ", "), "\n")
+      cat("Dependent variable: ", fit$dep_label, "\n")
+      cat("Independent variables: ", paste(fit$indep_labels, collapse = ", "), "\n")
       cat("Number of complete observations: ", nrow(data), "\n\n")
 
-      summary(model)
+      summary(fit$model)
     })
 
     # Render coefficient table
     output$regression_coef <- renderDT({
-      result <- regression_data()
-      data <- result$data
+      fit <- regression_fit()
+      if (is.null(fit) || is.null(fit$model)) return(NULL)
+      data <- fit$data
 
-      # Check for sufficient data
-      if (nrow(data) < 10 || ncol(data) < 2) {
-        return(NULL)
-      }
-
-      # Build formula using IDs
-      formula <- stats::as.formula(paste(names(data)[1], "~", paste(names(data)[-1], collapse = " + ")))
-      model <- stats::lm(formula, data = data)
-
-      # Create coefficient table with labels
-      coef_table <- broom::tidy(model) %>%
+      coef_table <- broom::tidy(fit$model) %>%
         dplyr::mutate(
           term = dplyr::case_when(
             term == "(Intercept)" ~ "Intercept",
             term %in% names(data) ~ {
-              # Map variable names to labels
               var_id <- term
               if (var_id == names(data)[1]) {
-                result$dep_label
+                fit$dep_label
               } else {
-                idx <- which(result$indep_ids == var_id)
+                idx <- which(fit$indep_ids == var_id)
                 if (length(idx) > 0)
-                  result$indep_labels[idx]
+                  fit$indep_labels[idx]
                 else
                   var_id
               }
@@ -1188,7 +1167,6 @@ shinyServer(
           p.value = ifelse(p.value < 0.001, "<0.001", round(p.value, 3))
         )
 
-      # Create datatable
       DT::datatable(
         coef_table,
         extensions = 'Buttons',
@@ -1207,76 +1185,58 @@ shinyServer(
 
     # Render diagnostic plots
     output$regression_diag <- renderPlot({
-      result <- regression_data()
-      data <- result$data
+      fit <- regression_fit()
+      if (is.null(fit) || is.null(fit$model)) return(NULL)
 
-      # Check for sufficient data
-      if (nrow(data) < 10 || ncol(data) < 2) {
-        return(NULL)
-      }
-
-      # Build formula using IDs
-      formula <- stats::as.formula(paste(names(data)[1], "~", paste(names(data)[-1], collapse = " + ")))
-      model <- stats::lm(formula, data = data)
-
-      # Set up 2x2 grid
       par(mfrow = c(2, 2))
-      plot(model, ask = FALSE)
+      plot(fit$model, ask = FALSE)
     })
 
     # Render prediction plot
     output$regression_prediction <- renderPlotly({
-      result <- regression_data()
-      data <- result$data
+      fit <- regression_fit()
+      if (is.null(fit) || is.null(fit$model)) return(NULL)
+      data <- fit$data
 
-      # Check for sufficient data and variables
-      if (nrow(data) < 10 || ncol(data) < 2) {
-        return(NULL)
-      }
-
-      # Use first independent variable for bivariate plot
+      # Use first independent variable for the visual bivariate relationship.
       x_var_id <- names(data)[2]
       y_var_id <- names(data)[1]
+      x_label <- fit$indep_labels[1]
+      y_label <- fit$dep_label
 
-      # Get corresponding labels
-      x_label <- result$indep_labels[1]
-      y_label <- result$dep_label
-
-      # Create model for bivariate relationship
       formula <- stats::as.formula(paste(y_var_id, "~", x_var_id))
-      model <- stats::lm(formula, data = data)
+      prediction_model <- stats::lm(formula, data = data)
 
-      # Generate prediction data
       x_range <- seq(min(data[[x_var_id]], na.rm = TRUE),
                      max(data[[x_var_id]], na.rm = TRUE),
                      length.out = 100)
       pred_data <- data.frame(x = x_range)
       names(pred_data) <- x_var_id
-      pred <- stats::predict(model, newdata = pred_data, interval = "confidence")
+      pred <- stats::predict(prediction_model, newdata = pred_data, interval = "confidence")
 
-      # Combine prediction data
       plot_data <- cbind(pred_data, pred) %>%
         dplyr::rename(fit = 2, lwr = 3, upr = 4)
 
-      # Create plot
+      point_data <- data
+      if (nrow(point_data) > 5000) {
+        point_data <- dplyr::slice_sample(point_data, n = 5000)
+      }
+
       p <- ggplot2::ggplot() +
         ggplot2::geom_point(
-          data = data,
+          data = point_data,
           ggplot2::aes(x = .data[[x_var_id]], y = .data[[y_var_id]]),
-          alpha = 0.5,
-          color = "#3366CC"
+          alpha = 0.5
         ) +
         ggplot2::geom_line(
           data = plot_data,
           ggplot2::aes(x = .data[[x_var_id]], y = fit),
-          color = "#FF3366",
           linewidth = 1
         ) +
         ggplot2::geom_ribbon(
           data = plot_data,
           ggplot2::aes(x = .data[[x_var_id]], ymin = lwr, ymax = upr),
-          alpha = 0.2,
-          fill = "#FF3366"
+          alpha = 0.2
         ) +
         ggplot2::labs(
           title = paste("Regression of", y_label, "on", x_label),

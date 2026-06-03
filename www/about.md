@@ -1,13 +1,8 @@
 # About the WorldView app
 
-This app has been developed specifically for PSYC382: Cognition and Culture at the University of Canterbury.
+WorldView runs in [R Shiny](https://shiny.posit.co/), a framework for building interactive web applications with R. If you are interested in research, data analysis, or building your own interactive tools, learning to code in R is strongly recommended.
 
-
----
-
-### Application status:
-- This app is still in development — feedback is welcome. Please send any feedback to your TA or Joseph Watts.
-- Built with [Shiny](https://shiny.rstudio.com/). The project code is available on [GitHub here](https://github.com/Joseph-Watts/WorldView)
+The WorldView app licensed under Creative Commons Attribution 4.0 International (CC BY 4.0), and the app code is available on [GitHub here](https://github.com/Joseph-Watts/WorldView).
 
 ---
 
@@ -28,6 +23,13 @@ Prisca Mbikou, Developer
 
 ---
 
+# Feedback
+
+WorldView is still in development, and your feedback is welcome. Please share comments, suggestions, or problems using the [feedback form](https://forms.office.com/r/fbQWv0DVTc).
+
+
+---
+
 # Frequently Asked Questions
 
 ---
@@ -43,6 +45,11 @@ The majority of surveys were completed in 2018-2020 with only about a dozen of c
 Wave 8 started in January 2024. WVS-8 is planned for 2024-2026<br>
 
 Waves 1 through 6 (1981 to 2014) are also available to download, however that data is not loaded in this app currently.<br>
+
+The WVS data are [subject to copyright](https://www.worldvaluessurvey.org/WVSEventsShow.jsp?ID=362) and are used here for non-commercial educational purposes.
+
+Citation for WVS data: Haerpfer, C., Inglehart, R., Moreno, A., Welzel, C., Kizilova, K., Diez-Medrano J., M. Lagos, P. Norris, E. Ponarin & B. Puranen et al. (eds.). 2020. World Values Survey: Round Seven – Country-Pooled Datafile. Madrid, Spain & Vienna, Austria: JD Systems Institute & WVSA Secretariat. doi.org/10.14281/18241.1
+
 
 ---
 

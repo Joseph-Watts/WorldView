@@ -1,6 +1,4 @@
-## Histogram Visualization Instructions
-
-Explore the distribution of responses for any survey question across multiple countries.
+## Histogram Visualization 
 
 Visualize distribution of responses for a selected question.
 Compare distributions across countries using histograms or density plots.

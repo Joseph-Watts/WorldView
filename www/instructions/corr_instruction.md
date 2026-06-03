@@ -1,4 +1,4 @@
-## Correlation Chart Instructions
+## Correlation Chart
 
 #### Analyze relationships between multiple survey questions simultaneously.
 

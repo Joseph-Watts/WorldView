@@ -10,10 +10,6 @@
 #' creates some issues for other functions
 d <- read_rds("WVS_Dataset/WVS_Cross-National_Wave_7_rds_v6_0.rds")
 
-#' Manually coded table with variables wanted and their classification
-d_vars_coded <- readxl::read_xlsx("WVS_Dataset/Codebook manual coded index.xlsx")
-
-
 #' Reading in variable information
 d_vars_coded <- readxl::read_xlsx("WVS_Dataset/Codebook manual coded index.xlsx")
 
@@ -397,9 +393,8 @@ readr::write_rds(indiv_ordinal,
 #' Processed variable codebook and markdown documentation
 #'
 #' This section reads the full processed codebook generated for WorldView and
-#' writes a clean, collapsible Markdown/HTML codebook containing only the
-#' variables displayed to users in the app. It is safe to rerun whenever the
-#' setup pipeline is rerun.
+#' writes a clean Markdown codebook containing only the variables displayed to
+#' users in the app. It is safe to rerun whenever the setup pipeline is rerun.
 #=================================================================================================================================
 
 full_codebook_path <- file.path("WVS_Dataset", "WVS7_Full_Processed_Codebook.xlsx")
@@ -407,138 +402,77 @@ markdown_codebook_path <- file.path("www", "codebook.md")
 
 if (file.exists(full_codebook_path)) {
   full_codebook <- readxl::read_xlsx(full_codebook_path)
-  
-  # Order sections to match the original WVS Wave 7 Variables Report PDF.
-  # Any section not listed here is kept after these, in its input order.
-  section_order <- c(
-    "TECHNICAL VARIABLES",
-    "SOCIAL VALUES, NORMS, STEREOTYPES",
-    "HAPPINESS AND WELLBEING",
-    "SOCIAL CAPITAL, TRUST AND ORGANIZATIONAL MEMBERSHIP",
-    "ECONOMIC VALUES",
-    "PERCEPTIONS OF CORRUPTION",
-    "PERCEPTIONS OF MIGRATION",
-    "PERCEPTIONS OF SECURITY",
-    "INDEX OF POSTMATERIALISM",
-    "PERCEPTIONS ABOUT SCIENCE AND TECHNOLOGY",
-    "RELIGIOUS VALUES",
-    "ETHICAL VALUES AND NORMS",
-    "POLITICAL INTEREST AND POLITICAL PARTICIPATION",
-    "POLITICAL CULTURE AND POLITICAL REGIMES",
-    "DEMOGRAPHICS"
-  )
-  
-  # Sort variable ids naturally, so Q2 appears before Q10 and Q33_3 follows Q33.
-  variable_sort_key <- function(x) {
-    x <- as.character(x)
-    prefix <- gsub("^([A-Za-z]+).*", "\\1", x)
-    main_num <- suppressWarnings(as.numeric(gsub("^[A-Za-z]+([0-9]+).*$", "\\1", x)))
-    suffix_num <- suppressWarnings(as.numeric(gsub("^[A-Za-z]+[0-9]+_?([0-9]*).*$", "\\1", x)))
-    suffix_num[is.na(suffix_num)] <- 0
-    data.frame(prefix = prefix, main_num = main_num, suffix_num = suffix_num, id = x)
-  }
-  
-  sort_keys <- variable_sort_key(full_codebook$Col_ID)
-  
+
   # Keep the markdown aligned with the app's display rule and ignored variables.
   display_codebook <- full_codebook |>
     dplyr::mutate(
       Display_to_Users = as.logical(Display_to_Users),
-      In_Final_Individual_Dataset = as.logical(In_Final_Individual_Dataset),
-      Section = as.character(Section),
-      Section_Order = match(Section, section_order),
-      Section_Order = ifelse(is.na(Section_Order), length(section_order) + dplyr::dense_rank(Section), Section_Order),
-      Variable_Prefix = sort_keys$prefix,
-      Variable_Main_Number = sort_keys$main_num,
-      Variable_Suffix_Number = sort_keys$suffix_num
+      In_Final_Individual_Dataset = as.logical(In_Final_Individual_Dataset)
     ) |>
-    dplyr::filter(Display_to_Users, In_Final_Individual_Dataset) |>
-    dplyr::arrange(Section_Order, Variable_Prefix, Variable_Main_Number, Variable_Suffix_Number, Col_ID)
-  
+    dplyr::filter(Display_to_Users, In_Final_Individual_Dataset) 
+
   md_clean <- function(x) {
     x <- ifelse(is.na(x), "", as.character(x))
+    x <- gsub("\\|", "\\\\|", x)
     x <- gsub("\\s+", " ", x)
     trimws(x)
   }
-  
-  html_escape <- function(x) {
-    x <- md_clean(x)
-    x <- gsub("&", "&amp;", x, fixed = TRUE)
-    x <- gsub("<", "&lt;", x, fixed = TRUE)
-    x <- gsub(">", "&gt;", x, fixed = TRUE)
-    x <- gsub('"', "&quot;", x, fixed = TRUE)
-    x <- gsub("'", "&#39;", x, fixed = TRUE)
-    x
-  }
-  
+
   md_lines <- c(
     "# WorldView WVS Wave 7 Codebook",
     "",
-    "This codebook describes the processed variables displayed in the WorldView Shiny app. Original negative missing and non-response codes are simplified to `NA`. Where the setup script applies a custom recode, the displayed values below are the processed values used by the app.",
+    "This codebook describes the processed variables displayed in 
+    the WorldView Shiny app. Original negative missing and 
+    non-response codes are simplified to `NA`. The values displayed here
+    are the processed values used by this app",
     "",
-    "Click a section title to expand or collapse its variables.",
+    "The origional WVS codebook and data documentation for the Wave 7 
+    can be [found here](https://www.worldvaluessurvey.org/WVSDocumentationWV7.jsp).",
+    "",
+    "Please note that the WorldView app displays only a small subset of
+    variable from the WVS for teaching purposes.",
     ""
   )
-  
+
   for (section_i in unique(display_codebook$Section)) {
     section_df <- display_codebook[display_codebook$Section == section_i, ]
-    section_title <- html_escape(section_i)
-    section_n <- nrow(section_df)
-    
-    # md_lines <- c(
-    #   md_lines,
-    #   "<details class=\"codebook-section\">",
-    #   paste0("<summary><strong>", section_title, "</strong> (", section_n, " variables)</summary>"),
-    #   ""
-    # )
-    
-    md_lines <- c(
-      md_lines,
-      "<details class=\"codebook-section\">",
-      paste0('<hr style="width:50%;text-align:left;margin-left:0">'),
-      paste0("<summary><h2>", section_title, "▲▼ (", section_n, " variables)</h2></summary>"),
-      paste0('<hr style="width:50%;text-align:left;margin-left:0">'),
-      ""
-    )
-    
+    md_lines <- c(md_lines, paste0("## ", md_clean(section_i)), "")
+
     for (i in seq_len(nrow(section_df))) {
       row_i <- section_df[i, ]
       md_lines <- c(
         md_lines,
-        paste0("<h3>", html_escape(row_i$Col_ID), ": ", html_escape(row_i$Short_Label), "</h3>"),
-        paste0("<p><strong>Question:</strong> ", html_escape(row_i$Question_Text), "</p>"),
-        paste0("<p><strong>Processed data type:</strong> ", html_escape(row_i$Processed_Data_Type), "</p>")
+        paste0("### ", row_i$Col_ID, ": ", md_clean(row_i$Short_Label)),
+        paste0("**Question:** ", md_clean(row_i$Question_Text)),
+        ""
       )
-      
+
+      md_lines <- c(
+        md_lines,
+        paste0("**Processed data type:** ", md_clean(row_i$Processed_Data_Type)),
+        ""
+      )
+
       values_i <- md_clean(row_i$Processed_Response_Values)
       if (nzchar(values_i)) {
+        md_lines <- c(md_lines, "**Processed values**")
         value_lines <- unlist(strsplit(values_i, "; ", fixed = TRUE))
-        value_items <- paste0("<li>", html_escape(value_lines), "</li>")
-        md_lines <- c(
-          md_lines,
-          "<p><strong>Processed values</strong></p>",
-          "<ul>",
-          value_items,
-          "</ul>"
-        )
+        md_lines <- c(md_lines, paste0("- ", md_clean(value_lines)), "")
       }
-      
+
       note_i <- md_clean(row_i$Processing_Notes)
       if (nzchar(note_i)) {
-        md_lines <- c(md_lines, paste0("<p><strong>Processing note:</strong> ", html_escape(note_i), "</p>"))
+        md_lines <- c(md_lines, paste0("**Processing note:** ", note_i), "")
       }
-      
-      md_lines <- c(md_lines, "")
     }
-    
-    md_lines <- c(md_lines, "</details>", "")
   }
-  
+
   readr::write_lines(md_lines, markdown_codebook_path)
 } else {
   warning("Full processed codebook was not found at ", full_codebook_path,
           ". Skipping markdown codebook generation.")
 }
+
 
 
 #=================================================================================================================================
@@ -712,6 +646,7 @@ writexl::write_xlsx(CB_var_info,
 #=================================================================================================================================
 #=================================================================================================================================
 
+#' Picker List
 
 orig_country_data <- readRDS("WVS_Dataset/WVS7_Country.rds")
 orig_UNSD_data <- readxl::read_excel("WVS_Dataset/UNSD — Methodology.xlsx")

@@ -1,7 +1,5 @@
-## Univariate Statistics Instructions
+## Descriptive Statistics
 
-Explore distributions of individual survey questions.
+Select a question and one or more countries to view summary statistics and frequency distributions.
 
-Select a question and countries to view summary statistics and frequency distributions.
-The output includes both numerical summaries (mean, median, etc.) and frequency tables for categorical variables.
-Use this to understand response patterns for single questions across different countries.
+The output includes numerical summaries, such as the mean and median, as well as frequency tables for categorical variables.

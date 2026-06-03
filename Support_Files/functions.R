@@ -152,14 +152,13 @@
 #####
 
 #####
-# Identify factor variables and print the number of levels for each
-factor_info <- sapply(indiv_data, function(x) {
-  if (is.factor(x)) {
-    return(length(levels(x)))
-  } else {
-    return(NA)  # NA for non-factor variables
-  }
-})
+# Optional development helper. The previous version scanned every column in
+# indiv_data at startup; leave this lazy so it only runs when explicitly called.
+get_factor_info <- function(data = indiv_data) {
+  vapply(data, function(x) {
+    if (is.factor(x)) length(levels(x)) else NA_integer_
+  }, integer(1))
+}
 #####
 
 #####
@@ -257,10 +256,19 @@ variables_used = colnames(indiv_data)
 
 #####
 # Question ID mapping function
-get_question_id <- function(label) {
-  # Access the codebook data directly
-  var_info <- codebook_data
-  var_info$Col_ID[var_info$ColLab == label]
+get_question_id <- function(label, var_info = NULL) {
+  if (is.null(label) || length(label) == 0 || is.na(label[[1]])) return(NA_character_)
+
+  if (exists("question_id_by_label", inherits = TRUE)) {
+    out <- unname(question_id_by_label[[label]])
+    if (!is.null(out)) return(out)
+  }
+
+  # Fallback for scripts/tests that source functions.R before global.R creates
+  # question_id_by_label.
+  if (is.null(var_info)) var_info <- codebook_data
+  out <- var_info$Col_ID[match(label, var_info$ColLab)]
+  if (length(out) == 0 || is.na(out)) NA_character_ else out
 }
 #####
 
@@ -281,7 +289,7 @@ prepare_analysis_data <- function(raw_data, var1_label, var2_label, countries, s
   
   # Sample data
   if (nrow(data) > sample_size) {
-    data <- data %>% dplyr::sample_n(sample_size)
+    data <- data %>% dplyr::slice_sample(n = sample_size)
   }
   
   data %>%

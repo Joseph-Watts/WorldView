@@ -13,6 +13,11 @@
 #' - Much of this recoding should not be don't the way it is (e.g. Q273 makese no
 #' sense to convert to numerical)
 
+library(tidyverse)
+library(readxl)
+library(writexl)
+library(haven)
+
 #' -----------------------------------------------------------------------------
 #' Step 1: Setting up the data
 #' -----------------------------------------------------------------------------
@@ -42,9 +47,11 @@ ignored_questions <- c("Q223", # political parties for each country - almost 100
 
 cols_display <- cols_display[!cols_display %in% ignored_questions]
 
-cols_include <- c("B_COUNTRY", 
-                  "B_COUNTRY_ALPHA", 
-                  "S007", 
+cols_id <-  c("B_COUNTRY", 
+              "B_COUNTRY_ALPHA", 
+              "S007")
+
+cols_include <- c(cols_id, 
                   cols_display)
 
 
@@ -52,33 +59,28 @@ cols_include <- c("B_COUNTRY",
 #' presented in the app
 table(d_vars_coded$Variable_Display_Type)
 
-vars_to_process <- d_vars_coded$Col_ID[]
-
 #' Selecting variables wanted and converting to a data.frame
 indiv <- as.data.frame(d[ , cols_include])
 
-
-stop("UP TO HERE")
-
 #' Converting all ordinal haven format variables to standard ordered factors
-for(i in 1:length(cols_include)){
+for(i in 1:length(cols_display)){
   
   #' Variable ID
-  i_ID <- cols_include[i]
+  i_ID <- cols_display[i]
   
-  #' This variable does not need processing further
-  if(i_ID == "B_COUNTRY_ALPHA"){next}
+  i_display_type <- d_vars_coded$Variable_Display_Type[
+    d_vars_coded$Col_ID == i_ID]
   
   #' raw data for column i
   i_d <- indiv[ , i_ID]
   
   #' If the variable is to be treated as as an ordered factor, then...
-  if(d_vars_coded$Variable_Display_Type[i] %in% 
+  if(i_display_type %in% 
      c("factor_ordered", "factor")){
     
     #' Treating variable as numeric
-    i_d_numeric <- as.numeric(i_d)
-    
+    i_d_numeric <- as.numeric(zap_labels(i_d))
+
     #' Replacing codes for missing data with NA
     i_d_numeric <- ifelse(i_d_numeric < 0, NA, i_d_numeric)
     
@@ -94,8 +96,7 @@ for(i in 1:length(cols_include)){
                           names(i_d_values)[i_match_idx])
     
     #' Ordered level of factor (taking the order from WVS survey)
-    #' NOTE: assuming that there are no 0 codes? Need to check this later
-    i_d_values_noNA <- names(i_d_values)[i_d_values >= 0]
+    i_d_values_noNA <- names(i_d_values)[i_d_values > 0]
     
     #' Dropping duplicate factor labels
     i_d_values_noNA <- i_d_values_noNA[!duplicated(i_d_values_noNA)]
@@ -111,9 +112,9 @@ for(i in 1:length(cols_include)){
     #' Updating variable
     indiv[ , i_ID] <- i_d_updated
     
-  }else if(d_vars_coded$Variable_Display_Type[i] == "integer") {
+  }else if(i_display_type == "integer") {
     #' Treating variable as numeric
-    i_d_integer <- as.integer(i_d)
+    i_d_integer <- as.integer(zap_labels(i_d))
     
     #' Replacing codes for missing data with NA
     i_d_integer <- ifelse(i_d_integer < 0, NA, i_d_integer)
@@ -124,7 +125,7 @@ for(i in 1:length(cols_include)){
   } else{
     stop(
       paste0(
-        d_vars_coded$Variable_Display_Type[i],
+        i_display_type,
         " in d_vars_coded$Variable_Display_Type[",
         i,
         "]. Code not currently set up to handle this input."
@@ -133,8 +134,21 @@ for(i in 1:length(cols_include)){
   }
 }
 
-
-
+# Recoding columns with ordered factors from Yes No to No Yes order
+indiv <- indiv %>%
+  mutate(
+    across(
+      all_of(cols_display),
+      ~ {
+        x <- as.factor(.x)
+        if (identical(levels(x), c("Yes", "No"))) {
+          factor(x, levels = c("No", "Yes"), ordered = is.ordered(x))
+        } else {
+          x
+        }
+      }
+    )
+  )
 
 
 
@@ -143,13 +157,13 @@ for(i in 1:length(cols_include)){
 #' Transforming the variables to simplify NA codes and to avoid reverse coding where necessary
 
 # transform into ordinal
-indiv_ordinal <- as.data.frame(lapply(indiv, function(col) {
-  if (is.ordered(col)) {
-    as.numeric(col)
-  } else {
-    col
-  }
-}))
+# indiv_ordinal <- as.data.frame(lapply(indiv, function(col) {
+#   if (is.ordered(col)) {
+#     as.numeric(col)
+#   } else {
+#     col
+#   }
+# }))
 
 # # transformation of non-ordinal data into numerical
 # indiv_ordinal <- indiv_ordinal[, lubridate::setdiff(names(indiv_ordinal), 

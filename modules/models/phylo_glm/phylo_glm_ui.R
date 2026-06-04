@@ -69,7 +69,8 @@ models_phylo_glm_ui <- function(id) {
         shiny::tags$small(
           shiny::tags$ul(
             shiny::tags$li("CRAN phylolm: Phylogenetic Linear Regression."),
-            shiny::tags$li("Ho LST, Ane C (2014). A linear-time algorithm for Gaussian and non-Gaussian trait evolution models. Systematic Biology, 63, 397–408.")
+            shiny::tags$li("Ho LST, Ane C (2014). A linear-time algorithm for Gaussian and non-Gaussian trait evolution models. Systematic Biology, 63, 397–408."),
+            shiny::tags$li("Bouckaert, R., Redding, D., Sheehan, O., Kyritsis, T., Gray, R., Jones, K. E., & Atkinson, Q. (2022, 1 July). Global language diversification is linked to socio-ecology and threat status. doi:10.31235/osf.io/f8tr6")
           )
         )
         

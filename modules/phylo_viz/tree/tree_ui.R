@@ -193,7 +193,8 @@ phylo_viz_tree_ui <- function(id) {
         tags$small(
           tags$ul(
             tags$li("Xu, S., Li, L., Luo, X., Chen, M., Tang, W., Zhan, L., Dai, Z., Lam, T.T., Guan, Y., & Yu, G. (2022). ggtree: A serialized data object for visualization of a phylogenetic tree and annotation data. iMeta, 1(4), e56."),
-            tags$li("Xu, S., Dai, Z., Guo, P., Fu, X., Liu, S., Zhou, L., Tang, W., Feng, T., Chen, M., Zhan, L., Wu, T., Hu, E., Jiang, Y., Bo, X., & Yu, G. (2021). ggtreeExtra: Compact visualization of richly annotated phylogenetic data. Molecular Biology and Evolution, 38(9), 4039–4042.")
+            tags$li("Xu, S., Dai, Z., Guo, P., Fu, X., Liu, S., Zhou, L., Tang, W., Feng, T., Chen, M., Zhan, L., Wu, T., Hu, E., Jiang, Y., Bo, X., & Yu, G. (2021). ggtreeExtra: Compact visualization of richly annotated phylogenetic data. Molecular Biology and Evolution, 38(9), 4039–4042."),
+            tags$li("Bouckaert, R., Redding, D., Sheehan, O., Kyritsis, T., Gray, R., Jones, K. E., & Atkinson, Q. (2022, 1 July). Global language diversification is linked to socio-ecology and threat status. doi:10.31235/osf.io/f8tr6")
           )
         )
       )

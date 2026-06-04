@@ -72,7 +72,7 @@ set.seed(20241211)
 # load processed data
 indiv_data <- readRDS("WVS_Dataset/WVS7_Individual.rds")
 country_data <- readRDS("WVS_Dataset/WVS7_Country.rds")
-codebook_data <- readxl::read_xlsx("WVS_Dataset/WVS7_Codebook_updated_labels.xlsx")
+codebook_data <- readxl::read_xlsx("WVS_Dataset/WVS7_Variable_Index.xlsx")
 codebook_data$Variable_Display_Logical <- as.logical(codebook_data$Variable_Display_Logical)
 
 # Fast lookup vectors used throughout the app. These avoid repeatedly scanning

@@ -1,6 +1,18 @@
 #' To do:
 #' Consider including some of the country level additional data (e.g. HDI etc)
 
+#' Notes:
+#' - Not currently set up to process the Recoded Variables (e.g. Q95R)
+#' - Havnt checked variables beyond those currently marked for display
+#' - When changing how a variable is processed in this script, it also need to be 
+#' updated in the "WVS7_Variable_Index.xlsx" file to reflect this (otherwise 
+#' codebook) wont be updated
+#' 
+#' - To come back and reflect on the variable processing here. It seems 
+#' that categorical information should often be retained. 
+#' - Much of this recoding should not be don't the way it is (e.g. Q273 makese no
+#' sense to convert to numerical)
+
 #' -----------------------------------------------------------------------------
 #' Step 1: Setting up the data
 #' -----------------------------------------------------------------------------
@@ -11,7 +23,7 @@
 d <- read_rds("WVS_Dataset/WVS_Cross-National_Wave_7_rds_v6_0.rds")
 
 #' Reading in variable information
-d_vars_coded <- readxl::read_xlsx("WVS_Dataset/Codebook manual coded index.xlsx")
+d_vars_coded <- readxl::read_xlsx("WVS_Dataset/WVS7_Variable_Index.xlsx")
 
 #' Converting character to logical
 d_vars_coded$Variable_Display_Logical <- as.logical(d_vars_coded$Variable_Display_Logical)
@@ -318,21 +330,21 @@ dplyr::mutate(
     Q284 == "Government or public institution" ~ 0,
     TRUE ~ NA_real_
   )
-) %>% ######################################  ######################################
-dplyr::mutate(
-  Q289 = dplyr::case_when(
-    Q289 == "Do not belong to a denomination" ~ 9,
-    Q289 == "Catholic (Roman/Greek/etc)" ~ 8,
-    Q289 == "Protestant" ~ 7,
-    Q289 == "Orthodox (Russian/Greek/etc.)" ~ 6,
-    Q289 == "Jew" ~ 5,
-    Q289 == "Muslim" ~ 4,
-    Q289 == "Hindu" ~ 3,
-    Q289 == "Buddhist" ~ 2,
-    Q289 == "Other Christian (Jehova withness...)" ~ 1,
-    Q289 == "Other" ~ 0,
-    TRUE ~ NA_real_
-  )
+# ) %>% ######################################  ######################################
+# dplyr::mutate(
+#   Q289 = dplyr::case_when(
+#     Q289 == "Do not belong to a denomination" ~ 9,
+#     Q289 == "Catholic (Roman/Greek/etc)" ~ 8,
+#     Q289 == "Protestant" ~ 7,
+#     Q289 == "Orthodox (Russian/Greek/etc.)" ~ 6,
+#     Q289 == "Jew" ~ 5,
+#     Q289 == "Muslim" ~ 4,
+#     Q289 == "Hindu" ~ 3,
+#     Q289 == "Buddhist" ~ 2,
+#     Q289 == "Other Christian (Jehova withness...)" ~ 1,
+#     Q289 == "Other" ~ 0,
+#     TRUE ~ NA_real_
+#   )
 ) %>% ######################################  ######################################
 dplyr::mutate(
   E1_LITERACY = dplyr::case_when(
@@ -397,7 +409,7 @@ readr::write_rds(indiv_ordinal,
 #' users in the app. It is safe to rerun whenever the setup pipeline is rerun.
 #=================================================================================================================================
 
-full_codebook_path <- file.path("WVS_Dataset", "WVS7_Full_Processed_Codebook.xlsx")
+full_codebook_path <- file.path("WVS_Dataset", "WVS7_Variable_Index.xlsx")
 markdown_codebook_path <- file.path("www", "codebook.md")
 
 if (file.exists(full_codebook_path)) {
@@ -460,10 +472,6 @@ if (file.exists(full_codebook_path)) {
         md_lines <- c(md_lines, paste0("- ", md_clean(value_lines)), "")
       }
 
-      note_i <- md_clean(row_i$Processing_Notes)
-      if (nzchar(note_i)) {
-        md_lines <- c(md_lines, paste0("**Processing note:** ", note_i), "")
-      }
     }
   }
 
@@ -606,7 +614,6 @@ country_sum_output <- lapply(countries, country_sum, data = d)
 country_sum_output <- plyr::ldply(country_sum_output , data.frame)
 
 #' Saving out the country level summary data
-#writexl::write_xlsx(country_sum_output, "WVS_Dataset/WVS7_Country.xlsx")
 readr::write_rds(country_sum_output, "WVS_Dataset/WVS7_Country.rds")
 
 
@@ -614,32 +621,32 @@ readr::write_rds(country_sum_output, "WVS_Dataset/WVS7_Country.rds")
 #=================================================================================================================================
 #=================================================================================================================================
 ### Read in files
-spssdata <- readRDS("WVS_Dataset/WVS_Cross-National_Wave_7_rds_v6_0.rds")
-C.data <- readRDS("WVS_Dataset/WVS7_Country.rds")
-I.data <- readRDS("WVS_Dataset/WVS7_Individual.rds")
-CB_var_info <- readxl::read_xlsx("WVS_Dataset/Codebook manual coded index.xlsx")
-
-
-### Main SPSS Dataset can't be handled directly, so create a data dictionary.
-dict <- labelled::generate_dictionary(spssdata)
-
-### dict$label is a list of the labels with attr info, so extract just the label name.
-labels <- vector("character", length = nrow(dict))
-for (x in 1:nrow(dict)) {
-  labels[x] <- dict$label[[x]]
-}
-
-### Create a data frame mapping the data dictionary variables with the extracted labels.
-mapped.vars.labels <- as.data.frame(cbind(dict$variable, labels))
-colnames(mapped.vars.labels) <- c("Col_ID", "Col_Label")
-
-### Using the mapping to add a new column to the Codebook to give a longer ID with meaningful name, eg "Q1 - meaning of Q1".
-CB_var_info <- dplyr::inner_join(CB_var_info, mapped.vars.labels)
-CB_var_info$ColLab <- paste0(CB_var_info$Col_ID, "-", CB_var_info$Col_Label)
-
-# Save new codebook updated with labels
-writexl::write_xlsx(CB_var_info,
-                    "WVS_Dataset/WVS7_Codebook_updated_labels.xlsx")
+# spssdata <- readRDS("WVS_Dataset/WVS_Cross-National_Wave_7_rds_v6_0.rds")
+# C.data <- readRDS("WVS_Dataset/WVS7_Country.rds")
+# I.data <- readRDS("WVS_Dataset/WVS7_Individual.rds")
+# CB_var_info <- readxl::read_xlsx("WVS_Dataset/WVS7_Variable_Index.xlsx")
+# 
+# 
+# ### Main SPSS Dataset can't be handled directly, so create a data dictionary.
+# dict <- labelled::generate_dictionary(spssdata)
+# 
+# ### dict$label is a list of the labels with attr info, so extract just the label name.
+# labels <- vector("character", length = nrow(dict))
+# for (x in 1:nrow(dict)) {
+#   labels[x] <- dict$label[[x]]
+# }
+# 
+# ### Create a data frame mapping the data dictionary variables with the extracted labels.
+# mapped.vars.labels <- as.data.frame(cbind(dict$variable, labels))
+# colnames(mapped.vars.labels) <- c("Col_ID", "Col_Label")
+# 
+# ### Using the mapping to add a new column to the Codebook to give a longer ID with meaningful name, eg "Q1 - meaning of Q1".
+# CB_var_info <- dplyr::inner_join(CB_var_info, mapped.vars.labels)
+# CB_var_info$ColLab <- paste0(CB_var_info$Col_ID, "-", CB_var_info$Col_Label)
+# 
+# # Save new codebook updated with labels
+# writexl::write_xlsx(CB_var_info,
+#                     "WVS_Dataset/WVS7_Codebook_updated_labels.xlsx")
 
 
 #=================================================================================================================================

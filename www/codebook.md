@@ -22,8 +22,6 @@ Please note that the WorldView app displays only a small subset of
 - 0 = No
 - 1 = Yes
 
-**Processing note:** Custom recode in setup script; all unmatched responses and original negative missing codes are set to NA.
-
 ### Q166: Belief in life after death
 **Question:** In which of the following things do you believe, if you believe in any? - Life after death
 
@@ -32,8 +30,6 @@ Please note that the WorldView app displays only a small subset of
 **Processed values**
 - 0 = No
 - 1 = Yes
-
-**Processing note:** Custom recode in setup script; all unmatched responses and original negative missing codes are set to NA.
 
 ### Q167: Belief in Hell
 **Question:** In which of the following things do you believe, if you believe in any? - Hell
@@ -44,8 +40,6 @@ Please note that the WorldView app displays only a small subset of
 - 0 = No
 - 1 = Yes
 
-**Processing note:** Custom recode in setup script; all unmatched responses and original negative missing codes are set to NA.
-
 ### Q168: Belief in Heaven
 **Question:** In which of the following things do you believe, if you believe in any? - Heaven
 
@@ -54,8 +48,6 @@ Please note that the WorldView app displays only a small subset of
 **Processed values**
 - 0 = No
 - 1 = Yes
-
-**Processing note:** Custom recode in setup script; all unmatched responses and original negative missing codes are set to NA.
 
 ## ETHICAL VALUES AND NORMS
 
@@ -76,8 +68,6 @@ Please note that the WorldView app displays only a small subset of
 - 9 = 9
 - 10 = Always justifiable
 
-**Processing note:** Original numeric values retained; all values below 0 are set to NA.
-
 ### Q178: Justification for avoiding a fare on public transport
 **Question:** Please tell me for each of the following statements whether you think it can always be justified, never be justified, or something in between, using this card. - Avoiding a fare on public transport
 
@@ -94,8 +84,6 @@ Please note that the WorldView app displays only a small subset of
 - 8 = 8
 - 9 = 9
 - 10 = Always justifiable
-
-**Processing note:** Original numeric values retained; all values below 0 are set to NA.
 
 ### Q179: Justification for stealing property
 **Question:** Please tell me for each of the following statements whether you think it can always be justified, never be justified, or something in between, using this card. Stealing property
@@ -114,8 +102,6 @@ Please note that the WorldView app displays only a small subset of
 - 9 = 9
 - 10 = Always justifiable
 
-**Processing note:** Original numeric values retained; all values below 0 are set to NA.
-
 ### Q180: Justification for cheating on taxes
 **Question:** Please tell me for each of the following statements whether you think it can always be justified, never be justified, or something in between, using this card. Cheating on taxes if you have a chance
 
@@ -132,8 +118,6 @@ Please note that the WorldView app displays only a small subset of
 - 8 = 8
 - 9 = 9
 - 10 = Always justifiable
-
-**Processing note:** Original numeric values retained; all values below 0 are set to NA.
 
 ### Q181: Justification for accepting a bribe in the course of duties
 **Question:** Please tell me for each of the following statements whether you think it can always be justified, never be justified, or something in between, using this card. Someone accepting a bribe in the course of their duties
@@ -152,8 +136,6 @@ Please note that the WorldView app displays only a small subset of
 - 9 = 9
 - 10 = Always justifiable
 
-**Processing note:** Original numeric values retained; all values below 0 are set to NA.
-
 ### Q182: Justification for homosexuality
 **Question:** Please tell me for each of the following statements whether you think it can always be justified, never be justified, or something in between, using this card. Homosexuality
 
@@ -170,8 +152,6 @@ Please note that the WorldView app displays only a small subset of
 - 8 = 8
 - 9 = 9
 - 10 = Always justifiable
-
-**Processing note:** Original numeric values retained; all values below 0 are set to NA.
 
 ### Q183: Justification for prostitution
 **Question:** Please tell me for each of the following statements whether you think it can always be justified, never be justified, or something in between, using this card. Prostitution
@@ -190,8 +170,6 @@ Please note that the WorldView app displays only a small subset of
 - 9 = 9
 - 10 = Always justifiable
 
-**Processing note:** Original numeric values retained; all values below 0 are set to NA.
-
 ### Q184: Justification for abortion
 **Question:** Please tell me for each of the following statements whether you think it can always be justified, never be justified, or something in between, using this card. Abortion
 
@@ -208,8 +186,6 @@ Please note that the WorldView app displays only a small subset of
 - 8 = 8
 - 9 = 9
 - 10 = Always justifiable
-
-**Processing note:** Original numeric values retained; all values below 0 are set to NA.
 
 ### Q185: Justification for divorce
 **Question:** Please tell me for each of the following statements whether you think it can always be justified, never be justified, or something in between, using this card. Divorce
@@ -228,8 +204,6 @@ Please note that the WorldView app displays only a small subset of
 - 9 = 9
 - 10 = Always justifiable
 
-**Processing note:** Original numeric values retained; all values below 0 are set to NA.
-
 ### Q186: Justification for sex before marriage
 **Question:** Please tell me for each of the following statements whether you think it can always be justified, never be justified, or something in between, using this card. Sex before marriage
 
@@ -246,8 +220,6 @@ Please note that the WorldView app displays only a small subset of
 - 8 = 8
 - 9 = 9
 - 10 = Always justifiable
-
-**Processing note:** Original numeric values retained; all values below 0 are set to NA.
 
 ### Q187: Justification for suicide
 **Question:** Please tell me for each of the following statements whether you think it can always be justified, never be justified, or something in between, using this card. Suicide
@@ -266,8 +238,6 @@ Please note that the WorldView app displays only a small subset of
 - 9 = 9
 - 10 = Always justifiable
 
-**Processing note:** Original numeric values retained; all values below 0 are set to NA.
-
 ### Q188: Justification for euthanasia
 **Question:** Please tell me for each of the following statements whether you think it can always be justified, never be justified, or something in between, using this card. Euthanasia
 
@@ -284,8 +254,6 @@ Please note that the WorldView app displays only a small subset of
 - 8 = 8
 - 9 = 9
 - 10 = Always justifiable
-
-**Processing note:** Original numeric values retained; all values below 0 are set to NA.
 
 ### Q189: Justification for a man to beat his wife
 **Question:** Please tell me for each of the following statements whether you think it can always be justified, never be justified, or something in between, using this card. For a man to beat his wife
@@ -304,8 +272,6 @@ Please note that the WorldView app displays only a small subset of
 - 9 = 9
 - 10 = Always justifiable
 
-**Processing note:** Original numeric values retained; all values below 0 are set to NA.
-
 ### Q190: Justification for parents beating children
 **Question:** Please tell me for each of the following statements whether you think it can always be justified, never be justified, or something in between, using this card. Parents beating children
 
@@ -322,8 +288,6 @@ Please note that the WorldView app displays only a small subset of
 - 8 = 8
 - 9 = 9
 - 10 = Always justifiable
-
-**Processing note:** Original numeric values retained; all values below 0 are set to NA.
 
 ### Q191: Justification for violence against other people
 **Question:** Please tell me for each of the following statements whether you think it can always be justified, never be justified, or something in between, using this card. Violence against other people
@@ -342,8 +306,6 @@ Please note that the WorldView app displays only a small subset of
 - 9 = 9
 - 10 = Always justifiable
 
-**Processing note:** Original numeric values retained; all values below 0 are set to NA.
-
 ### Q192: Justification for terrorism
 **Question:** Please tell me for each of the following statements whether you think it can always be justified, never be justified, or something in between, using this card. Terrorism as a political, ideological or religious mean
 
@@ -360,8 +322,6 @@ Please note that the WorldView app displays only a small subset of
 - 8 = 8
 - 9 = 9
 - 10 = Always justifiable
-
-**Processing note:** Original numeric values retained; all values below 0 are set to NA.
 
 ### Q193: Justification for casual sex
 **Question:** Please tell me for each of the following statements whether you think it can always be justified, never be justified, or something in between, using this card. Having casual sex
@@ -380,8 +340,6 @@ Please note that the WorldView app displays only a small subset of
 - 9 = 9
 - 10 = Always justifiable
 
-**Processing note:** Original numeric values retained; all values below 0 are set to NA.
-
 ### Q194: Justification for political violence
 **Question:** Please tell me for each of the following statements whether you think it can always be justified, never be justified, or something in between, using this card. Political violence
 
@@ -398,8 +356,6 @@ Please note that the WorldView app displays only a small subset of
 - 8 = 8
 - 9 = 9
 - 10 = Always justifiable
-
-**Processing note:** Original numeric values retained; all values below 0 are set to NA.
 
 ### Q195: Justification for the death penalty
 **Question:** Please tell me for each of the following statements whether you think it can always be justified, never be justified, or something in between, using this card. Death penalty
@@ -418,8 +374,6 @@ Please note that the WorldView app displays only a small subset of
 - 9 = 9
 - 10 = Always justifiable
 
-**Processing note:** Original numeric values retained; all values below 0 are set to NA.
-
 ## DEMOGRAPHICS
 
 ### Q260: Respondent's sex
@@ -430,8 +384,6 @@ Please note that the WorldView app displays only a small subset of
 **Processed values**
 - 0 = Female
 - 1 = Male
-
-**Processing note:** Custom recode in setup script; all unmatched responses and original negative missing codes are set to NA.
 
 ### Q262: Age
 **Question:** This means you are XX years old? Numeric variable - numbers of years
@@ -446,8 +398,6 @@ Please note that the WorldView app displays only a small subset of
 - 5 = 55-64 years
 - 6 = 65 and over;
 
-**Processing note:** Original numeric values retained; all values below 0 are set to NA.
-
 ### Q263: Born in this country or immigrant
 **Question:** Were you born in this country or are you an immigrant?
 
@@ -456,8 +406,6 @@ Please note that the WorldView app displays only a small subset of
 **Processed values**
 - 0 = I am an immigrant to this country (born outside this country)
 - 1 = I am born in this country
-
-**Processing note:** Custom recode in setup script; all unmatched responses and original negative missing codes are set to NA.
 
 ### Q275: Highest educational level of respondent
 **Question:** What is the highest educational level that you have attained?
@@ -478,8 +426,6 @@ Please note that the WorldView app displays only a small subset of
 - 11 = Master or equivalent
 - 12 = Doctoral or equivalent
 
-**Processing note:** Haven labelled values converted to an ordered factor, then ordered factors are converted to ordinal integers with negative missing codes set to NA.
-
 ### Q288: Income scale placement
 **Question:** On this card is an income scale on which 1 indicates the lowest income group and 10 the highest income group in your country. We would like to know in what group your household is. Please, specify the appropriate number, counting all wages, salaries, pensions and other incomes that come in.
 
@@ -497,5 +443,19 @@ Please note that the WorldView app displays only a small subset of
 - 9 = Nineth step
 - 10 = Tenth step;
 
-**Processing note:** Original numeric values retained; all values below 0 are set to NA.
+### Q289: Religious Denomination
+**Question:** Do you belong to a religion or religious denomination?
+
+**Processed data type:** factor
+
+**Processed values**
+- 0 = No: do not belong to a denomination
+- 1 = Yes: Roman Catholic
+- 2 = Protestant
+- 3 = Orthodox (Russian/Greek/etc.)
+- 4 = Jew
+- 5 = Muslim
+- 6 = Hindu
+- 7 = Buddhist
+- 8 = Other
 

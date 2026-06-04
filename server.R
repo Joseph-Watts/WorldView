@@ -74,7 +74,8 @@ shinyServer(
       d <- codebook_data[, c(1, 2, 10)]
       d <- split(d, d$Section)
       c <- lapply(d, function(group) {
-        stats::setNames(group$Col_ID, group$ColLab)
+        stats::setNames(group$Col_ID, 
+                        group$ColLab)
         })
       c
     }) # TODO get the list ordered by 'Col_ID' not by 'Section'
@@ -83,7 +84,9 @@ shinyServer(
     get_sectionsOrd <- reactive({
       var_info <- get_var_info()
       sections <- as.list(unique(var_info$Section))
-      sections_ord <- unique(factor(var_info$Section, ordered = TRUE, levels = sections))
+      sections_ord <- unique(factor(var_info$Section, 
+                                    ordered = TRUE, 
+                                    levels = sections))
       sections_ord <- sections_ord[-1]
       sections_ord
     })
@@ -275,7 +278,8 @@ shinyServer(
       country_names <- unique(data$orig$country)
       
       # Generate summary for each country and overall - with Overall first
-      tabs <- lapply(c("Selected Sample", country_names), function(ctry_name) {
+      tabs <- lapply(c("Selected Sample", country_names), 
+                     function(ctry_name) {
         if (ctry_name == "Selected Sample") {
           orig_sub <- data$orig
           num_sub <- data$num
@@ -329,7 +333,8 @@ shinyServer(
       do.call(tabsetPanel, c(
         id = "countryTabs",
         lapply(c("Selected Sample", country_names), function(name) {
-          tabPanel(title = name, tabs[[which(c("Selected Sample", country_names) == name)]])
+          tabPanel(title = name, tabs[[which(c("Selected Sample", 
+                                               country_names) == name)]])
         })
       ))
     })
@@ -398,7 +403,10 @@ shinyServer(
           )
         ),
         rownames = FALSE,
-        caption = paste("Cross-tabulation of", input$bivariate_var1, "and", input$bivariate_var2)
+        caption = paste("Cross-tabulation of", 
+                        input$bivariate_var1, 
+                        "and", 
+                        input$bivariate_var2)
       ) %>%
         DT::formatRound(
           columns = 2:ncol(df),
@@ -424,22 +432,45 @@ shinyServer(
           dplyr::mutate(response = as.factor(response)) %>%
           dplyr::count(country, response) %>%
           dplyr::group_by(country) %>%
-          dplyr::mutate(percent = n / sum(n) * 100)
+          dplyr::mutate(percent = n / sum(n) * 100) %>%
+          stats::na.omit()
         
         if (input$bar_type == "Percentage") {
-          p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = response, y = percent, fill = country)) +
-            ggplot2::geom_bar(stat = "identity", position = ggplot2::position_dodge()) +
-            ggplot2::labs(y = "Percentage (%)", x = "Country", title = paste("Distribution of", input$bar_question)) +
+          p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = response, 
+                                                       y = percent, 
+                                                       fill = country)) +
+            ggplot2::geom_bar(stat = "identity", 
+                              position = ggplot2::position_dodge(preserve = "single")) +
+            ggplot2::labs(y = "Percentage (%)", 
+                          x = "Country", 
+                          title = paste("Distribution of",
+                                        input$bar_question)
+                          ) +
             ggplot2::scale_fill_viridis_d()
           
         } else if (input$bar_type == "Count") {
-          p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = response, y = n, fill = country)) +
-            ggplot2::geom_bar(stat = "identity", position = ggplot2::position_dodge()) +
-            ggplot2::labs(y = "Count", x = "Country", title = paste("Distribution of", input$bar_question)) +
+          # p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = response, y = n, fill = country)) +
+          #   ggplot2::geom_bar(stat = "identity", position = ggplot2::position_dodge()) +
+          #   ggplot2::labs(y = "Count", x = "Country", title = paste("Distribution of", input$bar_question)) +
+          #   ggplot2::scale_fill_viridis_d()
+          
+          p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = response, 
+                                                       y = n, 
+                                                       fill = country)) +
+            ggplot2::geom_col(position = ggplot2::position_dodge(preserve = "single")) +
+            ggplot2::labs(
+              y = "Count",
+              x = "Response",
+              title = paste("Distribution of", 
+                            input$bar_question),
+              fill = "Country"
+            ) +
             ggplot2::scale_fill_viridis_d()
           
         } else if (input$bar_type == "Stacked") {
-          p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = country, y = percent, fill = response)) +
+          p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = country, 
+                                                       y = percent, 
+                                                       fill = response)) +
             ggplot2::geom_col(position = ggplot2::position_stack(reverse = TRUE)) +
             ggplot2::labs(y = "Percentage (%)", 
                  title = paste("Distribution of", input$bar_question)) +
@@ -448,10 +479,13 @@ shinyServer(
           
         } else {
           # Staggered view
-          p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = response, y = n, fill = response)) +
+          p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = response, 
+                                                       y = n, 
+                                                       fill = response)) +
             ggplot2::geom_col() +
             ggplot2::facet_wrap(~country, ncol = 1, scales = "fixed") +
-            ggplot2::labs(y = "Count", title = paste("Distribution of", input$bar_question)) +
+            ggplot2::labs(y = "Count", title = paste("Distribution of", 
+                                                     input$bar_question)) +
             ggplot2::scale_fill_viridis_d(option = "D") +
             ggplot2::theme(legend.position = "none")
         }
@@ -459,10 +493,12 @@ shinyServer(
         # Remove x-axis title for ALL display types
         p <- p + ggplot2::labs(x = NULL) +
           ggplot2::theme_minimal() +
-          ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
+          ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, 
+                                                             hjust = 1))
         
         plotly::ggplotly(p) %>% 
-          plotly::layout(legend = list(orientation = "h", y = -0.2))
+          plotly::layout(legend = list(orientation = "h", 
+                                       y = -0.2))
     })
     
     
@@ -674,7 +710,8 @@ shinyServer(
           )
       } else {
         # Overlaid view
-        p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = response, fill = country)) +
+        p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = response, 
+                                                     fill = country)) +
           {if (input$hist_type == "Frequency")
             ggplot2::geom_histogram(position = "identity",
                                     bins = input$hist_bins,
@@ -760,26 +797,35 @@ shinyServer(
       var1_id <- get_question_id(input$corr_model_var1)
       var2_id <- get_question_id(input$corr_model_var2)
       
-      # Prepare data from preprocessed numeric dataset
+      count_select <- input$corr_model_countries
+      
       data <- indiv_data
       
       # Apply country filter if selected
-      if (!is.null(input$corr_model_countries)) {
+      if (!is.null(count_select)) {
         data <- data %>%
-          filter(B_COUNTRY_ALPHA %in% input$corr_model_countries)
+          filter(B_COUNTRY_ALPHA %in% count_select)
       }
       
-      # # Apply sampling for performance - MOMENTARILY DISABLED
-      # if (nrow(data) > input$corr_model_sample) {
-      #   data <- data %>% sample_n(input$corr_model_sample)
-      # }
-      
       # Select relevant columns and omit missing values
-      data %>%
+      data <- data %>%
         dplyr::select(var1 = !!var1_id,
                var2 = !!var2_id,
                country = B_COUNTRY) %>%
         stats::na.omit()  # Remove any rows with missing values
+      
+      
+      # If ordered factor, convert to numeric
+      if("ordered" %in% class(data$var1)){
+        data$var1 <- as.numeric(data$var1)
+      }
+      
+      if("ordered" %in% class(data$var2)){
+        data$var2 <- as.numeric(data$var2)
+      }
+      
+      data
+      
     })
 
     # Render correlation results
@@ -788,11 +834,11 @@ shinyServer(
       data <- corr_model_data()
       
       # Check for sufficient data
-      if (nrow(data) < 3) {
-        return("Insufficient data to compute correlation. Need at least 3 complete observations.")
+      if (nrow(data) < 20) {
+        return("Insufficient data to compute correlation. Need at least 20 complete observations.")
       }
       
-      # Compute Kendall's correlation
+      # Compute correlation
       cor_test <- stats::cor.test(data$var1,
                                   data$var2,
                                   method = tolower(input$corr_choice),
@@ -926,14 +972,25 @@ shinyServer(
       var_id <- get_question_id(input$anova_var)
       
       data <- indiv_data
+      
+      # filtering based on countries
       if (!is.null(input$anova_countries)) {
         data <- data %>%
           dplyr::filter(B_COUNTRY_ALPHA %in% input$anova_countries)
       }
       
-      data %>%
+      # selecting variable
+      data <- data %>%
         dplyr::select(value = dplyr::all_of(var_id), country = B_COUNTRY) %>%
         stats::na.omit()
+
+      # If ordered factor, convert to numeric
+      if("ordered" %in% class(data[ , "value"])){
+        data[ , "value"] <- as.numeric(data[ , "value"])
+      }
+      
+      data
+      
     })
     
     # Fit the ANOVA once per Run Analysis click, then share the model across
@@ -993,7 +1050,8 @@ shinyServer(
         return(NULL)
       }
       
-      p <- ggplot2::ggplot(data, ggplot2::aes(x = country, y = value, fill = country)) +
+      p <- ggplot2::ggplot(data, ggplot2::aes(x = country, y = value, 
+                                              fill = country)) +
         ggplot2::geom_boxplot(alpha = 0.8, outlier.shape = NA) +
         ggplot2::geom_jitter(width = 0.2,
                              alpha = 0.3,
@@ -1086,6 +1144,11 @@ shinyServer(
         dplyr::select(dplyr::all_of(c(dep_id, indep_ids))) %>%
         stats::na.omit()
 
+      # If ordered factor, convert to numeric
+      if("ordered" %in% class(data[ , dep_id])){
+        data[ , dep_id] <- as.numeric(data[ , dep_id])
+      }
+      
       list(
         data = data,
         dep_label = input$regression_dep,
@@ -1212,7 +1275,9 @@ shinyServer(
                      length.out = 100)
       pred_data <- data.frame(x = x_range)
       names(pred_data) <- x_var_id
-      pred <- stats::predict(prediction_model, newdata = pred_data, interval = "confidence")
+      pred <- stats::predict(prediction_model, 
+                             newdata = pred_data, 
+                             interval = "confidence")
 
       plot_data <- cbind(pred_data, pred) %>%
         dplyr::rename(fit = 2, lwr = 3, upr = 4)
@@ -1249,21 +1314,21 @@ shinyServer(
     })
     
     
-    models_phylo_lm_server(
-      "models_phylo_lm",
-      wvs_country = wvs_country2,
-      codebook_data = codebook_data,
-      lang_tree = country_phylogeny_tree,
-      lang_country_map = country_phylogeny
-    )
-    
-    models_phylo_glm_server(
-      "models_phylo_glm",
-      wvs_country = wvs_country2,
-      codebook_data = codebook_data,
-      lang_tree = country_phylogeny_tree,
-      lang_country_map = country_phylogeny
-    )
+    # models_phylo_lm_server(
+    #   "models_phylo_lm",
+    #   wvs_country = wvs_country2,
+    #   codebook_data = codebook_data,
+    #   lang_tree = country_phylogeny_tree,
+    #   lang_country_map = country_phylogeny
+    # )
+    # 
+    # models_phylo_glm_server(
+    #   "models_phylo_glm",
+    #   wvs_country = wvs_country2,
+    #   codebook_data = codebook_data,
+    #   lang_tree = country_phylogeny_tree,
+    #   lang_country_map = country_phylogeny
+    # )
     
     geo_viz_map_server(
       "geo_viz_map",

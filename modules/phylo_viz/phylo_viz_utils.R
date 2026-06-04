@@ -1,7 +1,7 @@
 # modules/phylo_viz/phylo_viz_utils.R
 
 ## check phylogeny dataset exist or not, and initial phylogeny dataset
-phylo_init_dataset <- function(path="WVS_Dataset/phylogeny"){
+phylo_init_dataset <- function(path="data/phylogeny"){
   if(!dir.exists(path)){
     dir.create(path)
   }

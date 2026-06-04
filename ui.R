@@ -7,14 +7,18 @@
 #' -----------
 #' Things that would be nice to add in the future:
 #' 
-#' - Integrate data from outside the WVS with the global analyses
+#' Basic and important:
+#' - ? Logistic regression
+#' - T test 
+#' - Chi square
 #' 
+#' 
+#' Less important
 #' - Individual level world plots using the latitude and longitude coordinates 
 #' provided in the WVS
 #' 
-#' - Plot country level data on a language phylogeny
-#' 
-#' - Perform more sophisticated statistical models
+#' - Perform more sophisticated statistical models (e.g. mixed effects models with country level variables as well). 
+#' - Integrate data from outside the WVS with the global analyses
 
 #################-
 #### LOAD UI ####
@@ -166,7 +170,7 @@ shinyUI(fluidPage(
                          startExpanded = F,
                          
                          menuSubItem(
-                           "Correlation Models",
+                           "Correlations",
                            tabName = "corrModelTab",
                            icon = icon("sort-by-attributes-alt", lib = "glyphicon")
                          ),
@@ -181,19 +185,19 @@ shinyUI(fluidPage(
                            "Linear Regression",
                            tabName = "regressionTab",
                            icon = icon("line-chart")
-                         ),
+                         )#,
                          
-                         menuSubItem(
-                           "PhyloLM (Advanced)",
-                           tabName = "models_phylo_lm",
-                           icon = icon("fullscreen", lib = "glyphicon")
-                         ),
-                         
-                         menuSubItem(
-                           "PhyloGLM (Advanced)",
-                           tabName = "models_phylo_glm",
-                           icon = icon("random", lib = "glyphicon")
-                         )
+                         # menuSubItem(
+                         #   "PhyloLM (Advanced)",
+                         #   tabName = "models_phylo_lm",
+                         #   icon = icon("fullscreen", lib = "glyphicon")
+                         # ),
+                         # 
+                         # menuSubItem(
+                         #   "PhyloGLM (Advanced)",
+                         #   tabName = "models_phylo_glm",
+                         #   icon = icon("random", lib = "glyphicon")
+                         # )
                          
                        ),
                        ###################### MODELS ######################
@@ -332,8 +336,8 @@ shinyUI(fluidPage(
                       selectizeInput(
                         inputId = "bar_question",
                         label = "Select Question:",
-                        choices = grouped_questions,
-                        selected = grouped_questions[[1]][1],
+                        choices = grouped_questions_no_numeric,
+                        selected = grouped_questions_no_numeric[[1]][1],
                         size = 30
                       ),
                       pickerInput(
@@ -484,14 +488,14 @@ shinyUI(fluidPage(
                       selectizeInput(
                         inputId = "corr_model_var1",
                         label = "Select Variable 1:",
-                        choices = grouped_questions,
-                        selected = grouped_questions[[1]][1]
+                        choices = grouped_questions_no_factors,
+                        selected = grouped_questions_no_factors[[1]][1]
                       ),
                       selectizeInput(
                         inputId = "corr_model_var2",
                         label = "Select Variable 2:",
-                        choices = grouped_questions,
-                        selected = grouped_questions[[1]][2]
+                        choices = grouped_questions_no_factors,
+                        selected = grouped_questions_no_factors[[1]][2]
                       ),
                       pickerInput(
                         inputId = "corr_model_countries",
@@ -541,8 +545,8 @@ shinyUI(fluidPage(
                       selectizeInput(
                         inputId = "anova_var",
                         label = "Select Variable:",
-                        choices = grouped_questions,
-                        selected = grouped_questions[[1]][1]
+                        choices = grouped_questions_no_factors,
+                        selected = grouped_questions_no_factors[[1]][1]
                       ),
                       pickerInput(
                         inputId = "anova_countries",
@@ -585,8 +589,8 @@ shinyUI(fluidPage(
                       selectizeInput(
                         inputId = "regression_dep",
                         label = "Outcome Variable:",
-                        choices = grouped_questions,
-                        selected = grouped_questions[[1]][1]
+                        choices = grouped_questions_no_factors,
+                        selected = grouped_questions_no_factors[[1]][1]
                       ),
                       pickerInput(
                         inputId = "regression_indep",
@@ -633,11 +637,11 @@ shinyUI(fluidPage(
                 )
         ),
         
-        tabItem(tabName = "models_phylo_lm",
-                models_phylo_lm_ui("models_phylo_lm")),
-        
-        tabItem(tabName = "models_phylo_glm",
-                models_phylo_glm_ui("models_phylo_glm")),
+        # tabItem(tabName = "models_phylo_lm",
+        #         models_phylo_lm_ui("models_phylo_lm")),
+        # 
+        # tabItem(tabName = "models_phylo_glm",
+        #         models_phylo_glm_ui("models_phylo_glm")),
         
         ###################### MODELS ######################
         

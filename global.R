@@ -70,9 +70,10 @@ set.seed(20241211)
 #################################-
 
 # load processed data
-indiv_data <- readRDS("WVS_Dataset/WVS7_Individual.rds")
-country_data <- readRDS("WVS_Dataset/WVS7_Country.rds")
-codebook_data <- readxl::read_xlsx("WVS_Dataset/WVS7_Variable_Index.xlsx")
+indiv_data <- readRDS("data/WVS7_Individual.rds")
+country_data <- readRDS("data/WVS7_Country.rds")
+codebook_data <- readxl::read_xlsx("data/WVS7_Variable_Index.xlsx")
+
 codebook_data$Variable_Display_Logical <- as.logical(codebook_data$Variable_Display_Logical)
 
 # Fast lookup vectors used throughout the app. These avoid repeatedly scanning
@@ -80,8 +81,8 @@ codebook_data$Variable_Display_Logical <- as.logical(codebook_data$Variable_Disp
 question_id_by_label <- stats::setNames(codebook_data$Col_ID, codebook_data$ColLab)
 question_label_by_id <- stats::setNames(codebook_data$ColLab, codebook_data$Col_ID)
 
-orig_UNSD_data <- readxl::read_excel("WVS_Dataset/UNSD — Methodology.xlsx")
-picker_country_list <- read_rds("WVS_Dataset/picker_country_list.rds")
+orig_UNSD_data <- readxl::read_excel("data/UNSD — Methodology.xlsx")
+picker_country_list <- read_rds("data/picker_country_list.rds")
 
 
 ###########################-
@@ -94,8 +95,28 @@ source(file.path("Support_Files/functions.R"),
 # Create global list of questions to select from
 grouped_questions <- get_groupedQs_I(colnames(indiv_data))
 
+# Creating a list of all variables excluding simple factors (but leaving ordinal)
+all_factors <- codebook_data$Col_ID[codebook_data$Variable_Display_Type == "factor"]
+
+grouped_questions_no_factors <- lapply(grouped_questions, function(x) {
+  x[!sapply(x, function(q) any(startsWith(q, all_factors)))]
+})
+
+grouped_questions_no_factors <- Filter(function(x) length(x) > 0, grouped_questions_no_factors)
+
+#' Creating a list of all variables excluding numeric and integers
+all_numeric <- codebook_data$Col_ID[codebook_data$Variable_Display_Type %in% c("integer", "numeric")]
+
+grouped_questions_no_numeric <- lapply(grouped_questions, function(x) {
+  x[!sapply(x, function(q) any(startsWith(q, all_numeric )))]
+})
+
+grouped_questions_no_numeric <- Filter(function(x) length(x) > 0, grouped_questions_no_numeric)
+
+
+
 #### modules ####
 # source("modules/phylogeny/phylogeny_global.R")
 source("modules/phylo_viz/phylo_viz_global.R")
 source("modules/geo_viz/geo_viz_global.R")
-source("modules/models/models_global.R")
+#source("modules/models/models_global.R")

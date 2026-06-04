@@ -32,9 +32,9 @@ source("modules/phylo_viz/tree/tree_server.R")
 
 ## data load
 
-path_phylogeny_dataset <- "WVS_Dataset/phylogeny"
+path_phylogeny_dataset <- "data/phylogeny"
 
-# run one time when missing WVS_Dataset/phylogeny folder .
+# run one time when missing data/phylogeny folder .
 # phylo_init_dataset(path_phylogeny_dataset)
 
 country_phylogeny <- readr::read_csv(paste0(path_phylogeny_dataset,"/country_phylogeny.csv"), na = "", show_col_types = FALSE)

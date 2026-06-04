@@ -119,7 +119,7 @@
 #' if(testing){
 #'   
 #'   #' Individual level data
-#'   d_ind <- read_rds("WVS_Dataset/WVS7_Individual.rds")
+#'   d_ind <- read_rds("data/WVS7_Individual.rds")
 #'   
 #'   # Testing two ordered factors
 #'   test_output <- within_country_compare(data = d_ind, 
@@ -248,7 +248,9 @@ get_groupedQs_I <- function(variables_used = NULL) {
                                                ")\\b"), x)]}
                    )
     
-    return(choicesgrpQ)
+    #Dropping groups without entries selected
+    Filter(function(x) length(x) > 0, choicesgrpQ)
+
   }
 }
 #####

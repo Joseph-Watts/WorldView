@@ -71,7 +71,6 @@ set.seed(20241211)
 
 # load processed data
 indiv_data <- readRDS("data/WVS7_Individual.rds")
-# country_data <- readRDS("data/WVS7_Country.rds")
 codebook_data <- readxl::read_xlsx("data/WVS7_Variable_Index.xlsx")
 
 codebook_data$Variable_Display_Logical <- as.logical(codebook_data$Variable_Display_Logical)
@@ -116,7 +115,6 @@ grouped_questions_no_numeric <- Filter(function(x) length(x) > 0, grouped_questi
 
 
 #### modules ####
-# source("modules/phylogeny/phylogeny_global.R")
 source("modules/phylo_viz/phylo_viz_global.R")
 source("modules/geo_viz/geo_viz_global.R")
-#source("modules/models/models_global.R")
+#source("modules/models/models_global.R") # Will need updated to run with individual level data

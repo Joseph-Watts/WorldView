@@ -54,7 +54,7 @@ Please note that the WorldView app displays only a small subset of
 ### Q177: Justification for claiming government benefits not entitled to
 **Question:** Please tell me for each of the following statements whether you think it can always be justified, never be justified, or something in between, using this card. - Claiming government benefits to which you are not entitled
 
-**Variable class:** ordinal
+**Variable class:** factor_ordered
 
 **Values**
 - 1 = Never justifiable
@@ -71,7 +71,7 @@ Please note that the WorldView app displays only a small subset of
 ### Q178: Justification for avoiding a fare on public transport
 **Question:** Please tell me for each of the following statements whether you think it can always be justified, never be justified, or something in between, using this card. - Avoiding a fare on public transport
 
-**Variable class:** ordinal
+**Variable class:** factor_ordered
 
 **Values**
 - 1 = Never justifiable
@@ -88,7 +88,7 @@ Please note that the WorldView app displays only a small subset of
 ### Q179: Justification for stealing property
 **Question:** Please tell me for each of the following statements whether you think it can always be justified, never be justified, or something in between, using this card. Stealing property
 
-**Variable class:** ordinal
+**Variable class:** factor_ordered
 
 **Values**
 - 1 = Never justifiable
@@ -105,7 +105,7 @@ Please note that the WorldView app displays only a small subset of
 ### Q180: Justification for cheating on taxes
 **Question:** Please tell me for each of the following statements whether you think it can always be justified, never be justified, or something in between, using this card. Cheating on taxes if you have a chance
 
-**Variable class:** ordinal
+**Variable class:** factor_ordered
 
 **Values**
 - 1 = Never justifiable
@@ -122,7 +122,7 @@ Please note that the WorldView app displays only a small subset of
 ### Q181: Justification for accepting a bribe in the course of duties
 **Question:** Please tell me for each of the following statements whether you think it can always be justified, never be justified, or something in between, using this card. Someone accepting a bribe in the course of their duties
 
-**Variable class:** ordinal
+**Variable class:** factor_ordered
 
 **Values**
 - 1 = Never justifiable
@@ -139,7 +139,7 @@ Please note that the WorldView app displays only a small subset of
 ### Q182: Justification for homosexuality
 **Question:** Please tell me for each of the following statements whether you think it can always be justified, never be justified, or something in between, using this card. Homosexuality
 
-**Variable class:** ordinal
+**Variable class:** factor_ordered
 
 **Values**
 - 1 = Never justifiable
@@ -156,7 +156,7 @@ Please note that the WorldView app displays only a small subset of
 ### Q183: Justification for prostitution
 **Question:** Please tell me for each of the following statements whether you think it can always be justified, never be justified, or something in between, using this card. Prostitution
 
-**Variable class:** ordinal
+**Variable class:** factor_ordered
 
 **Values**
 - 1 = Never justifiable
@@ -173,7 +173,7 @@ Please note that the WorldView app displays only a small subset of
 ### Q184: Justification for abortion
 **Question:** Please tell me for each of the following statements whether you think it can always be justified, never be justified, or something in between, using this card. Abortion
 
-**Variable class:** ordinal
+**Variable class:** factor_ordered
 
 **Values**
 - 1 = Never justifiable
@@ -190,7 +190,7 @@ Please note that the WorldView app displays only a small subset of
 ### Q185: Justification for divorce
 **Question:** Please tell me for each of the following statements whether you think it can always be justified, never be justified, or something in between, using this card. Divorce
 
-**Variable class:** ordinal
+**Variable class:** factor_ordered
 
 **Values**
 - 1 = Never justifiable
@@ -207,7 +207,7 @@ Please note that the WorldView app displays only a small subset of
 ### Q186: Justification for sex before marriage
 **Question:** Please tell me for each of the following statements whether you think it can always be justified, never be justified, or something in between, using this card. Sex before marriage
 
-**Variable class:** ordinal
+**Variable class:** factor_ordered
 
 **Values**
 - 1 = Never justifiable
@@ -224,7 +224,7 @@ Please note that the WorldView app displays only a small subset of
 ### Q187: Justification for suicide
 **Question:** Please tell me for each of the following statements whether you think it can always be justified, never be justified, or something in between, using this card. Suicide
 
-**Variable class:** ordinal
+**Variable class:** factor_ordered
 
 **Values**
 - 1 = Never justifiable
@@ -241,7 +241,7 @@ Please note that the WorldView app displays only a small subset of
 ### Q188: Justification for euthanasia
 **Question:** Please tell me for each of the following statements whether you think it can always be justified, never be justified, or something in between, using this card. Euthanasia
 
-**Variable class:** ordinal
+**Variable class:** factor_ordered
 
 **Values**
 - 1 = Never justifiable
@@ -258,7 +258,7 @@ Please note that the WorldView app displays only a small subset of
 ### Q189: Justification for a man to beat his wife
 **Question:** Please tell me for each of the following statements whether you think it can always be justified, never be justified, or something in between, using this card. For a man to beat his wife
 
-**Variable class:** ordinal
+**Variable class:** factor_ordered
 
 **Values**
 - 1 = Never justifiable
@@ -275,7 +275,7 @@ Please note that the WorldView app displays only a small subset of
 ### Q190: Justification for parents beating children
 **Question:** Please tell me for each of the following statements whether you think it can always be justified, never be justified, or something in between, using this card. Parents beating children
 
-**Variable class:** ordinal
+**Variable class:** factor_ordered
 
 **Values**
 - 1 = Never justifiable
@@ -292,7 +292,7 @@ Please note that the WorldView app displays only a small subset of
 ### Q191: Justification for violence against other people
 **Question:** Please tell me for each of the following statements whether you think it can always be justified, never be justified, or something in between, using this card. Violence against other people
 
-**Variable class:** ordinal
+**Variable class:** factor_ordered
 
 **Values**
 - 1 = Never justifiable
@@ -309,7 +309,7 @@ Please note that the WorldView app displays only a small subset of
 ### Q192: Justification for terrorism
 **Question:** Please tell me for each of the following statements whether you think it can always be justified, never be justified, or something in between, using this card. Terrorism as a political, ideological or religious mean
 
-**Variable class:** ordinal
+**Variable class:** factor_ordered
 
 **Values**
 - 1 = Never justifiable
@@ -326,7 +326,7 @@ Please note that the WorldView app displays only a small subset of
 ### Q193: Justification for casual sex
 **Question:** Please tell me for each of the following statements whether you think it can always be justified, never be justified, or something in between, using this card. Having casual sex
 
-**Variable class:** ordinal
+**Variable class:** factor_ordered
 
 **Values**
 - 1 = Never justifiable
@@ -343,7 +343,7 @@ Please note that the WorldView app displays only a small subset of
 ### Q194: Justification for political violence
 **Question:** Please tell me for each of the following statements whether you think it can always be justified, never be justified, or something in between, using this card. Political violence
 
-**Variable class:** ordinal
+**Variable class:** factor_ordered
 
 **Values**
 - 1 = Never justifiable
@@ -360,7 +360,7 @@ Please note that the WorldView app displays only a small subset of
 ### Q195: Justification for the death penalty
 **Question:** Please tell me for each of the following statements whether you think it can always be justified, never be justified, or something in between, using this card. Death penalty
 
-**Variable class:** ordinal
+**Variable class:** factor_ordered
 
 **Values**
 - 1 = Never justifiable
@@ -405,7 +405,7 @@ Integer (min = 16 max = 103)
 ### Q275: Highest educational level of respondent
 **Question:** What is the highest educational level that you have attained?
 
-**Variable class:** ordinal
+**Variable class:** factor_ordered
 
 **Values**
 - 1 = Primary education (ISCED 1)
@@ -420,7 +420,7 @@ Integer (min = 16 max = 103)
 ### Q288: Income scale placement
 **Question:** On this card is an income scale on which 1 indicates the lowest income group and 10 the highest income group in your country. We would like to know in what group your household is. Please, specify the appropriate number, counting all wages, salaries, pensions and other incomes that come in.
 
-**Variable class:** ordinal
+**Variable class:** factor_ordered
 
 **Values**
 - 1 = Lower step

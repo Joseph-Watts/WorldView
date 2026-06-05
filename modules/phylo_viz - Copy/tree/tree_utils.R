@@ -13,7 +13,7 @@ default_palette_sequence <- function() {
 default_palette_for_var <- function(var_name, selected_vars) {
   seq <- default_palette_sequence()
   idx <- match(var_name, selected_vars)
-
+  
   if (is.na(idx) || idx < 1) return("viridis")
   if (idx > length(seq)) return(tail(seq, 1))
   seq[[idx]]
@@ -33,221 +33,6 @@ assert_tree_deps <- function() {
   }
 }
 
-tree_safe_input_id <- function(prefix, var) {
-  paste0(prefix, gsub("[^A-Za-z0-9_]", "_", var))
-}
-
-# ------------------------------------------------------------------------------
-# Individual-level WVS aggregation helpers
-# ------------------------------------------------------------------------------
-
-tree_variable_type <- function(x) {
-  if (is.factor(x) && !is.ordered(x)) {
-    return("factor")
-  }
-
-  if (is.ordered(x)) {
-    return("ordered")
-  }
-
-  if (is.numeric(x) || is.integer(x)) {
-    return("numeric")
-  }
-
-  "unsupported"
-}
-
-tree_var_display <- function(var, codebook_data = NULL) {
-  if (is.null(var) || length(var) == 0 || is.na(var)) {
-    return("")
-  }
-
-  if (!is.null(codebook_data) && exists("wvs_var_display", mode = "function")) {
-    return(wvs_var_display(var, codebook_data))
-  }
-
-  if (!is.null(codebook_data) && all(c("Col_ID", "ColLab") %in% names(codebook_data))) {
-    label <- codebook_data$ColLab[match(var, codebook_data$Col_ID)]
-    if (length(label) == 1 && !is.na(label)) {
-      return(label)
-    }
-  }
-
-  var
-}
-
-tree_measure_label <- function(var, factor_level = NULL, codebook_data = NULL, type = NULL) {
-  var_label <- tree_var_display(var, codebook_data)
-
-  if (identical(type, "factor")) {
-    return(paste0("Proportion: ", var_label, " = ", factor_level))
-  }
-
-  if (identical(type, "ordered")) {
-    return(paste0("Mean ordered response: ", var_label))
-  }
-
-  paste0("Mean: ", var_label)
-}
-
-tree_plot_var_name <- function(var, factor_level = NULL, type = NULL) {
-  if (identical(type, "factor")) {
-    level_stub <- gsub("[^A-Za-z0-9_]+", "_", as.character(factor_level))
-    level_stub <- gsub("^_+|_+$", "", level_stub)
-    if (!nzchar(level_stub)) level_stub <- "level"
-    return(paste0(var, "__", level_stub))
-  }
-
-  var
-}
-
-tree_compatible_variable_ids <- function(indiv_data) {
-  ids <- names(indiv_data)
-  ids <- setdiff(ids, c("B_COUNTRY", "B_COUNTRY_ALPHA", "S007"))
-
-  ids <- ids[vapply(indiv_data[ids], function(x) {
-    is.numeric(x) || is.integer(x) || is.ordered(x) || is.factor(x)
-  }, logical(1))]
-
-  ids[vapply(indiv_data[ids], function(x) any(!is.na(x)), logical(1))]
-}
-
-tree_factor_levels_available <- function(indiv_data, var) {
-  if (is.null(var) || length(var) != 1 || !(var %in% names(indiv_data))) {
-    return(character(0))
-  }
-
-  x <- indiv_data[[var]]
-  if (!is.factor(x) || is.ordered(x)) {
-    return(character(0))
-  }
-
-  levs <- levels(x)
-  levs[vapply(levs, function(level) any(!is.na(x) & x == level), logical(1))]
-}
-
-aggregate_individual_tree_value <- function(indiv_data,
-                                            var,
-                                            factor_level = NULL,
-                                            codebook_data = NULL,
-                                            merge_nir_to_gbr = TRUE) {
-  if (is.null(var) || length(var) != 1 || !(var %in% names(indiv_data))) {
-    return(list(
-      data = data.frame(B_COUNTRY_ALPHA = character(0)),
-      plot_var = character(0),
-      label = character(0)
-    ))
-  }
-
-  x <- indiv_data[[var]]
-  type <- tree_variable_type(x)
-
-  if (identical(type, "unsupported")) {
-    stop("Selected variable is not compatible with the phylogeny visualisation.", call. = FALSE)
-  }
-
-  if (identical(type, "factor")) {
-    levels_available <- tree_factor_levels_available(indiv_data, var)
-    if (length(levels_available) == 0) {
-      stop("Selected factor has no non-missing levels.", call. = FALSE)
-    }
-    if (is.null(factor_level) || length(factor_level) != 1 || !(factor_level %in% levels_available)) {
-      factor_level <- levels_available[[1]]
-    }
-  }
-
-  d <- indiv_data %>%
-    dplyr::transmute(
-      B_COUNTRY_ALPHA = as.character(.data$B_COUNTRY_ALPHA),
-      response = .data[[var]]
-    ) %>%
-    dplyr::filter(!is.na(.data$B_COUNTRY_ALPHA), !is.na(.data$response))
-
-  # Match the old country-level phylogeny behaviour, but derive the value from
-  # individual responses. Combining NIR with GBR here naturally weights by the
-  # number of individual non-missing responses for the selected variable.
-  if (merge_nir_to_gbr) {
-    d <- d %>%
-      dplyr::mutate(
-        B_COUNTRY_ALPHA = dplyr::if_else(
-          .data$B_COUNTRY_ALPHA == "NIR",
-          "GBR",
-          .data$B_COUNTRY_ALPHA
-        )
-      )
-  }
-
-  if (identical(type, "factor")) {
-    d <- d %>%
-      dplyr::mutate(.tree_numeric = as.numeric(.data$response == factor_level))
-  } else {
-    d <- d %>%
-      dplyr::mutate(.tree_numeric = suppressWarnings(as.numeric(.data$response)))
-  }
-
-  plot_var <- tree_plot_var_name(var, factor_level = factor_level, type = type)
-  label <- tree_measure_label(
-    var = var,
-    factor_level = factor_level,
-    codebook_data = codebook_data,
-    type = type
-  )
-
-  out <- d %>%
-    dplyr::group_by(.data$B_COUNTRY_ALPHA) %>%
-    dplyr::summarise(
-      value = mean(.data$.tree_numeric, na.rm = TRUE),
-      n = dplyr::n(),
-      .groups = "drop"
-    )
-
-  names(out)[names(out) == "value"] <- plot_var
-  names(out)[names(out) == "n"] <- paste0(plot_var, "__n")
-
-  list(
-    data = out,
-    plot_var = plot_var,
-    label = label
-  )
-}
-
-aggregate_individual_tree_values <- function(indiv_data,
-                                             specs,
-                                             codebook_data = NULL,
-                                             merge_nir_to_gbr = TRUE) {
-  if (length(specs) == 0) {
-    return(list(
-      data = data.frame(B_COUNTRY_ALPHA = character(0)),
-      outcome_vars = character(0),
-      labels = character(0)
-    ))
-  }
-
-  pieces <- lapply(specs, function(spec) {
-    aggregate_individual_tree_value(
-      indiv_data = indiv_data,
-      var = spec$var,
-      factor_level = spec$factor_level,
-      codebook_data = codebook_data,
-      merge_nir_to_gbr = merge_nir_to_gbr
-    )
-  })
-
-  data_pieces <- lapply(pieces, `[[`, "data")
-  out <- Reduce(function(x, y) {
-    dplyr::full_join(x, y, by = "B_COUNTRY_ALPHA")
-  }, data_pieces)
-
-  outcome_vars <- vapply(pieces, `[[`, character(1), "plot_var")
-  labels <- stats::setNames(vapply(pieces, `[[`, character(1), "label"), outcome_vars)
-
-  list(
-    data = out,
-    outcome_vars = outcome_vars,
-    labels = labels
-  )
-}
-
 # ------------------------------------------------------------------------------
 # Tip parsing + joins
 # ------------------------------------------------------------------------------
@@ -256,7 +41,7 @@ aggregate_individual_tree_values <- function(indiv_data,
 extract_tip_keys <- function(tree) {
   tip_country_codes <- vapply(strsplit(tree$tip.label, "_"), function(x) x[length(x)], character(1))
   tip_glottocodes   <- vapply(strsplit(tree$tip.label, "_"), function(x) x[1], character(1))
-
+  
   data.frame(
     label = tree$tip.label,              # Must match ggtree tip key
     country_code = tip_country_codes,    # ISO3
@@ -265,7 +50,7 @@ extract_tip_keys <- function(tree) {
   )
 }
 
-# Build tip annotation table: (tip keys) + (language/country map) + (aggregated WVS variables)
+# Build tip annotation table: (tip keys) + (language/country map) + (WVS variables)
 make_tip_annotation <- function(tree, wvs_data, lang_country_map, outcome_vars) {
   # Use the startup cache created in phylo_viz_global.R when available. This
   # avoids rebuilding the static tip/country/language join for every tree render.
@@ -275,7 +60,7 @@ make_tip_annotation <- function(tree, wvs_data, lang_country_map, outcome_vars) 
     tip_anno <- country_phylogeny_base_tip_anno
   } else {
     tip_keys <- extract_tip_keys(tree)
-
+    
     tip_anno <- dplyr::left_join(
       tip_keys,
       lang_country_map,
@@ -283,9 +68,8 @@ make_tip_annotation <- function(tree, wvs_data, lang_country_map, outcome_vars) 
       keep = TRUE
     )
   }
-
-  # Join aggregated WVS values by ISO3 (B_COUNTRY_ALPHA). These values are
-  # produced from indiv_data inside tree_server.R.
+  
+  # Join WVS by ISO3 (B_COUNTRY_ALPHA)
   if (length(outcome_vars) > 0) {
     wvs_small <- dplyr::select(wvs_data, B_COUNTRY_ALPHA, dplyr::all_of(outcome_vars))
     tip_anno <- dplyr::left_join(
@@ -294,7 +78,7 @@ make_tip_annotation <- function(tree, wvs_data, lang_country_map, outcome_vars) 
       by = c("country_code" = "B_COUNTRY_ALPHA")
     )
   }
-
+  
   tip_anno
 }
 
@@ -303,13 +87,13 @@ build_tip_label <- function(tip_anno, fields = c("country_name"), sep = " | ") {
   fields <- unique(fields)
   fields <- fields[fields %in% names(tip_anno)]
   if (length(fields) == 0) return(tip_anno$label)
-
+  
   parts <- lapply(fields, function(f) {
     x <- tip_anno[[f]]
     x[is.na(x)] <- ""
     as.character(x)
   })
-
+  
   out <- do.call(paste, c(parts, list(sep = sep)))
   out <- trimws(gsub(paste0("(^\\Q", sep, "\\E\\s*|\\s*\\Q", sep, "\\E$)"), "", out))
   ifelse(out == "", tip_anno$label, out)
@@ -320,20 +104,20 @@ prune_tree_for_selected_vars <- function(tree, tip_anno, outcome_vars) {
   if (length(outcome_vars) == 0) {
     return(list(tree = tree, tip_anno = tip_anno))
   }
-
+  
   keep <- rep(FALSE, nrow(tip_anno))
   for (v in outcome_vars) {
     keep <- keep | !is.na(tip_anno[[v]])
   }
-
+  
   if (sum(keep) == 0) {
     stop("No matching WVS data for selected variables on this tree.")
   }
-
+  
   kept_labels <- tip_anno$label[keep]
   pruned_tree <- ape::keep.tip(tree, kept_labels)
   pruned_tip_anno <- tip_anno[keep, , drop = FALSE]
-
+  
   list(tree = pruned_tree, tip_anno = pruned_tip_anno)
 }
 
@@ -369,7 +153,6 @@ build_ggtree_multi_bar_plot <- function(
     lang_country_map,
     outcome_vars,
     palettes_by_var,
-    outcome_var_labels = NULL,
     layout = "rectangular",
     show_tip_labels = TRUE,
     tip_label_fields = c("country_name"),
@@ -380,50 +163,50 @@ build_ggtree_multi_bar_plot <- function(
     show_legends = TRUE
 ) {
   assert_tree_deps()
-
+  
   # geom_fruit requires a bare geom name (avoid ggplot2::geom_col in the call)
   geom_col  <- ggplot2::geom_col
   geom_text <- ggplot2::geom_text
-
-  outcome_label <- function(var) {
-    if (!is.null(outcome_var_labels) && var %in% names(outcome_var_labels)) {
-      return(unname(outcome_var_labels[[var]]))
-    }
-    var
-  }
-
+  
   # Prepare tip annotation
   tip_anno <- make_tip_annotation(tree, wvs_data, lang_country_map, outcome_vars)
   tip_anno$formatted_label <- build_tip_label(tip_anno, tip_label_fields, tip_label_sep)
-
+  
   # Prune tree for selected variables
   if (length(outcome_vars) > 0) {
     pruned <- prune_tree_for_selected_vars(tree, tip_anno, outcome_vars)
     tree <- pruned$tree
     tip_anno <- pruned$tip_anno
   }
-
+  
   tip_anno_tree <- dplyr::select(tip_anno, -formatted_label)
-
+  
   # Base tree
   p <- ggtree::ggtree(tree, layout = layout) %<+% tip_anno_tree +
     ggtree::theme_tree2()
-
+  
+  # Tip labels aligned right (works best for rectangular/slanted)
+  # if (show_tip_labels) {
+  #   p <- p + ggtree::geom_tiplab(
+  #     ggplot2::aes(label = formatted_label),
+  #     align = TRUE,
+  #     linesize = 0.25,
+  #     size = tip_label_size
+  #   )
+  # }
+  
   offset <- bar_panel_gap
-
-  if (length(outcome_vars) > 0) {
-    # Multi-variable bars: one panel per selected derived variable, each with
-    # its own fill scale + legend. Derived variables come from individual-level
-    # aggregation in tree_server.R.
+  
+  if(length(outcome_vars) > 0){
+    # Multi-variable bars: one panel per variable, each with its own fill scale + legend
     bar_long <- make_long_bar_data(tip_anno, outcome_vars)
-
+    
     for (i in seq_along(outcome_vars)) {
       var <- outcome_vars[i]
       pal <- palettes_by_var[[var]] %||% "viridis"
-      var_label <- outcome_label(var)
-
+      
       df_var <- bar_long[bar_long$variable == var, , drop = FALSE]
-
+      
       p <- p +
         ggtreeExtra::geom_fruit(
           data = df_var,
@@ -439,23 +222,23 @@ build_ggtree_multi_bar_plot <- function(
           axis.params = list(
             axis = "x",
             text.size = 2.5,
-            title = var_label,
+            title = var,
             title.size = 3
           ),
           grid.params = list()
         ) +
         viridis_scale_for_option(
           option = pal,
-          name = var_label,
-          legend_order = i,
+          name = var,
+          legend_order = i,      # <-- keep legend order same as variable order
           show_legend = show_legends
         )
-
+      
       # Separate legends/scales for next variable
       if (i < length(outcome_vars)) {
         p <- p + ggnewscale::new_scale_fill()
       }
-
+      
       offset <- offset + bar_panel_gap
     }
   }
@@ -469,11 +252,12 @@ build_ggtree_multi_bar_plot <- function(
         mapping = ggplot2::aes(
           y = label,                 # tip key
           x = 0,                     # constant x within this panel
-          label = formatted_label
+          label = formatted_label    # IMPORTANT: use column name, not tip_anno$...
         ),
         orientation = "y",
         offset = offset,             # after the last bar panel
         pwidth = 1.0,
+        # hjust = 0,                   # left align text
         size = tip_label_size,
         axis.params = list(axis = "none"),
         grid.params = NULL
@@ -489,10 +273,10 @@ build_ggtree_multi_bar_plot <- function(
       p <- p + ggplot2::coord_cartesian(clip = "off")
     }
   }
-
+  
   # Blank mode (no variables)
   if (length(outcome_vars) == 0) {
     return(p + ggplot2::ggtitle("Language Phylogeny (Base)"))
   }
-  p 
+  p + ggplot2::ggtitle("Language Phylogeny (Multi-variable bars)")
 }

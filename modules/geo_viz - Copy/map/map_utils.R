@@ -25,143 +25,7 @@ map_palette_cols <- function(n = 256, option = "viridis") {
   substr(viridisLite::viridis(n, option = map_palette_option(option)), 1, 7)
 }
 
-# ---- display name for a WVS variable ----
-map_var_display <- function(var, codebook_data = NULL) {
-  if (is.null(var) || length(var) == 0 || is.na(var)) {
-    return("")
-  }
-
-  if (!is.null(codebook_data) && exists("wvs_var_display", mode = "function")) {
-    return(wvs_var_display(var, codebook_data))
-  }
-
-  if (!is.null(codebook_data) && all(c("Col_ID", "ColLab") %in% names(codebook_data))) {
-    label <- codebook_data$ColLab[match(var, codebook_data$Col_ID)]
-    if (length(label) == 1 && !is.na(label)) {
-      return(label)
-    }
-  }
-
-  var
-}
-
-# ---- variable type used by the map module ----
-map_variable_type <- function(x) {
-  if (is.factor(x) && !is.ordered(x)) {
-    return("factor")
-  }
-
-  if (is.ordered(x)) {
-    return("ordered")
-  }
-
-  if (is.numeric(x) || is.integer(x)) {
-    return("numeric")
-  }
-
-  "unsupported"
-}
-
-# ---- readable measure label for the selected map value ----
-map_measure_label <- function(var, factor_level = NULL, codebook_data = NULL, type = NULL) {
-  var_label <- map_var_display(var, codebook_data)
-
-  if (identical(type, "factor")) {
-    return(paste0("Proportion: ", var_label, " = ", factor_level))
-  }
-
-  if (identical(type, "ordered")) {
-    return(paste0("Mean ordered response: ", var_label))
-  }
-
-  paste0("Mean: ", var_label)
-}
-
-# ---- aggregate individual-level WVS data to one value per country ----
-aggregate_individual_map_values <- function(indiv_data, var, factor_level = NULL, codebook_data = NULL) {
-  if (is.null(var) || length(var) != 1 || !(var %in% names(indiv_data))) {
-    return(data.frame(
-      B_COUNTRY_ALPHA = character(0),
-      B_COUNTRY = character(0),
-      value = numeric(0),
-      n = integer(0)
-    ))
-  }
-
-  x <- indiv_data[[var]]
-  type <- map_variable_type(x)
-
-  if (identical(type, "unsupported")) {
-    stop("Selected variable is not map-compatible.", call. = FALSE)
-  }
-
-  d <- indiv_data %>%
-    dplyr::transmute(
-      B_COUNTRY_ALPHA = as.character(.data$B_COUNTRY_ALPHA),
-      B_COUNTRY = as.character(.data$B_COUNTRY),
-      response = .data[[var]]
-    ) %>%
-    dplyr::filter(!is.na(.data$B_COUNTRY_ALPHA), !is.na(.data$response))
-
-  if (identical(type, "factor")) {
-    levels_available <- levels(x)
-    if (is.null(factor_level) || length(factor_level) != 1 || !(factor_level %in% levels_available)) {
-      factor_level <- levels_available[[1]]
-    }
-
-    d <- d %>%
-      dplyr::mutate(.map_numeric = as.numeric(.data$response == factor_level))
-  } else {
-    d <- d %>%
-      dplyr::mutate(.map_numeric = suppressWarnings(as.numeric(.data$response)))
-  }
-
-  out <- d %>%
-    dplyr::group_by(.data$B_COUNTRY_ALPHA) %>%
-    dplyr::summarise(
-      B_COUNTRY = dplyr::first(.data$B_COUNTRY),
-      value = mean(.data$.map_numeric, na.rm = TRUE),
-      n = dplyr::n(),
-      .groups = "drop"
-    )
-
-  names(out)[names(out) == "value"] <- var
-  out$.map_n <- out$n
-  out$.map_measure_label <- map_measure_label(
-    var = var,
-    factor_level = factor_level,
-    codebook_data = codebook_data,
-    type = type
-  )
-
-  out
-}
-
-# ---- join shape, individual-level map aggregate, and phylogeny metadata ----
-join_world_data_from_individuals <- function(world_shape, indiv_data, country_phylogeny,
-                                             var, factor_level = NULL, codebook_data = NULL) {
-  country_values <- aggregate_individual_map_values(
-    indiv_data = indiv_data,
-    var = var,
-    factor_level = factor_level,
-    codebook_data = codebook_data
-  )
-
-  out <- world_shape %>%
-    dplyr::left_join(country_values, by = c("iso_a3" = "B_COUNTRY_ALPHA")) %>%
-    dplyr::left_join(
-      country_phylogeny %>% dplyr::distinct(iso3166alpha3, .keep_all = TRUE),
-      by = c("iso_a3" = "iso3166alpha3")
-    )
-
-  if (!"name" %in% names(out) && "name_long" %in% names(out)) {
-    out$name <- out$name_long
-  }
-  out
-}
-
-# Backwards-compatible wrapper. New map code should use
-# join_world_data_from_individuals(); this remains for any older callers.
+# ---- join data ----
 join_world_data <- function(world_shape, wvs_country, country_phylogeny) {
   out <- world_shape %>%
     dplyr::left_join(wvs_country, by = c("iso_a3" = "B_COUNTRY_ALPHA")) %>%
@@ -169,36 +33,45 @@ join_world_data <- function(world_shape, wvs_country, country_phylogeny) {
       country_phylogeny %>% dplyr::distinct(iso3166alpha3, .keep_all = TRUE),
       by = c("iso_a3" = "iso3166alpha3")
     )
-
+  
   if (!"name" %in% names(out) && "name_long" %in% names(out)) {
     out$name <- out$name_long
   }
   out
 }
 
+# ---- display name for a WVS variable ----
+map_var_display <- function(var, codebook_data = NULL) {
+  if (is.null(var) || length(var) == 0 || is.na(var)) {
+    return("")
+  }
+  
+  if (!is.null(codebook_data) && exists("wvs_var_display", mode = "function")) {
+    return(wvs_var_display(var, codebook_data))
+  }
+  
+  var
+}
+
 # ---- build per-country hover label ----
 build_country_labels <- function(world_sf, var = NULL, digits = 3, codebook_data = NULL) {
   n <- nrow(world_sf)
-
-  nm <- world_sf$name %||% world_sf$iso_a3
+  
+  nm   <- world_sf$name %||% world_sf$iso_a3
   iso3 <- world_sf$iso_a3
-
+  
   fmt_num <- function(x) {
     ifelse(is.na(x), "NA", format(round(x, digits), nsmall = digits))
   }
-
-  var_label <- if (".map_measure_label" %in% names(world_sf)) {
-    unique(stats::na.omit(world_sf$.map_measure_label))[1] %||% map_var_display(var, codebook_data)
-  } else {
-    map_var_display(var, codebook_data)
-  }
-
+  
+  var_label <- map_var_display(var, codebook_data)
+  
   vapply(seq_len(n), function(i) {
     parts <- c(
       paste0("<b>", htmltools::htmlEscape(nm[i]), "</b>"),
       paste0("ISO3: ", htmltools::htmlEscape(iso3[i]))
     )
-
+    
     if (!is.null(var) && length(var) == 1 && var %in% names(world_sf)) {
       parts <- c(
         parts,
@@ -208,12 +81,8 @@ build_country_labels <- function(world_sf, var = NULL, digits = 3, codebook_data
           htmltools::htmlEscape(fmt_num(world_sf[[var]][i]))
         )
       )
-
-      if (".map_n" %in% names(world_sf)) {
-        parts <- c(parts, paste0("Non-missing n: ", htmltools::htmlEscape(world_sf$.map_n[i])))
-      }
     }
-
+    
     paste(parts, collapse = "<br/>")
   }, character(1))
 }
@@ -225,8 +94,8 @@ make_variable_palette <- function(x, palette_option = "viridis") {
     rng <- c(0, 1)
   }
   leaflet::colorNumeric(
-    palette = map_palette_cols(256, palette_option),
-    domain = rng,
+    palette  = map_palette_cols(256, palette_option),
+    domain   = rng,
     na.color = "#CCCCCC"
   )
 }
@@ -236,12 +105,12 @@ add_variable_polygons <- function(map, sf1, var, codebook_data = NULL, palette_o
   if (is.null(var) || length(var) != 1 || !(var %in% names(sf1))) {
     return(
       map %>% leaflet::addPolygons(
-        data = sf1,
-        fillColor = "#CCCCCC",
+        data        = sf1,
+        fillColor   = "#CCCCCC",
         fillOpacity = 0.35,
-        weight = 1,
-        color = "white",
-        label = lapply(build_country_labels(sf1), htmltools::HTML),
+        weight      = 1,
+        color       = "white",
+        label       = lapply(build_country_labels(sf1), htmltools::HTML),
         highlightOptions = leaflet::highlightOptions(
           weight = 2,
           color = "#444444",
@@ -250,18 +119,18 @@ add_variable_polygons <- function(map, sf1, var, codebook_data = NULL, palette_o
       )
     )
   }
-
+  
   sf1$.map_value <- suppressWarnings(as.numeric(sf1[[var]]))
   pal <- make_variable_palette(sf1$.map_value, palette_option = palette_option)
   label <- build_country_labels(sf1, var = var, codebook_data = codebook_data)
   map %>%
     leaflet::addPolygons(
-      data = sf1,
-      fillColor = ~pal(.map_value),
+      data        = sf1,
+      fillColor   = ~pal(.map_value),
       fillOpacity = 0.75,
-      weight = 1,
-      color = "white",
-      label = lapply(label, htmltools::HTML),
+      weight      = 1,
+      color       = "white",
+      label       = lapply(label, htmltools::HTML),
       highlightOptions = leaflet::highlightOptions(
         weight = 2,
         color = "#444444",
@@ -275,25 +144,21 @@ build_map_legend_ui <- function(world_sf, var, codebook_data = NULL, palette_opt
   if (is.null(var) || length(var) != 1 || !(var %in% names(world_sf))) {
     return(NULL)
   }
-
+  
   values <- suppressWarnings(as.numeric(world_sf[[var]]))
   values <- values[is.finite(values)]
   if (length(values) == 0) {
     return(NULL)
   }
-
+  
   rng <- range(values, na.rm = TRUE)
   if (!all(is.finite(rng))) {
     return(NULL)
   }
-
-  legend_title <- if (".map_measure_label" %in% names(world_sf)) {
-    unique(stats::na.omit(world_sf$.map_measure_label))[1] %||% map_var_display(var, codebook_data)
-  } else {
-    map_var_display(var, codebook_data)
-  }
+  
+  legend_title <- map_var_display(var, codebook_data)
   fmt <- function(x) format(round(x, 3), nsmall = 3, trim = TRUE)
-
+  
   if (rng[1] == rng[2]) {
     tick_vals <- rng[1]
     tick_labels <- fmt(tick_vals)
@@ -305,15 +170,15 @@ build_map_legend_ui <- function(world_sf, var, codebook_data = NULL, palette_opt
     }
     tick_labels <- fmt(tick_vals)
   }
-
+  
   cols <- map_palette_cols(9, palette_option)
   stops <- paste0(cols, " ", seq(0, 100, length.out = length(cols)), "%")
   gradient_css <- paste0("linear-gradient(to right, ", paste(stops, collapse = ", "), ")")
-
+  
   tick_items <- lapply(seq_along(tick_labels), function(i) {
     htmltools::tags$span(tick_labels[[i]])
   })
-
+  
   htmltools::tags$div(
     class = "map-legend-below",
     style = paste0(
@@ -345,19 +210,15 @@ build_static_map_plot <- function(world_sf, var, codebook_data = NULL, palette_o
   if (is.null(var) || length(var) != 1 || !(var %in% names(world_sf))) {
     stop("No valid map variable selected.", call. = FALSE)
   }
-
+  
   sf1 <- world_sf
   sf1$.map_value <- suppressWarnings(as.numeric(sf1[[var]]))
-  legend_title <- if (".map_measure_label" %in% names(sf1)) {
-    unique(stats::na.omit(sf1$.map_measure_label))[1] %||% map_var_display(var, codebook_data)
-  } else {
-    map_var_display(var, codebook_data)
-  }
+  legend_title <- map_var_display(var, codebook_data)
   values <- sf1$.map_value[is.finite(sf1$.map_value)]
   if (length(values) == 0) {
     stop("The selected map variable has no finite values to plot.", call. = FALSE)
   }
-
+  
   ggplot2::ggplot(sf1) +
     ggplot2::geom_sf(ggplot2::aes(fill = .data$.map_value), color = "white", linewidth = 0.15) +
     ggplot2::scale_fill_gradientn(

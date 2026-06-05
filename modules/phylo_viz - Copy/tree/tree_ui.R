@@ -31,22 +31,19 @@ phylo_viz_tree_ui <- function(id) {
         div(
           class = "wv-box-scroll",
           
-          # Select up to 3 individual-level WVS variables
+          # Select up to 3 numeric WVS variables
           selectizeInput(
             ns("outcome_vars"),
             "WVS7 Variables (max 3):",
             choices = NULL,
             multiple = TRUE,
             options = list(
-              placeholder = "Select up to 3 individual-level variables",
+              placeholder = "Select up to 3 numeric variables",
               maxItems = 3,
               plugins = list("remove_button")
             )
           ),
           
-          # Per-variable factor-level selectors for unordered factor variables
-          uiOutput(ns("var_factor_level_ui")),
-
           # Per-variable palette selectors (generated dynamically)
           uiOutput(ns("var_palette_ui")),
           

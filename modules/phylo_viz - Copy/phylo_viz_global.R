@@ -42,6 +42,17 @@ country_phylogeny <- readr::read_csv(paste0(path_phylogeny_dataset,"/country_phy
 country_phylogeny_tree <- ape::read.tree(paste0(path_phylogeny_dataset, "/country_phylogeny_tree.tree"))
 
 
+wvs_country2 <- country_data
+
+merge_NIR_to_GBR <- TRUE
+# merge_NIR_to_GBR <- FALSE
+if(merge_NIR_to_GBR){
+  wvs_country2[wvs_country2$B_COUNTRY_ALPHA=="GBR", 3:ncol(wvs_country2)] <-
+    (447*wvs_country2[wvs_country2$B_COUNTRY_ALPHA=="NIR", 3:ncol(wvs_country2)] +
+       2609*wvs_country2[wvs_country2$B_COUNTRY_ALPHA=="GBR", 3:ncol(wvs_country2)]) / (447+2609)
+  wvs_country2 <- dplyr::filter(wvs_country2, B_COUNTRY_ALPHA!="NIR")
+}
+
 # Cache the static tree tip-to-country/language join once at startup. Plot
 # renders only need to join the selected WVS variables on top of this.
 country_phylogeny_tip_keys <- extract_tip_keys(country_phylogeny_tree)

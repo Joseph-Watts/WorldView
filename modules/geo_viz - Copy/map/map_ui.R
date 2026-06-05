@@ -2,7 +2,7 @@
 
 geo_viz_map_ui <- function(id) {
   ns <- NS(id)
-
+  
   tagList(
     fluidRow(
       box(
@@ -17,20 +17,18 @@ geo_viz_map_ui <- function(id) {
           selected = NULL,
           multiple = FALSE,
           options  = list(
-            placeholder = "Select one individual-level variable"
+            placeholder = "Select one numeric variable"
           )
         ),
-        uiOutput(ns("map_factor_level_ui")),
         selectInput(
           ns("map_palette"),
           "Palette:",
           choices = map_palette_choices(),
           selected = "viridis"
-        ),
-        uiOutput(ns("var_description"))
+        )
       )
     ),
-
+    
     fluidRow(
       box(
         width       = 12,
@@ -53,7 +51,7 @@ geo_viz_map_ui <- function(id) {
         )
       )
     ),
-
+    
     fluidRow(
       box(
         width = 12,

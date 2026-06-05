@@ -1,7 +1,6 @@
 # modules/phylo_viz/tree/tree_server.R
-
 phylo_viz_tree_server <- function(id,
-                                  indiv_data,
+                                  wvs_data,
                                   codebook_data,
                                   lang_tree,
                                   lang_country_map,
@@ -19,21 +18,20 @@ phylo_viz_tree_server <- function(id,
       min(max(input$download_height %||% 1200, 600), 3000)
     })
 
-    tree_variable_ids <- reactive({
-      tree_compatible_variable_ids(indiv_data)
-    })
-
     # Build grouped WVS variable choices.
-    # The selector returns real column IDs from indiv_data, while labels remain readable.
-    make_grouped_tree_choices <- function(grouped_vars, variable_ids, codebook_data) {
-      # Fallback: all tree-compatible individual-level WVS variables.
+    # The selector returns real column IDs from wvs_data, while labels remain readable.
+    make_grouped_tree_choices <- function(grouped_vars, wvs_data, codebook_data) {
+      numeric_vars <- names(wvs_data)[vapply(wvs_data, is.numeric, logical(1))]
+      numeric_vars <- setdiff(numeric_vars, "geometry")
+
+      # Fallback: all numeric variables in the country-level WVS data
       if (is.null(grouped_vars)) {
         disp <- vapply(
-          variable_ids,
-          function(v) tree_var_display(v, codebook_data),
+          numeric_vars,
+          function(v) wvs_var_display(v, codebook_data),
           FUN.VALUE = character(1)
         )
-        return(stats::setNames(variable_ids, disp))
+        return(stats::setNames(numeric_vars, disp))
       }
 
       out <- lapply(grouped_vars, function(x) {
@@ -72,7 +70,7 @@ phylo_viz_tree_server <- function(id,
 
         ids <- stats::na.omit(ids)
         ids <- unique(ids)
-        ids <- ids[ids %in% variable_ids]
+        ids <- ids[ids %in% numeric_vars]
 
         if (length(ids) == 0) {
           return(NULL)
@@ -82,7 +80,7 @@ phylo_viz_tree_server <- function(id,
           ids,
           vapply(
             ids,
-            function(v) tree_var_display(v, codebook_data),
+            function(v) wvs_var_display(v, codebook_data),
             FUN.VALUE = character(1)
           )
         )
@@ -90,62 +88,26 @@ phylo_viz_tree_server <- function(id,
 
       out <- out[!vapply(out, is.null, logical(1))]
 
-      # If grouped_vars does not match the individual-level columns for any
-      # reason, fall back to all available compatible WVS variables so the
-      # selector is never empty.
+      # If grouped_minus_ignored does not match the country-level columns for any
+      # reason, fall back to all available numeric WVS variables so the selector
+      # is never empty.
       if (length(out) == 0) {
         disp <- vapply(
-          variable_ids,
-          function(v) tree_var_display(v, codebook_data),
+          numeric_vars,
+          function(v) wvs_var_display(v, codebook_data),
           FUN.VALUE = character(1)
         )
-        return(stats::setNames(variable_ids, disp))
+        return(stats::setNames(numeric_vars, disp))
       }
 
       out
     }
 
-    selected_var_specs <- reactive({
-      vars <- input$outcome_vars
-      if (is.null(vars) || length(vars) == 0) {
-        return(list())
-      }
-      if (length(vars) > 3) vars <- vars[1:3]
-
-      lapply(vars, function(v) {
-        x <- indiv_data[[v]]
-        type <- tree_variable_type(x)
-        factor_level <- NULL
-
-        if (identical(type, "factor")) {
-          levels_available <- tree_factor_levels_available(indiv_data, v)
-          req(length(levels_available) > 0)
-
-          key <- tree_safe_input_id("factor_level__", v)
-          selected_level <- input[[key]]
-          if (is.null(selected_level) ||
-              length(selected_level) != 1 ||
-              is.na(selected_level) ||
-              !(selected_level %in% levels_available)) {
-            selected_level <- levels_available[[1]]
-          }
-          factor_level <- selected_level
-        }
-
-        list(
-          var = v,
-          type = type,
-          factor_level = factor_level
-        )
-      })
-    })
-
-    # Populate WVS variable list from grouped choices
+    # Populate WVS variable list from grouped_minus_ignored-style grouped choices
     observe({
-      variable_ids <- tree_variable_ids()
       var_choices <- make_grouped_tree_choices(
         grouped_vars  = grouped_vars,
-        variable_ids  = variable_ids,
+        wvs_data      = wvs_data,
         codebook_data = codebook_data
       )
 
@@ -167,41 +129,6 @@ phylo_viz_tree_server <- function(id,
       )
     })
 
-    # Dynamic factor-level dropdowns for selected unordered factor variables.
-    output$var_factor_level_ui <- renderUI({
-      vars <- input$outcome_vars
-      if (is.null(vars) || length(vars) == 0) return(NULL)
-      if (length(vars) > 3) vars <- vars[1:3]
-
-      factor_vars <- vars[vapply(vars, function(v) {
-        v %in% names(indiv_data) &&
-          is.factor(indiv_data[[v]]) &&
-          !is.ordered(indiv_data[[v]])
-      }, logical(1))]
-
-      if (length(factor_vars) == 0) return(NULL)
-
-      tagList(lapply(factor_vars, function(v) {
-        levels_available <- tree_factor_levels_available(indiv_data, v)
-        if (length(levels_available) == 0) return(NULL)
-
-        key <- tree_safe_input_id("factor_level__", v)
-        current <- input[[key]]
-        selected <- if (!is.null(current) && current %in% levels_available) {
-          current
-        } else {
-          levels_available[[1]]
-        }
-
-        selectInput(
-          session$ns(key),
-          label = paste0("Level to show for ", tree_var_display(v, codebook_data), ":"),
-          choices = levels_available,
-          selected = selected
-        )
-      }))
-    })
-
     # Dynamic palette dropdowns for each selected variable (max 3)
     output$var_palette_ui <- renderUI({
       vars <- input$outcome_vars
@@ -213,8 +140,8 @@ phylo_viz_tree_server <- function(id,
 
       tagList(lapply(vars, function(v) {
         selectInput(
-          session$ns(tree_safe_input_id("palette__", v)),
-          label = paste0("Palette for ", tree_var_display(v, codebook_data), ":"),
+          session$ns(paste0("palette__", v)),
+          label = paste0("Palette for ", wvs_var_display(v, codebook_data), ":"),
           choices = palette_choices,
           selected = default_palette_for_var(v, vars)
         )
@@ -225,37 +152,24 @@ phylo_viz_tree_server <- function(id,
     tree_plot_obj <- eventReactive(input$update_plot, {
       req(lang_tree, lang_country_map)
 
-      specs <- selected_var_specs()
-      req(length(specs) > 0)
-      if (length(specs) > 3) specs <- specs[1:3]
+      vars <- input$outcome_vars
+      req(vars)
+      if (length(vars) == 0) stop("Please select at least one WVS variable.")
+      if (length(vars) > 3) vars <- vars[1:3]
 
-      aggregated <- aggregate_individual_tree_values(
-        indiv_data = indiv_data,
-        specs = specs,
-        codebook_data = codebook_data,
-        merge_nir_to_gbr = TRUE
-      )
-
-      vars <- aggregated$outcome_vars
-      req(length(vars) > 0)
-
-      # Collect per-variable palette choices (defaulting by position). Palette
-      # inputs are keyed by the original variable ID, while the plot uses derived
-      # column names for factor-level proportions.
+      # Collect per-variable palette choices (defaulting by position)
       palettes_by_var <- stats::setNames(vector("list", length(vars)), vars)
-      original_vars <- vapply(specs, function(spec) spec$var, character(1))
-      for (i in seq_along(vars)) {
-        key <- tree_safe_input_id("palette__", original_vars[[i]])
-        palettes_by_var[[vars[[i]]]] <- input[[key]] %||% default_palette_for_var(original_vars[[i]], original_vars)
+      for (v in vars) {
+        key <- paste0("palette__", v)
+        palettes_by_var[[v]] <- input[[key]] %||% default_palette_for_var(v, vars)
       }
 
       build_ggtree_multi_bar_plot(
         tree = lang_tree,
-        wvs_data = aggregated$data,
+        wvs_data = wvs_data,
         lang_country_map = lang_country_map,
         outcome_vars = vars,
         palettes_by_var = palettes_by_var,
-        outcome_var_labels = aggregated$labels,
         layout = input$tree_layout,
         show_tip_labels = input$show_tip_labels,
         tip_label_fields = input$tip_label_fields,

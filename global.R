@@ -71,7 +71,7 @@ set.seed(20241211)
 
 # load processed data
 indiv_data <- readRDS("data/WVS7_Individual.rds")
-country_data <- readRDS("data/WVS7_Country.rds")
+# country_data <- readRDS("data/WVS7_Country.rds")
 codebook_data <- readxl::read_xlsx("data/WVS7_Variable_Index.xlsx")
 
 codebook_data$Variable_Display_Logical <- as.logical(codebook_data$Variable_Display_Logical)

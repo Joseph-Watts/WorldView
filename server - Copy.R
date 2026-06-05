@@ -23,7 +23,7 @@ shinyServer(
     # for compatibility with existing server code, but avoid copying/mutating the
     # full objects on every reactive call.
     get_I_data <- reactive(indiv_data)
-    # get_C_data <- reactive(country_data)
+    get_C_data <- reactive(country_data)
     get_var_info <- reactive(codebook_data)
     
     # indiv_data modified to have full question as name of column
@@ -1332,7 +1332,7 @@ shinyServer(
     
     geo_viz_map_server(
       "geo_viz_map",
-      indiv_data        = indiv_data,
+      wvs_country       = wvs_country2,
       codebook_data     = codebook_data,
       world_shape       = world_shape,
       country_phylogeny = country_phylogeny,
@@ -1341,9 +1341,9 @@ shinyServer(
     
     phylo_viz_tree_server(
       "phylo_viz_tree",
-      indiv_data = indiv_data,
-      codebook_data = codebook_data,
-      lang_tree = country_phylogeny_tree,
+      wvs_data = wvs_country2,           
+      codebook_data = codebook_data,     
+      lang_tree = country_phylogeny_tree,      
       lang_country_map = country_phylogeny,
       grouped_vars = grouped_questions
     )

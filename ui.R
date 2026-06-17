@@ -254,7 +254,32 @@ shinyUI(fluidPage(
         
         ############## VARIABLE DOCUMENTATION ##############
         tabItem(tabName = "codebook",
-                includeMarkdown("www/codebook.md")
+                includeMarkdown("www/instructions/codebook_instructions.md"),
+                tabItem(
+                  tabName = "browse",
+                  fluidRow(
+                    column(
+                      width = 6,
+                      box(
+                        width = 12,
+                        title = "All Variables",
+                        status = "primary",
+                        solidHeader = TRUE,
+                        DTOutput("table")
+                      )
+                    ),
+                    column(
+                      width = 6,
+                      box(
+                        width = 12,
+                        title = "Selected Variable Details",
+                        status = "info",
+                        solidHeader = TRUE,
+                        uiOutput("details")
+                      )
+                    )
+                  )
+                )
         ),
         ############## VARIABLE DOCUMENTATION ##############
         

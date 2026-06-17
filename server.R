@@ -1348,4 +1348,51 @@ shinyServer(
       grouped_vars = grouped_questions
     )
     
+    
+    
+    
+    ######################-
+    #### Codebook Gen ####
+    ######################-
+
+    # Browse table
+    output$table <- renderDT({
+      datatable(
+        codebook_df[, c("question_id", "question_title", "section", "variable_class")],
+        selection = "single",
+        rownames = FALSE,
+        options = list(
+          scrollY = "500px",
+          scrollX = TRUE,
+          paging = FALSE,
+          searching = TRUE,
+          info = FALSE
+        )
+      )
+    })
+    
+    # Browse details
+    observeEvent(input$table_rows_selected, {
+      idx <- input$table_rows_selected
+      if (length(idx) == 1) {
+        row <- codebook_df[idx, ]
+        output$details <- renderUI({
+          tagList(
+            h3(row$question_id, ": ", row$question_title),
+            p(strong("Section: "), row$section),
+            p(strong("Question: "), row$question_text),
+            p(strong("Variable class: "), row$variable_class),
+            p(strong("Values: ")),
+            if (length(row$values[[1]]) > 0) {
+              tags$ul(lapply(row$values[[1]], tags$li))
+            } else {
+              p("No specific values listed.")
+            }
+          )
+        })
+      } else {
+        output$details <- renderUI({ p("Select a variable from the table.") })
+      }
+    })
+    
   }) # end server logic

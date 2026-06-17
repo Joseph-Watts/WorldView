@@ -303,3 +303,121 @@ prepare_analysis_data <- function(raw_data, var1_label, var2_label, countries, s
     stats::na.omit()
 }
 #####
+
+
+#####
+# Function to parse codebook
+parse_codebook_df <- function(md) {
+  lines <- strsplit(md, "\n")[[1]]
+  
+  sections <- character()
+  q_ids <- character()
+  q_titles <- character()
+  q_texts <- character()
+  q_classes <- character()
+  q_values <- list()
+  
+  current_section <- NA
+  in_question <- FALSE
+  question_lines <- character()
+  
+  for (line in lines) {
+    if (grepl("^## ", line)) {
+      current_section <- trimws(sub("^## ", "", line))
+      next
+    }
+    
+    if (grepl("^### ", line)) {
+      if (in_question && length(question_lines) > 0) {
+        header <- question_lines[1]
+        id_title <- trimws(sub("^### ", "", header))
+        parts <- strsplit(id_title, ":\\s*", perl = TRUE)[[1]]
+        q_id <- parts[1]
+        q_title <- if (length(parts) > 1) parts[2] else ""
+        
+        q_text <- NA
+        q_class <- NA
+        val_lines <- character()
+        block_lines <- question_lines
+        for (i in seq_along(block_lines)) {
+          ln <- block_lines[i]
+          if (grepl("^\\*\\*Question:\\*\\*", ln)) {
+            q_text <- trimws(sub("^\\*\\*Question:\\*\\*\\s*", "", ln))
+          }
+          if (grepl("^\\*\\*Variable class:\\*\\*", ln)) {
+            q_class <- trimws(sub("^\\*\\*Variable class:\\*\\*\\s*", "", ln))
+          }
+          if (grepl("^\\*\\*Values\\*\\*", ln)) {
+            j <- i + 1
+            while (j <= length(block_lines) && grepl("^-\\s+", block_lines[j])) {
+              val_lines <- c(val_lines, trimws(sub("^-\\s+", "", block_lines[j])))
+              j <- j + 1
+            }
+          }
+        }
+        sections <- c(sections, current_section)
+        q_ids <- c(q_ids, q_id)
+        q_titles <- c(q_titles, q_title)
+        q_texts <- c(q_texts, q_text)
+        q_classes <- c(q_classes, q_class)
+        q_values <- c(q_values, list(val_lines))
+      }
+      
+      in_question <- TRUE
+      question_lines <- line
+      next
+    }
+    
+    if (in_question) {
+      question_lines <- c(question_lines, line)
+    }
+  }
+  
+  # Save last question
+  if (in_question && length(question_lines) > 0) {
+    header <- question_lines[1]
+    id_title <- trimws(sub("^### ", "", header))
+    parts <- strsplit(id_title, ":\\s*", perl = TRUE)[[1]]
+    q_id <- parts[1]
+    q_title <- if (length(parts) > 1) parts[2] else ""
+    
+    q_text <- NA
+    q_class <- NA
+    val_lines <- character()
+    block_lines <- question_lines
+    for (i in seq_along(block_lines)) {
+      ln <- block_lines[i]
+      if (grepl("^\\*\\*Question:\\*\\*", ln)) {
+        q_text <- trimws(sub("^\\*\\*Question:\\*\\*\\s*", "", ln))
+      }
+      if (grepl("^\\*\\*Variable class:\\*\\*", ln)) {
+        q_class <- trimws(sub("^\\*\\*Variable class:\\*\\*\\s*", "", ln))
+      }
+      if (grepl("^\\*\\*Values\\*\\*", ln)) {
+        j <- i + 1
+        while (j <= length(block_lines) && grepl("^-\\s+", block_lines[j])) {
+          val_lines <- c(val_lines, trimws(sub("^-\\s+", "", block_lines[j])))
+          j <- j + 1
+        }
+      }
+    }
+    sections <- c(sections, current_section)
+    q_ids <- c(q_ids, q_id)
+    q_titles <- c(q_titles, q_title)
+    q_texts <- c(q_texts, q_text)
+    q_classes <- c(q_classes, q_class)
+    q_values <- c(q_values, list(val_lines))
+  }
+  
+  df <- data.frame(
+    section = sections,
+    question_id = q_ids,
+    question_title = q_titles,
+    question_text = q_texts,
+    variable_class = q_classes,
+    stringsAsFactors = FALSE
+  )
+  df$values <- q_values
+  return(df)
+}
+#####

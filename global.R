@@ -10,7 +10,7 @@ required_packages <- c(
   "sjlabelled", "shinycssloaders", "shinydashboard", "shinyWidgets",
   "broom", "viridis", "viridisLite", "plotly", "psych", "car",
   "leaflet", "sf", "rnaturalearth", "htmltools", "ape", "phylolm", "pROC",
-  "ggtree", "ggtreeExtra", "ggnewscale"
+  "ggtree", "ggtreeExtra", "ggnewscale", "stringr"
 )
 
 missing_packages <- required_packages[
@@ -46,6 +46,7 @@ library(viridis)
 library(plotly)
 library(psych)
 library(car)
+library(stringr)
 
 ##########################################-
 #### SETTING SEED FOR REPRODUCIBILITY ####
@@ -62,7 +63,6 @@ set.seed(20241211)
 # source(file.path("Support_Files/WVS_Wave7_Setup.R"), local = TRUE)
 
 #' JW TO DO: check whether there have been changes or whether there is data and run above if needed
-
 
 
 #################################-
@@ -89,6 +89,18 @@ picker_country_list <- read_rds("data/picker_country_list.rds")
 ###########################-
 source(file.path("Support_Files/functions.R"), 
        local = TRUE)
+
+
+
+# Read the markdown file
+codebook_md <- paste(readLines("www/codebook.md", warn = FALSE), collapse = "\n")
+if (length(codebook_md) == 0 || nchar(codebook_md) == 0) {
+  stop("Could not read codebook.md. Please make sure the file exists in the app directory.")
+}
+
+# Parse into a data frame
+codebook_df <- parse_codebook_df(codebook_md)
+
 
 
 # Create global list of questions to select from

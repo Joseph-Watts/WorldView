@@ -2,99 +2,35 @@
 
 WorldView runs in [R Shiny](https://shiny.posit.co/), a framework for building interactive web applications with R. If you are interested in research, data analysis, or building your own interactive tools, learning to code in R is strongly recommended.
 
-The WorldView app is licensed under Creative Commons Attribution 4.0 International (CC BY 4.0), and the app code is available on [GitHub here](https://github.com/Joseph-Watts/WorldView).
+The WorldView app licensed under Creative Commons Attribution 4.0 International (CC BY 4.0), and the app code is available on [GitHub here](https://github.com/Joseph-Watts/WorldView).
 
 ---
 
-## Team
+### Team
 
 The core team members involved in the development of this app are:
 
-<style>
-.team-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2rem;
-  margin-top: 1rem;
-  margin-bottom: 1rem;
-}
-.team-member {
-  text-align: center;
-  width: 220px;
-}
-.team-member img {
-  width: 180px;
-  height: 180px;
-  object-fit: cover;
-  border-radius: 50%;
-  margin-bottom: 0.5rem;
-  background: #f2f2f2;
-}
-.team-placeholder {
-  width: 180px;
-  height: 180px;
-  border-radius: 50%;
-  margin: 0 auto 0.5rem auto;
-  background: #f2f2f2;
-  color: #777;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 3rem;
-  font-weight: 600;
-}
-.team-name {
-  font-weight: bold;
-}
-.team-role {
-  color: #666;
-}
-</style>
 
-<div class="team-grid">
+[Joseph Watts](https://profiles.canterbury.ac.nz/Joseph-William-Harry-Watts), Project Lead
 
-<div class="team-member">
-<img src="images/JW.png" alt="Joseph Watts">
-<div class="team-name"><a href="https://profiles.canterbury.ac.nz/Joseph-William-Harry-Watts">Joseph Watts</a></div>
-<div class="team-role">Project Lead</div>
-</div>
+[André De Vito](https://www.linkedin.com/in/andre-de-vito), Lead Developer
 
-<div class="team-member">
-<img src="images/AV.png" alt="André De Vito">
-<div class="team-name"><a href="https://www.linkedin.com/in/andre-de-vito">André De Vito</a></div>
-<div class="team-role">Lead Developer</div>
-</div>
+[Nicki Cartlidge](https://www.linkedin.com/in/nicki-cartlidge-571b3b51), Developer
 
-<div class="team-member">
-<img src="images/NC.png" alt="Nicki Cartlidge">
-<div class="team-name"><a href="https://www.linkedin.com/in/nicki-cartlidge-571b3b51">Nicki Cartlidge</a></div>
-<div class="team-role">Developer</div>
-</div>
+Kong Weiming (William), Developer
 
-<div class="team-member">
-<div class="team-placeholder" aria-label="Profile placeholder">KW</div>
-<div class="team-name">Kong Weiming (William)</div>
-<div class="team-role">Developer</div>
-</div>
-
-<div class="team-member">
-<div class="team-placeholder" aria-label="Profile placeholder">PM</div>
-<div class="team-name">Prisca Mbikou</div>
-<div class="team-role">Developer</div>
-</div>
-
-</div>
+Prisca Mbikou, Developer
 
 ---
 
-## Feedback
+# Feedback
 
 WorldView is still in development, and your feedback is welcome. Please share comments, suggestions, or problems using the [feedback form](https://forms.office.com/r/fbQWv0DVTc).
 
 
 ---
 
-## Frequently Asked Questions
+# Frequently Asked Questions
 
 ---
 
@@ -119,7 +55,7 @@ Citation for WVS data: Haerpfer, C., Inglehart, R., Moreno, A., Welzel, C., Kizi
 
 ### What transformations have been made to the data?
 
-Transformations may have been applied to the data, such as recoding responses, filtering for specific variables, and aggregating data to facilitate analysis. The variables shown on the Codebook page represent how the post-processing variables used in this database.
+Transformations may have been applied to the data, such as recoding responses, filtering for specific variables, and aggregating data to facilitate analysis. You variables shown on the Codebook page represent how the post-processing variables used in this database.
 
 ---
 

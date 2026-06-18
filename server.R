@@ -845,39 +845,46 @@ shinyServer(
                                   exact = FALSE)
       
       # Format and display results
-      cat(input$corr_choice, "'s Rank Correlation Analysis\n")
-      cat("===================================\n")
       cat("Variable 1: ", input$corr_model_var1, "\n")
       cat("Variable 2: ", input$corr_model_var2, "\n")
       cat("Countries: ", paste(input$corr_model_countries, collapse = ", "), "\n")
       cat("Number of complete observations: ", nrow(data), "\n\n")
       
-      cat("Correlation coefficient (tau): ", 
-          round(cor_test$estimate, 4), "\n")
-      cat("95% Confidence Interval: [", 
-          cor_test$conf.int[1], ", ",
-          cor_test$conf.int[2], "]\n")
-      cat("p-value: ", format.pval(cor_test$p.value, digits = 4), "\n\n")
+      if(input$corr_choice == "Pearson"){
       
-      cat("Interpretation:\n")
-      tau <- abs(cor_test$estimate)
-      if (tau > 0.7) {
-        cat("- Very strong monotonic relationship\n")
-      } else if (tau > 0.5) {
-        cat("- Strong monotonic relationship\n")
-      } else if (tau > 0.3) {
-        cat("- Moderate monotonic relationship\n")
-      } else if (tau > 0.1) {
-        cat("- Weak monotonic relationship\n")
-      } else {
-        cat("- No meaningful monotonic relationship\n")
+        cat("Pearson's product-moment correlation (r) = ", 
+            round(cor_test$estimate, 4), "\n")
+        cat("95% Confidence Interval: [", 
+            cor_test$conf.int[1], ", ",
+            cor_test$conf.int[2], "]\n")
+        cat("p-value: ", 
+            format.pval(cor_test$p.value, 
+                        digits = 4,
+                        scientific = FALSE), 
+            "\n\n")
+        
+      }else if(input$corr_choice == "Kendall"){
+        
+        cat("Kendall's rank correlation (tau) = ", 
+            round(cor_test$estimate, 4), "\n")
+        cat("p-value: ", 
+            format.pval(cor_test$p.value, 
+                        digits = 4,
+                        scientific = FALSE), 
+            "\n\n")
+         
+      }else if(input$corr_choice == "Spearman"){
+        
+        cat("Spearman's rank correlation (rho) = ", 
+            round(cor_test$estimate, 4), "\n")
+        cat("p-value: ", 
+            format.pval(cor_test$p.value, 
+                        digits = 4,
+                        scientific = FALSE), 
+            "\n\n")
+        
       }
       
-      if (cor_test$p.value < 0.05) {
-        cat("- Statistically significant at p < 0.05\n")
-      } else {
-        cat("- Not statistically significant at p < 0.05\n")
-      }
     })
     
     # Render the scatter plot
@@ -1359,10 +1366,11 @@ shinyServer(
     output$table <- renderDT({
       datatable(
         codebook_df[, c("question_id", "question_title", "section", "variable_class")],
+        colnames = c("ID", "Title", "Section", "Variable Class"),
         selection = "single",
         rownames = FALSE,
         options = list(
-          scrollY = "500px",
+          scrollY = "300px",
           scrollX = TRUE,
           paging = FALSE,
           searching = TRUE,

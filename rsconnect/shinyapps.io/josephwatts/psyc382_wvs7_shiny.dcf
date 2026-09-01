@@ -1,0 +1,10 @@
+name: psyc382_wvs7_shiny
+title:
+username: josephwatts
+account: josephwatts
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 17528715
+bundleId: 12147153
+url: https://josephwatts.shinyapps.io/psyc382_wvs7_shiny/
+version: 1

@@ -1,0 +1,9 @@
+WorldView Step 1 source inspection
+Source file: WVS_Dataset/WVS_Cross-National_Wave_7_rds_v6_0.rds
+Rows: 97220
+Columns: 613
+Required variables found: 31 of 31
+Countries represented by non-missing alpha code: 66
+Countries with more than 1,000 source participants: 62
+
+No participant-level rows were written by this inspection script.

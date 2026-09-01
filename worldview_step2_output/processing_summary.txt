@@ -1,0 +1,10 @@
+WorldView Step 2 processing and validation
+Source rows: 97220
+Processed rows: 97220
+Processed columns: 31
+Countries: 66
+Student variables: 29
+Validation checks passed: 6 of 6
+
+The private RDS contains participant-level processed data and should not be uploaded or committed.
+The CSV validation outputs contain aggregate metadata only.

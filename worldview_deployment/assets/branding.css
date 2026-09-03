@@ -88,3 +88,27 @@
 .variable-card > summary {
   list-style: none;
 }
+
+
+/* World map: use a white ocean/background on screen. */
+.world-map-container {
+  background: #ffffff !important;
+}
+
+
+/* Phylogeny display controls */
+.phylo-display-controls {
+  margin: 18px 0 4px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+.phylo-display-controls h3 {
+  margin: 0 0 12px;
+  font-size: 1rem;
+}
+.phylo-display-controls .field {
+  margin-bottom: 14px;
+}
+.phylo-scaling-help {
+  margin: -2px 0 14px;
+}

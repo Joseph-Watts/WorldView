@@ -1,35 +1,30 @@
-WorldView phylogeny attribution update
-====================================
+WorldView World Map topic-grouping update
+========================================
 
 Copy the contents of this package into the ROOT of your current WorldView
-repository, preserving the folder structure, and replace the existing files.
+repository, preserving the folder structure, and replace the existing file.
 
 REPLACE:
-  ATTRIBUTION.md
   worldview_deployment/assets/step28-enhancements.js
 
-This update adds the phylogeny source attribution in two visible locations:
+Change
+------
+The World Map variable selector is now grouped under the same WorldView topic
+headings used by the other analysis pages.
 
-1. Visualisations > Phylogeny
-2. About > Sources
+This update also makes variable grouping robust to controls that populate
+asynchronously after page load, which was why the World Map selector could
+remain as one flat list even when other pages were grouped correctly.
 
-It also adds a dedicated "Phylogeny" section to ATTRIBUTION.md.
-
-Citation used:
-
-Bouckaert, R., Redding, D., Sheehan, O., Kyritsis, T., Gray, R., Jones, K. E.,
-& Atkinson, Q. (2022, 1 July). Global language diversification is linked to
-socio-ecology and threat status. doi:10.31235/osf.io/f8tr6
-
-The title links to:
-https://doi.org/10.31235/osf.io/f8tr6
-
-Testing:
+Testing
+-------
 1. Run:
      servr::httd("worldview_deployment")
 2. Hard-refresh with Ctrl+F5.
-3. Open Visualisations > Phylogeny and confirm the citation appears.
-4. Open About > Sources and confirm the citation appears there too.
-5. Click the citation title and confirm the DOI opens.
+3. Open Visualisations > World map.
+4. Open the Variable dropdown and confirm variables are nested under topic
+   headings.
+5. Check Phylogeny and the other variable selectors remain grouped normally.
+6. Run /validation.html.
 
 No WVS data rebuild is required.

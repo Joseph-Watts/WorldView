@@ -298,6 +298,35 @@ function worldviewAddCodebookInstructions(){
     "The downward arrow indicates an expandable section.";
   heading.insertAdjacentElement("afterend",help);
 }
+
+const WORLDVIEW_PHYLOGENY_SOURCE_URL="https://doi.org/10.31235/osf.io/f8tr6";
+
+function worldviewPhylogenyCitation(container){
+  const p=document.createElement("p");
+  p.className="phylogeny-source";
+  p.append(document.createTextNode("Phylogeny source: Bouckaert, R., Redding, D., Sheehan, O., Kyritsis, T., Gray, R., Jones, K. E., & Atkinson, Q. (2022, 1 July). "));
+  const title=worldviewExternalLink(
+    "Global language diversification is linked to socio-ecology and threat status",
+    WORLDVIEW_PHYLOGENY_SOURCE_URL
+  );
+  p.append(title);
+  p.append(document.createTextNode(". doi:10.31235/osf.io/f8tr6"));
+  container.appendChild(p);
+}
+
+function worldviewAddPhylogenyAttribution(){
+  const phylogenyHeading=document.querySelector("#panel-visual-phylogeny .model-subheading");
+  if(phylogenyHeading && !phylogenyHeading.querySelector(".phylogeny-source")){
+    worldviewPhylogenyCitation(phylogenyHeading);
+  }
+
+  const sourceCards=[...document.querySelectorAll("#page-about .about-card")];
+  const sourcesCard=sourceCards.find(card=>card.querySelector("h2")?.textContent.trim()==="Sources");
+  if(sourcesCard && !sourcesCard.querySelector(".phylogeny-source")){
+    worldviewPhylogenyCitation(sourcesCard);
+  }
+}
+
 document.addEventListener("DOMContentLoaded",async()=>{
   worldviewLoadBrandingStyles();
   worldviewReplaceBrandMark();
@@ -308,6 +337,7 @@ document.addEventListener("DOMContentLoaded",async()=>{
   worldviewAddCodebookInstructions();
   worldviewUpdateDescribeCompareCard();
   worldviewUpdateDevelopers();
+  worldviewAddPhylogenyAttribution();
   worldviewSpaceCorrelationMethodHelp();
   worldviewLinkWVSReferences();
   worldviewAddLicenceCard();

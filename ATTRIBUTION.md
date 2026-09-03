@@ -29,6 +29,18 @@ World Values Survey data and materials are **not** relicensed by this
 repository. Users remain responsible for complying with WVS conditions of use,
 citation requirements, and any applicable redistribution restrictions.
 
+
+## Phylogeny
+
+The language phylogeny used in WorldView is attributed to:
+
+Bouckaert, R., Redding, D., Sheehan, O., Kyritsis, T., Gray, R., Jones, K. E.,
+& Atkinson, Q. (2022, 1 July). *Global language diversification is linked to
+socio-ecology and threat status*. https://doi.org/10.31235/osf.io/f8tr6
+
+This phylogenetic resource remains subject to the terms and attribution
+requirements of its original source.
+
 ## Other third-party material
 
 Other third-party material, including geographic or phylogenetic resources,

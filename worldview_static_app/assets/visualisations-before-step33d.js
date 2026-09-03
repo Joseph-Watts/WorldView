@@ -254,102 +254,92 @@ function visualCsvCell(value) {
 }
 
 function downloadGraphData() {
-  if (!visualState.lastRows || !visualState.lastRows.length) return;
+  if (!visualState.lastRows.length) return;
 
   const rows = visualState.lastRows;
-  const groups = [...new Set(rows.map(row => row.country_selection))];
-  const responses = [...new Set(rows.map(row => row.response))];
-  const measureControl = document.getElementById("visual-measure");
-  const useCounts = measureControl && measureControl.value === "count";
-  const getValue = row => useCounts ? Number(row.count) : Number(row.percentage_of_valid);
-  const maximum = Math.max(1, ...rows.map(getValue).filter(Number.isFinite));
+  const groupNames = [...new Set(rows.map(row => row.country_selection))];
+  const responseNames = [...new Set(rows.map(row => row.response))];
+  const measureElement = document.getElementById("visual-measure");
+  const measure = measureElement ? measureElement.value : "percentage";
+  const valueFor = row => measure === "count" ? Number(row.count) : Number(row.percentage_of_valid);
+  const maximum = Math.max(1, ...rows.map(valueFor));
 
-  const width = Math.max(960, groups.length * 190);
-  const height = 640;
-  const scale = 2;
-  const margin = { top: 70, right: 36, bottom: 170, left: 86 };
+  const width = Math.max(900, groupNames.length * Math.max(180, responseNames.length * 54));
+  const height = 620;
+  const margin = { top: 80, right: 40, bottom: 170, left: 85 };
   const plotWidth = width - margin.left - margin.right;
   const plotHeight = height - margin.top - margin.bottom;
-  const canvas = document.createElement("canvas");
-  canvas.width = width * scale;
-  canvas.height = height * scale;
-  const context = canvas.getContext("2d");
-  context.scale(scale, scale);
-  context.fillStyle = "#ffffff";
-  context.fillRect(0, 0, width, height);
-  context.font = "14px Arial, sans-serif";
-  context.textBaseline = "middle";
+  const groupWidth = plotWidth / groupNames.length;
+  const barGap = 5;
+  const barWidth = Math.max(8, Math.min(42, (groupWidth - 24) / Math.max(1, responseNames.length) - barGap));
+  const colours = ["#005b53", "#2f7f77", "#65a39c", "#9bc7c2", "#d2e6e3", "#6c5b7b", "#aa6f73", "#d09a74"];
+  const escapeXml = value => String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll(""", "&quot;");
+  const y = value => margin.top + plotHeight - (value / maximum) * plotHeight;
 
-  context.fillStyle = "#173d38";
-  context.font = "bold 22px Arial, sans-serif";
-  context.textAlign = "center";
-  context.fillText(document.getElementById("visual-title").textContent, width / 2, 32);
+  const ticks = 5;
+  let body = `<rect width="${width}" height="${height}" fill="white"/>`;
+  body += `<text x="${width / 2}" y="34" text-anchor="middle" font-family="Arial" font-size="22" font-weight="700">${escapeXml(document.getElementById("visual-title").textContent)}</text>`;
 
-  context.font = "13px Arial, sans-serif";
-  for (let tick = 0; tick <= 5; tick += 1) {
-    const value = maximum * tick / 5;
-    const y = margin.top + plotHeight - (value / maximum) * plotHeight;
-    context.strokeStyle = "#d7dfdd";
-    context.beginPath();
-    context.moveTo(margin.left, y);
-    context.lineTo(width - margin.right, y);
-    context.stroke();
-    context.fillStyle = "#334a47";
-    context.textAlign = "right";
-    context.fillText(useCounts ? String(Math.round(value)) : value.toFixed(0) + "%", margin.left - 10, y);
+  for (let i = 0; i <= ticks; i += 1) {
+    const value = maximum * i / ticks;
+    const yy = y(value);
+    body += `<line x1="${margin.left}" y1="${yy}" x2="${width - margin.right}" y2="${yy}" stroke="#d7dfdd"/>`;
+    body += `<text x="${margin.left - 12}" y="${yy + 5}" text-anchor="end" font-family="Arial" font-size="13">${measure === "count" ? Math.round(value) : value.toFixed(0) + "%"}</text>`;
   }
 
-  const colours = ["#005b53", "#4f9189", "#90c0ba", "#c7dfdc", "#6c5b7b", "#aa6f73"];
-  const groupWidth = plotWidth / Math.max(1, groups.length);
-  const gap = 5;
-  const barWidth = Math.max(7, Math.min(42, groupWidth / Math.max(1, responses.length) - gap));
-
-  groups.forEach((group, groupIndex) => {
-    const groupRows = rows.filter(row => row.country_selection === group);
-    const usedWidth = responses.length * (barWidth + gap);
-    const startX = margin.left + groupIndex * groupWidth + (groupWidth - usedWidth) / 2;
-    responses.forEach((response, responseIndex) => {
+  groupNames.forEach((groupName, groupIndex) => {
+    const groupRows = rows.filter(row => row.country_selection === groupName);
+    const usedWidth = responseNames.length * (barWidth + barGap);
+    const groupStart = margin.left + groupIndex * groupWidth + (groupWidth - usedWidth) / 2;
+    responseNames.forEach((response, responseIndex) => {
       const row = groupRows.find(item => item.response === response);
       if (!row) return;
-      const value = getValue(row);
-      if (!Number.isFinite(value)) return;
-      const barHeight = value / maximum * plotHeight;
-      context.fillStyle = colours[responseIndex % colours.length];
-      context.fillRect(startX + responseIndex * (barWidth + gap), margin.top + plotHeight - barHeight, barWidth, barHeight);
+      const value = valueFor(row);
+      const x = groupStart + responseIndex * (barWidth + barGap);
+      const yy = y(value);
+      const barHeight = margin.top + plotHeight - yy;
+      body += `<rect x="${x}" y="${yy}" width="${barWidth}" height="${barHeight}" rx="2" fill="${colours[responseIndex % colours.length]}"/>`;
     });
-
-    context.save();
-    context.translate(margin.left + groupIndex * groupWidth + groupWidth / 2, margin.top + plotHeight + 20);
-    context.rotate(-Math.PI / 5);
-    context.fillStyle = "#334a47";
-    context.textAlign = "right";
-    context.font = "13px Arial, sans-serif";
-    context.fillText(group, 0, 0);
-    context.restore();
+    const labelX = margin.left + groupIndex * groupWidth + groupWidth / 2;
+    body += `<text x="${labelX}" y="${margin.top + plotHeight + 28}" text-anchor="end" transform="rotate(-35 ${labelX} ${margin.top + plotHeight + 28})" font-family="Arial" font-size="13">${escapeXml(groupName)}</text>`;
   });
 
-  context.font = "12px Arial, sans-serif";
-  context.textAlign = "left";
-  responses.forEach((response, index) => {
-    const x = margin.left + index * Math.min(220, plotWidth / Math.max(1, responses.length));
-    const y = height - 36;
-    context.fillStyle = colours[index % colours.length];
-    context.fillRect(x, y - 7, 14, 14);
-    context.fillStyle = "#334a47";
-    context.fillText(response, x + 20, y);
+  const legendY = height - 42;
+  responseNames.forEach((response, index) => {
+    const itemWidth = Math.min(220, plotWidth / Math.max(1, responseNames.length));
+    const x = margin.left + index * itemWidth;
+    body += `<rect x="${x}" y="${legendY - 13}" width="14" height="14" fill="${colours[index % colours.length]}"/>`;
+    body += `<text x="${x + 20}" y="${legendY}" font-family="Arial" font-size="12">${escapeXml(response)}</text>`;
   });
 
-  canvas.toBlob(blob => {
-    if (!blob) return;
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "worldview-bar-chart-" + document.getElementById("visual-variable").value + ".png";
-    document.body.appendChild(link);
-    link.click();
-    setTimeout(() => { URL.revokeObjectURL(link.href); link.remove(); }, 0);
-  }, "image/png");
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">${body}</svg>`;
+  const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const image = new Image();
+  image.onload = () => {
+    const scale = 2;
+    const canvas = document.createElement("canvas");
+    canvas.width = width * scale;
+    canvas.height = height * scale;
+    const context = canvas.getContext("2d");
+    context.scale(scale, scale);
+    context.drawImage(image, 0, 0, width, height);
+    URL.revokeObjectURL(url);
+    canvas.toBlob(pngBlob => {
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(pngBlob);
+      link.download = `worldview-bar-chart-${document.getElementById("visual-variable").value}.png`;
+      document.body.appendChild(link);
+      link.click();
+      setTimeout(() => { URL.revokeObjectURL(link.href); link.remove(); }, 0);
+    }, "image/png");
+  };
+  image.onerror = () => {
+    URL.revokeObjectURL(url);
+    document.getElementById("visual-message").textContent = "The PNG image could not be created in this browser.";
+  };
+  image.src = url;
 }
-
 function updateAgeControls() {
   document.getElementById("age-band-controls").hidden = document.getElementById("visual-variable").value !== "Q262";
 }

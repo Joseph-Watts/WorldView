@@ -254,18 +254,100 @@ function visualCsvCell(value) {
 }
 
 function downloadGraphData() {
-  const columns = ["country_selection", "variable", "response", "count", "percentage_of_valid", "valid_n", "missing_n"];
-  const lines = [columns.join(",")].concat(
-    visualState.lastRows.map(row => columns.map(column => visualCsvCell(row[column])).join(","))
-  );
-  const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = `worldview-bar-graph-${document.getElementById("visual-variable").value}.csv`;
-  document.body.appendChild(link);
-  link.click();
-  URL.revokeObjectURL(link.href);
-  link.remove();
+  if (!visualState.lastRows || !visualState.lastRows.length) return;
+
+  const rows = visualState.lastRows;
+  const groups = [...new Set(rows.map(row => row.country_selection))];
+  const responses = [...new Set(rows.map(row => row.response))];
+  const measureControl = document.getElementById("visual-measure");
+  const useCounts = measureControl && measureControl.value === "count";
+  const getValue = row => useCounts ? Number(row.count) : Number(row.percentage_of_valid);
+  const maximum = Math.max(1, ...rows.map(getValue).filter(Number.isFinite));
+
+  const width = Math.max(960, groups.length * 190);
+  const height = 640;
+  const scale = 2;
+  const margin = { top: 70, right: 36, bottom: 170, left: 86 };
+  const plotWidth = width - margin.left - margin.right;
+  const plotHeight = height - margin.top - margin.bottom;
+  const canvas = document.createElement("canvas");
+  canvas.width = width * scale;
+  canvas.height = height * scale;
+  const context = canvas.getContext("2d");
+  context.scale(scale, scale);
+  context.fillStyle = "#ffffff";
+  context.fillRect(0, 0, width, height);
+  context.font = "14px Arial, sans-serif";
+  context.textBaseline = "middle";
+
+  context.fillStyle = "#173d38";
+  context.font = "bold 22px Arial, sans-serif";
+  context.textAlign = "center";
+  context.fillText(document.getElementById("visual-title").textContent, width / 2, 32);
+
+  context.font = "13px Arial, sans-serif";
+  for (let tick = 0; tick <= 5; tick += 1) {
+    const value = maximum * tick / 5;
+    const y = margin.top + plotHeight - (value / maximum) * plotHeight;
+    context.strokeStyle = "#d7dfdd";
+    context.beginPath();
+    context.moveTo(margin.left, y);
+    context.lineTo(width - margin.right, y);
+    context.stroke();
+    context.fillStyle = "#334a47";
+    context.textAlign = "right";
+    context.fillText(useCounts ? String(Math.round(value)) : value.toFixed(0) + "%", margin.left - 10, y);
+  }
+
+  const colours = ["#005b53", "#4f9189", "#90c0ba", "#c7dfdc", "#6c5b7b", "#aa6f73"];
+  const groupWidth = plotWidth / Math.max(1, groups.length);
+  const gap = 5;
+  const barWidth = Math.max(7, Math.min(42, groupWidth / Math.max(1, responses.length) - gap));
+
+  groups.forEach((group, groupIndex) => {
+    const groupRows = rows.filter(row => row.country_selection === group);
+    const usedWidth = responses.length * (barWidth + gap);
+    const startX = margin.left + groupIndex * groupWidth + (groupWidth - usedWidth) / 2;
+    responses.forEach((response, responseIndex) => {
+      const row = groupRows.find(item => item.response === response);
+      if (!row) return;
+      const value = getValue(row);
+      if (!Number.isFinite(value)) return;
+      const barHeight = value / maximum * plotHeight;
+      context.fillStyle = colours[responseIndex % colours.length];
+      context.fillRect(startX + responseIndex * (barWidth + gap), margin.top + plotHeight - barHeight, barWidth, barHeight);
+    });
+
+    context.save();
+    context.translate(margin.left + groupIndex * groupWidth + groupWidth / 2, margin.top + plotHeight + 20);
+    context.rotate(-Math.PI / 5);
+    context.fillStyle = "#334a47";
+    context.textAlign = "right";
+    context.font = "13px Arial, sans-serif";
+    context.fillText(group, 0, 0);
+    context.restore();
+  });
+
+  context.font = "12px Arial, sans-serif";
+  context.textAlign = "left";
+  responses.forEach((response, index) => {
+    const x = margin.left + index * Math.min(220, plotWidth / Math.max(1, responses.length));
+    const y = height - 36;
+    context.fillStyle = colours[index % colours.length];
+    context.fillRect(x, y - 7, 14, 14);
+    context.fillStyle = "#334a47";
+    context.fillText(response, x + 20, y);
+  });
+
+  canvas.toBlob(blob => {
+    if (!blob) return;
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "worldview-bar-chart-" + document.getElementById("visual-variable").value + ".png";
+    document.body.appendChild(link);
+    link.click();
+    setTimeout(() => { URL.revokeObjectURL(link.href); link.remove(); }, 0);
+  }, "image/png");
 }
 
 function updateAgeControls() {

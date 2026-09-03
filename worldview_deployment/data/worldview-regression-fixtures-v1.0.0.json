@@ -1,0 +1,302 @@
+{
+  "fixtureVersion": "1.0.0",
+  "dataVersion": "WV7-WORLDVIEW-1.0.0",
+  "model": "Multiple ordinary least-squares regression",
+  "rules": {
+    "maximumPredictors": 5,
+    "missingData": "Complete cases across outcome and all predictors",
+    "intercept": true,
+    "confidenceLevel": 0.95,
+    "referenceImplementation": "R stats::lm"
+  },
+  "cases": [
+    {
+      "id": "NZL_Q177_on_Q165_Q260_Q262",
+      "outcome": "Q177",
+      "predictors": ["Q165", "Q260", "Q262"],
+      "countries": "NZL",
+      "filteredRows": 1000,
+      "completeObservations": 746,
+      "excludedMissingAny": 254,
+      "residualDegreesFreedom": 742,
+      "rSquared": 0.0354349170028542,
+      "adjustedRSquared": 0.0315350581767203,
+      "residualStandardError": 1.86476018722592,
+      "fStatistic": 9.08620506091022,
+      "numeratorDegreesFreedom": 3,
+      "denominatorDegreesFreedom": 742,
+      "coefficients": [
+        {
+          "term": "(Intercept)",
+          "estimate": 3.07765671640013,
+          "standardError": 0.258767132695831,
+          "tValue": 11.8935379634081,
+          "pValue": 5.57905246727032e-30,
+          "confidenceLower": 2.56965381529683,
+          "confidenceUpper": 3.58565961750342
+        },
+        {
+          "term": "Q165",
+          "estimate": 0.190360981562187,
+          "standardError": 0.141134283451369,
+          "tValue": 1.34879333998093,
+          "pValue": 0.17781484669245,
+          "confidenceLower": -0.0867090802014388,
+          "confidenceUpper": 0.467431043325813
+        },
+        {
+          "term": "Q260",
+          "estimate": 0.176379269477027,
+          "standardError": 0.138529651689143,
+          "tValue": 1.27322394394536,
+          "pValue": 0.203337327956925,
+          "confidenceLower": -0.09557746712149,
+          "confidenceUpper": 0.448336006075544
+        },
+        {
+          "term": "Q262",
+          "estimate": -0.0216873396878026,
+          "standardError": 0.00424571062616285,
+          "tValue": -5.10805883805674,
+          "pValue": 4.14255623340956e-07,
+          "confidenceLower": -0.0300223754895521,
+          "confidenceUpper": -0.0133523038860531
+        }
+      ]
+    },
+    {
+      "id": "NZL_Q184_on_five_predictors",
+      "outcome": "Q184",
+      "predictors": ["Q165", "Q167", "Q260", "Q262", "Q275"],
+      "countries": "NZL",
+      "filteredRows": 1000,
+      "completeObservations": 626,
+      "excludedMissingAny": 374,
+      "residualDegreesFreedom": 620,
+      "rSquared": 0.315397901233548,
+      "adjustedRSquared": 0.309876916566077,
+      "residualStandardError": 2.50714481029196,
+      "fStatistic": 57.1271105119734,
+      "numeratorDegreesFreedom": 5,
+      "denominatorDegreesFreedom": 620,
+      "coefficients": [
+        {
+          "term": "(Intercept)",
+          "estimate": 8.6029639820074,
+          "standardError": 0.599610662334249,
+          "tValue": 14.3475833943922,
+          "pValue": 1.60957147735767e-40,
+          "confidenceLower": 7.42545001329211,
+          "confidenceUpper": 9.78047795072269
+        },
+        {
+          "term": "Q165",
+          "estimate": -1.63374452044544,
+          "standardError": 0.246945157734472,
+          "tValue": -6.61581921846035,
+          "pValue": 7.99395419968556e-11,
+          "confidenceLower": -2.11869482404235,
+          "confidenceUpper": -1.14879421684852
+        },
+        {
+          "term": "Q167",
+          "estimate": -2.37849542767094,
+          "standardError": 0.274311102159341,
+          "tValue": -8.67079534494864,
+          "pValue": 3.74739497333082e-17,
+          "confidenceLower": -2.91718690675317,
+          "confidenceUpper": -1.83980394858871
+        },
+        {
+          "term": "Q260",
+          "estimate": -0.451285749336661,
+          "standardError": 0.202506996346651,
+          "tValue": -2.22849460748582,
+          "pValue": 0.0262053299074673,
+          "confidenceLower": -0.848968499060403,
+          "confidenceUpper": -0.0536029996129194
+        },
+        {
+          "term": "Q262",
+          "estimate": -0.0119938960412824,
+          "standardError": 0.00653409313982476,
+          "tValue": -1.8355869413891,
+          "pValue": 0.0668975473864028,
+          "confidenceLower": -0.0248255323485459,
+          "confidenceUpper": 0.000837740265981003
+        },
+        {
+          "term": "Q275",
+          "estimate": 0.0873201442871255,
+          "standardError": 0.0634123514526377,
+          "tValue": 1.37702107376265,
+          "pValue": 0.16900270273394,
+          "confidenceLower": -0.0372088781520064,
+          "confidenceUpper": 0.211849166726257
+        }
+      ]
+    },
+    {
+      "id": "NZL_AUS_Q177_combined",
+      "outcome": "Q177",
+      "predictors": ["Q165", "Q260", "Q262"],
+      "countries": ["NZL", "AUS"],
+      "filteredRows": 2000,
+      "completeObservations": 1705,
+      "excludedMissingAny": 295,
+      "residualDegreesFreedom": 1701,
+      "rSquared": 0.0273342873801162,
+      "adjustedRSquared": 0.0256188275694991,
+      "residualStandardError": 1.76316188572276,
+      "fStatistic": 15.9340878818278,
+      "numeratorDegreesFreedom": 3,
+      "denominatorDegreesFreedom": 1701,
+      "coefficients": [
+        {
+          "term": "(Intercept)",
+          "estimate": 2.70979378493023,
+          "standardError": 0.152524688462925,
+          "tValue": 17.7662633652185,
+          "pValue": 6.53795087006018e-65,
+          "confidenceLower": 2.41063802391494,
+          "confidenceUpper": 3.00894954594552
+        },
+        {
+          "term": "Q165",
+          "estimate": 0.0817136245722013,
+          "standardError": 0.0877150759287613,
+          "tValue": 0.931580161186497,
+          "pValue": 0.351685738030222,
+          "confidenceLower": -0.0903271811256967,
+          "confidenceUpper": 0.253754430270099
+        },
+        {
+          "term": "Q260",
+          "estimate": 0.176925632165054,
+          "standardError": 0.0872264158843606,
+          "tValue": 2.02834921475635,
+          "pValue": 0.0426801613854864,
+          "confidenceLower": 0.00584326453337056,
+          "confidenceUpper": 0.348007999796737
+        },
+        {
+          "term": "Q262",
+          "estimate": -0.0172235120656543,
+          "standardError": 0.00255035730740568,
+          "tValue": -6.75337217088796,
+          "pValue": 1.97627081239783e-11,
+          "confidenceLower": -0.0222256798382723,
+          "confidenceUpper": -0.0122213442930362
+        }
+      ]
+    },
+    {
+      "id": "ALL_Q177_on_Q165_Q260_Q262",
+      "outcome": "Q177",
+      "predictors": ["Q165", "Q260", "Q262"],
+      "countries": "ALL",
+      "filteredRows": 65447,
+      "completeObservations": 60567,
+      "excludedMissingAny": 4880,
+      "residualDegreesFreedom": 60563,
+      "rSquared": 0.0109092829890237,
+      "adjustedRSquared": 0.0108602881877254,
+      "residualStandardError": 2.70241699262695,
+      "fStatistic": 222.662051889728,
+      "numeratorDegreesFreedom": 3,
+      "denominatorDegreesFreedom": 60563,
+      "coefficients": [
+        {
+          "term": "(Intercept)",
+          "estimate": 3.49370042698345,
+          "standardError": 0.041717761837008,
+          "tValue": 83.7461137208989,
+          "pValue": 0,
+          "confidenceLower": 3.4119334821377,
+          "confidenceUpper": 3.57546737182919
+        },
+        {
+          "term": "Q165",
+          "estimate": 0.20550557919449,
+          "standardError": 0.0293010339430915,
+          "tValue": 7.01359479647111,
+          "pValue": 2.34696257827523e-12,
+          "confidenceLower": 0.148075460203237,
+          "confidenceUpper": 0.262935698185743
+        },
+        {
+          "term": "Q260",
+          "estimate": 0.110993929604982,
+          "standardError": 0.022031607487023,
+          "tValue": 5.03794058923568,
+          "pValue": 4.71917455399557e-07,
+          "confidenceLower": 0.0678119094071371,
+          "confidenceUpper": 0.154175949802826
+        },
+        {
+          "term": "Q262",
+          "estimate": -0.0159312843314364,
+          "standardError": 0.000663778855688036,
+          "tValue": -24.000891554346,
+          "pValue": 1.06670116545073e-126,
+          "confidenceLower": -0.0172322929832158,
+          "confidenceUpper": -0.0146302756796571
+        }
+      ]
+    },
+    {
+      "id": "NZL_BINARY_LINEAR_PROBABILITY",
+      "outcome": "Q167",
+      "predictors": ["Q165", "Q260", "Q262"],
+      "countries": "NZL",
+      "filteredRows": 1000,
+      "completeObservations": 672,
+      "excludedMissingAny": 328,
+      "residualDegreesFreedom": 668,
+      "rSquared": 0.312299288041176,
+      "adjustedRSquared": 0.309210811789864,
+      "residualStandardError": 0.369624375031016,
+      "fStatistic": 101.117594123802,
+      "numeratorDegreesFreedom": 3,
+      "denominatorDegreesFreedom": 668,
+      "coefficients": [
+        {
+          "term": "(Intercept)",
+          "estimate": 0.153151385235275,
+          "standardError": 0.0539484470955693,
+          "tValue": 2.83884696373129,
+          "pValue": 0.00466525443934443,
+          "confidenceLower": 0.0472224428544727,
+          "confidenceUpper": 0.259080327616077
+        },
+        {
+          "term": "Q165",
+          "estimate": 0.504025604371265,
+          "standardError": 0.0290521519457623,
+          "tValue": 17.3489938133407,
+          "pValue": 6.12212801793362e-56,
+          "confidenceLower": 0.446981075841106,
+          "confidenceUpper": 0.561070132901423
+        },
+        {
+          "term": "Q260",
+          "estimate": 0.00451647470283631,
+          "standardError": 0.0287890456589644,
+          "tValue": 0.156881709673136,
+          "pValue": 0.875385478164463,
+          "confidenceLower": -0.0520114389441384,
+          "confidenceUpper": 0.061044388349811
+        },
+        {
+          "term": "Q262",
+          "estimate": -0.00250904651217689,
+          "standardError": 0.000884455924690527,
+          "tValue": -2.83682481188061,
+          "pValue": 0.00469454261830599,
+          "confidenceLower": -0.00424569484459194,
+          "confidenceUpper": -0.000772398179761845
+        }
+      ]
+    }
+  ]
+}

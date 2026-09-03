@@ -1,0 +1,8 @@
+"check","passed"
+"four_rebuilt_assets_installed",TRUE
+"all_runtime_columns_have_equal_length",TRUE
+"participant_count_matches_manifest",TRUE
+"all_requested_runtime_variables_present",TRUE
+"all_requested_codebook_records_present",TRUE
+"all_requested_variables_have_topics",TRUE
+"backup_created",TRUE

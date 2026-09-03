@@ -1,0 +1,259 @@
+{
+  "fixtureVersion": "1.0.0",
+  "dataVersion": "WV7-WORLDVIEW-1.0.0",
+  "calculationRules": {
+    "missingData": "Pairwise complete observations for correlations",
+    "correlation": "Pearson correlation",
+    "confidenceInterval": "R cor.test 95% confidence interval",
+    "minimumCompletePairs": 10,
+    "standardDeviation": "Sample standard deviation using denominator n - 1",
+    "quartiles": "R quantile type 7",
+    "percentages": "Percentage of valid responses"
+  },
+  "summaryCases": [
+    {
+      "id": "NZL_Q262_numeric",
+      "country": "NZL",
+      "variable": "Q262",
+      "result": {
+        "totalN": 1000,
+        "validN": 974,
+        "missingN": 26,
+        "mean": 57.8552361396304,
+        "standardDeviation": 16.3057436111616,
+        "median": 60,
+        "minimum": 18,
+        "firstQuartile": 46,
+        "thirdQuartile": 70,
+        "maximum": 91
+      }
+    },
+    {
+      "id": "NZL_Q177_numeric",
+      "country": "NZL",
+      "variable": "Q177",
+      "result": {
+        "totalN": 1000,
+        "validN": 962,
+        "missingN": 38,
+        "mean": 2.0010395010395,
+        "standardDeviation": 1.90377219070697,
+        "median": 1,
+        "minimum": 1,
+        "firstQuartile": 1,
+        "thirdQuartile": 2,
+        "maximum": 10
+      }
+    },
+    {
+      "id": "NZL_Q165_frequency",
+      "country": "NZL",
+      "variable": "Q165",
+      "result": {
+        "totalN": 1000,
+        "validN": 792,
+        "missingN": 208,
+        "categories": [
+          {
+            "value": "0",
+            "count": 342,
+            "percentageOfValid": 43.1818181818182
+          },
+          {
+            "value": "1",
+            "count": 450,
+            "percentageOfValid": 56.8181818181818
+          }
+        ]
+      }
+    },
+    {
+      "id": "NZL_Q289_frequency",
+      "country": "NZL",
+      "variable": "Q289",
+      "result": {
+        "totalN": 1000,
+        "validN": 938,
+        "missingN": 62,
+        "categories": [
+          {
+            "value": "Buddhist",
+            "count": 7,
+            "percentageOfValid": 0.746268656716418
+          },
+          {
+            "value": "Catholic (Roman/Greek/etc)",
+            "count": 102,
+            "percentageOfValid": 10.8742004264392
+          },
+          {
+            "value": "Do not belong to a denomination",
+            "count": 452,
+            "percentageOfValid": 48.1876332622601
+          },
+          {
+            "value": "Hindu",
+            "count": 10,
+            "percentageOfValid": 1.06609808102345
+          },
+          {
+            "value": "Jew",
+            "count": 2,
+            "percentageOfValid": 0.213219616204691
+          },
+          {
+            "value": "Muslim",
+            "count": 7,
+            "percentageOfValid": 0.746268656716418
+          },
+          {
+            "value": "Orthodox (Russian/Greek/etc.)",
+            "count": 1,
+            "percentageOfValid": 0.106609808102345
+          },
+          {
+            "value": "Other",
+            "count": 17,
+            "percentageOfValid": 1.81236673773987
+          },
+          {
+            "value": "Other Christian (Jehova withness...)",
+            "count": 340,
+            "percentageOfValid": 36.2473347547974
+          }
+        ]
+      }
+    },
+    {
+      "id": "ALL_Q262_numeric",
+      "country": "ALL",
+      "variable": "Q262",
+      "result": {
+        "totalN": 65447,
+        "validN": 65066,
+        "missingN": 381,
+        "mean": 42.9429809731657,
+        "standardDeviation": 16.5774349512958,
+        "median": 41,
+        "minimum": 16,
+        "firstQuartile": 29,
+        "thirdQuartile": 55,
+        "maximum": 103
+      }
+    }
+  ],
+  "correlationCases": [
+    {
+      "variable1": "Q165",
+      "variable2": "Q167",
+      "countries": "NZL",
+      "filteredRows": 1000,
+      "completePairs": 689,
+      "excludedMissingEither": 311,
+      "status": "ok",
+      "correlation": 0.54663886476751,
+      "confidenceLevel": 0.95,
+      "confidenceLower": 0.492036185524026,
+      "confidenceUpper": 0.596957625646223,
+      "pValue": 6.13539817155272e-55
+    },
+    {
+      "variable1": "Q165",
+      "variable2": "Q177",
+      "countries": "NZL",
+      "filteredRows": 1000,
+      "completePairs": 764,
+      "excludedMissingEither": 236,
+      "status": "ok",
+      "correlation": 0.00180597754993948,
+      "confidenceLevel": 0.95,
+      "confidenceLower": -0.0691322088695042,
+      "confidenceUpper": 0.0727259923907173,
+      "pValue": 0.960252664676222
+    },
+    {
+      "variable1": "Q165",
+      "variable2": "Q262",
+      "countries": "NZL",
+      "filteredRows": 1000,
+      "completePairs": 775,
+      "excludedMissingEither": 225,
+      "status": "ok",
+      "correlation": 0.195289625330039,
+      "confidenceLevel": 0.95,
+      "confidenceLower": 0.126606981044126,
+      "confidenceUpper": 0.262108707260973,
+      "pValue": 4.23615515287531e-08
+    },
+    {
+      "variable1": "Q177",
+      "variable2": "Q184",
+      "countries": "NZL",
+      "filteredRows": 1000,
+      "completePairs": 906,
+      "excludedMissingEither": 94,
+      "status": "ok",
+      "correlation": 0.0610439053112338,
+      "confidenceLevel": 0.95,
+      "confidenceLower": -0.00410359524441274,
+      "confidenceUpper": 0.125675422414651,
+      "pValue": 0.0662707835573056
+    },
+    {
+      "variable1": "Q177",
+      "variable2": "Q262",
+      "countries": "NZL",
+      "filteredRows": 1000,
+      "completePairs": 940,
+      "excludedMissingEither": 60,
+      "status": "ok",
+      "correlation": -0.180872858014849,
+      "confidenceLevel": 0.95,
+      "confidenceLower": -0.242015735975172,
+      "confidenceUpper": -0.1182991545392,
+      "pValue": 2.34781834918752e-08
+    },
+    {
+      "variable1": "Q262",
+      "variable2": "Q288",
+      "countries": "NZL",
+      "filteredRows": 1000,
+      "completePairs": 875,
+      "excludedMissingEither": 125,
+      "status": "ok",
+      "correlation": -0.396429445937985,
+      "confidenceLevel": 0.95,
+      "confidenceLower": -0.450859237708015,
+      "confidenceUpper": -0.339062353736657,
+      "pValue": 2.62484780975597e-34
+    },
+    {
+      "variable1": "Q167",
+      "variable2": "Q262",
+      "countries": ["NZL", "AUS"],
+      "filteredRows": 2000,
+      "completePairs": 1735,
+      "excludedMissingEither": 265,
+      "status": "ok",
+      "correlation": -0.0219397815929638,
+      "confidenceLevel": 0.95,
+      "confidenceLower": -0.0689287555416672,
+      "confidenceUpper": 0.0251463238630187,
+      "pValue": 0.36107621493098
+    },
+    {
+      "variable1": "Q167",
+      "variable2": "Q262",
+      "countries": "ALL",
+      "filteredRows": 65447,
+      "completePairs": 59727,
+      "excludedMissingEither": 5720,
+      "status": "ok",
+      "correlation": -0.119241719193824,
+      "confidenceLevel": 0.95,
+      "confidenceLower": -0.127139950451631,
+      "confidenceUpper": -0.111328367374491,
+      "pValue": 5.13857199435943e-188
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+"check","passed"
+"pending_state_present_in_source_html",TRUE
+"mutation_observer_added",TRUE
+"polling_interval_removed",TRUE
+"ungrouped_cards_hidden_while_pending",TRUE
+"loading_message_added",TRUE
+"topics_closed_by_default",TRUE
+"multiple_topics_remain_independent",TRUE
+"pending_state_removed_after_grouping",TRUE

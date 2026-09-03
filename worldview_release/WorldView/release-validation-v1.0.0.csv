@@ -1,0 +1,15 @@
+"check","passed"
+"all_required_release_files_present",TRUE
+"browser_columns_have_equal_lengths",TRUE
+"browser_row_count_matches_manifest",TRUE
+"manifest_reports_66_countries",TRUE
+"manifest_reports_29_student_variables",TRUE
+"codebook_contains_29_variables",TRUE
+"codebook_variable_ids_match_manifest",TRUE
+"student_csv_has_32_columns",TRUE
+"student_csv_has_worldview_id",TRUE
+"student_csv_has_country_fields",TRUE
+"no_known_secret_patterns_detected",TRUE
+"no_development_path_patterns_detected",TRUE
+"validation_page_included",TRUE
+"deployment_readme_created",TRUE

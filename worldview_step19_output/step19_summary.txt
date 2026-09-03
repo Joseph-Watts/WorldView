@@ -1,0 +1,5 @@
+WorldView Step 19 ANOVA fixtures
+Reference cases: 5
+Group result rows: 16
+Validation checks passed: 7 of 7
+Fixture output: worldview_static_app/data/worldview-anova-fixtures-v1.0.0.json

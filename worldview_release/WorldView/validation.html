@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WorldView validation</title>
+  <link rel="stylesheet" href="assets/styles.css">
+  <script src="assets/validation.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="index.html#home">
+        <span class="brand-mark" aria-hidden="true">W</span>
+        <span><strong>WorldView</strong><small>Browser validation</small></span>
+      </a>
+      <a class="button button-secondary" href="index.html#home">Return to app</a>
+    </div>
+  </header>
+
+  <main id="main-content" tabindex="-1">
+    <section class="page">
+      <div class="page-heading">
+        <p class="eyebrow">Quality assurance</p>
+        <h1>Browser validation</h1>
+        <p>This page recalculates selected summaries and correlations in the browser and compares them with the R reference fixtures.</p>
+      </div>
+
+      <div id="validation-status" class="notice" aria-live="polite">Running validation checks...</div>
+
+      <div class="stat-cards" aria-label="Validation totals">
+        <div class="stat-card"><strong id="validation-total">0</strong><span>Total checks</span></div>
+        <div class="stat-card"><strong id="validation-passed">0</strong><span>Passed</span></div>
+        <div class="stat-card"><strong id="validation-failed">0</strong><span>Failed</span></div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="results-table validation-table">
+          <thead><tr><th>Check</th><th>Expected</th><th>Browser result</th><th>Status</th></tr></thead>
+          <tbody id="validation-results"></tbody>
+        </table>
+      </div>
+
+      <details class="full-table-disclosure">
+        <summary>Validation rules</summary>
+        <div class="disclosure-content">
+          <ul>
+            <li>Counts and sample sizes must match exactly.</li>
+            <li>Means, standard deviations, quartiles, and correlations use a tolerance of 1e-10.</li>
+            <li>Confidence limits use a tolerance of 1e-8.</li>
+            <li>The p-value check allows a wider tolerance because the student app uses an approximation.</li>
+          </ul>
+        </div>
+      </details>
+    </section>
+  </main>
+</body>
+</html>

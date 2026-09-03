@@ -1,0 +1,322 @@
+{
+  "fixtureVersion": "1.0.0",
+  "dataVersion": "WV7-WORLDVIEW-1.0.0",
+  "model": "Binary logistic regression",
+  "rules": {
+    "referenceImplementation": "R stats::glm family binomial logit",
+    "maximumPredictors": 5,
+    "missingData": "Complete cases"
+  },
+  "cases": [
+    {
+      "id": "NZL_Q167_Q165_Q260_Q262",
+      "outcome": "Q167",
+      "predictors": ["Q165", "Q260", "Q262"],
+      "countries": "NZL",
+      "filteredRows": 1000,
+      "completeObservations": 672,
+      "excludedMissingAny": 328,
+      "events": 182,
+      "nonEvents": 490,
+      "converged": true,
+      "iterations": 6,
+      "logLikelihood": -265.405903025458,
+      "aic": 538.811806050916,
+      "mcfaddenPseudoRSquared": 0.323816515722439,
+      "coefficients": [
+        {
+          "term": "(Intercept)",
+          "estimate": -2.97349033413307,
+          "standardError": 0.540429813825429,
+          "zValue": -5.50208418940702,
+          "pValue": 3.75327640741776e-08,
+          "oddsRatio": 0.0511245567730232,
+          "oddsRatioLower": 0.0177261681365753,
+          "oddsRatioUpper": 0.14744982023752
+        },
+        {
+          "term": "Q165",
+          "estimate": 4.1751229505461,
+          "standardError": 0.433735224546921,
+          "zValue": 9.62597159340108,
+          "pValue": 6.21170776820277e-22,
+          "oddsRatio": 65.0478368364401,
+          "oddsRatioLower": 27.7994860080817,
+          "oddsRatioUpper": 152.205011123949
+        },
+        {
+          "term": "Q260",
+          "estimate": 0.0446561980448376,
+          "standardError": 0.213990533155311,
+          "zValue": 0.208683054275242,
+          "pValue": 0.834695669626659,
+          "oddsRatio": 1.04566829529838,
+          "oddsRatioLower": 0.68745593917211,
+          "oddsRatioUpper": 1.59053420224865
+        },
+        {
+          "term": "Q262",
+          "estimate": -0.0197462415866054,
+          "standardError": 0.00684820185570215,
+          "zValue": -2.88341991119373,
+          "pValue": 0.00393382664415667,
+          "oddsRatio": 0.980447438528704,
+          "oddsRatioLower": 0.967375571533901,
+          "oddsRatioUpper": 0.993695941890765
+        }
+      ]
+    },
+    {
+      "id": "NZL_Q165_FIVE_PREDICTORS",
+      "outcome": "Q165",
+      "predictors": ["Q167", "Q177", "Q260", "Q262", "Q275"],
+      "countries": "NZL",
+      "filteredRows": 1000,
+      "completeObservations": 646,
+      "excludedMissingAny": 354,
+      "events": 331,
+      "nonEvents": 315,
+      "converged": true,
+      "iterations": 6,
+      "logLikelihood": -309.798079940765,
+      "aic": 631.596159881529,
+      "mcfaddenPseudoRSquared": 0.307829664060295,
+      "coefficients": [
+        {
+          "term": "(Intercept)",
+          "estimate": -1.90934985279592,
+          "standardError": 0.642453045214177,
+          "zValue": -2.97196793916573,
+          "pValue": 0.00295897581388581,
+          "oddsRatio": 0.148176691947722,
+          "oddsRatioLower": 0.0420651915983326,
+          "oddsRatioUpper": 0.521959634612489
+        },
+        {
+          "term": "Q167",
+          "estimate": 4.33229124278871,
+          "standardError": 0.471556652067116,
+          "zValue": 9.18721265790159,
+          "pValue": 4.03152222598086e-20,
+          "oddsRatio": 76.1184928663812,
+          "oddsRatioLower": 30.2065016630795,
+          "oddsRatioUpper": 191.813836003763
+        },
+        {
+          "term": "Q177",
+          "estimate": 0.0784078123318102,
+          "standardError": 0.0548518998661982,
+          "zValue": 1.42944569874649,
+          "pValue": 0.152876171637697,
+          "oddsRatio": 1.08156364373595,
+          "oddsRatioLower": 0.971319389948814,
+          "oddsRatioUpper": 1.20432056392185
+        },
+        {
+          "term": "Q260",
+          "estimate": -0.409125127975228,
+          "standardError": 0.198813495259084,
+          "zValue": -2.05783378760117,
+          "pValue": 0.0396060914624789,
+          "oddsRatio": 0.664231113227782,
+          "oddsRatioLower": 0.449871893290668,
+          "oddsRatioUpper": 0.980730244231442
+        },
+        {
+          "term": "Q262",
+          "estimate": 0.0297055339364435,
+          "standardError": 0.00678857913438965,
+          "zValue": 4.37581021718682,
+          "pValue": 1.20982244460982e-05,
+          "oddsRatio": 1.03015114473434,
+          "oddsRatioLower": 1.01653538420889,
+          "oddsRatioUpper": 1.04394927858152
+        },
+        {
+          "term": "Q275",
+          "estimate": -0.0819198412680446,
+          "standardError": 0.0616741848110514,
+          "zValue": -1.32826792148156,
+          "pValue": 0.184089613096527,
+          "oddsRatio": 0.921345809648204,
+          "oddsRatioLower": 0.816442311657383,
+          "oddsRatioUpper": 1.03972820716883
+        }
+      ]
+    },
+    {
+      "id": "NZL_AUS_Q167_COMBINED",
+      "outcome": "Q167",
+      "predictors": ["Q165", "Q260", "Q262"],
+      "countries": ["NZL", "AUS"],
+      "filteredRows": 2000,
+      "completeObservations": 1625,
+      "excludedMissingAny": 375,
+      "events": 443,
+      "nonEvents": 1182,
+      "converged": true,
+      "iterations": 6,
+      "logLikelihood": -694.452445854505,
+      "aic": 1396.90489170901,
+      "mcfaddenPseudoRSquared": 0.270529023343391,
+      "coefficients": [
+        {
+          "term": "(Intercept)",
+          "estimate": -2.98880358163251,
+          "standardError": 0.310500786540029,
+          "zValue": -9.62575204699911,
+          "pValue": 6.22498806265276e-22,
+          "oddsRatio": 0.0503476375420433,
+          "oddsRatioLower": 0.0273955704676241,
+          "oddsRatioUpper": 0.0925289951184142
+        },
+        {
+          "term": "Q165",
+          "estimate": 3.7002669681242,
+          "standardError": 0.251083026743417,
+          "zValue": 14.7372246388663,
+          "pValue": 3.71750995078472e-49,
+          "oddsRatio": 40.4581039425493,
+          "oddsRatioLower": 24.7333683822864,
+          "oddsRatioUpper": 66.1801558658064
+        },
+        {
+          "term": "Q260",
+          "estimate": 0.194244816350156,
+          "standardError": 0.133811205314223,
+          "zValue": 1.45163341062521,
+          "pValue": 0.146603563665671,
+          "oddsRatio": 1.21439354996339,
+          "oddsRatioLower": 0.93424148325039,
+          "oddsRatioUpper": 1.57855513872256
+        },
+        {
+          "term": "Q262",
+          "estimate": -0.0153739120166613,
+          "standardError": 0.00390155481610237,
+          "zValue": -3.94045777678441,
+          "pValue": 8.13262648236387e-05,
+          "oddsRatio": 0.984743663266853,
+          "oddsRatioLower": 0.977242138416116,
+          "oddsRatioUpper": 0.992302771466562
+        }
+      ]
+    },
+    {
+      "id": "ALL_Q167_Q165_Q260_Q262",
+      "outcome": "Q167",
+      "predictors": ["Q165", "Q260", "Q262"],
+      "countries": "ALL",
+      "filteredRows": 65447,
+      "completeObservations": 58157,
+      "excludedMissingAny": 7290,
+      "events": 35105,
+      "nonEvents": 23052,
+      "converged": true,
+      "iterations": 4,
+      "logLikelihood": -31770.2785695212,
+      "aic": 63548.5571390424,
+      "mcfaddenPseudoRSquared": 0.186488729367901,
+      "coefficients": [
+        {
+          "term": "(Intercept)",
+          "estimate": -1.64199341246034,
+          "standardError": 0.0427668256342802,
+          "zValue": -38.3940914039731,
+          "pValue": 1.67982319586024e-322,
+          "oddsRatio": 0.193593745210159,
+          "oddsRatioLower": 0.178027926519584,
+          "oddsRatioUpper": 0.210520556618251
+        },
+        {
+          "term": "Q165",
+          "estimate": 3.12743919009657,
+          "standardError": 0.0349715147142761,
+          "zValue": 89.4281879309016,
+          "pValue": 0,
+          "oddsRatio": 22.8154785660072,
+          "oddsRatioLower": 21.3040305128921,
+          "oddsRatioUpper": 24.43415868565
+        },
+        {
+          "term": "Q260",
+          "estimate": -0.0107581677272388,
+          "standardError": 0.0194594432526474,
+          "zValue": -0.552850746424884,
+          "pValue": 0.580365616345272,
+          "oddsRatio": 0.989299494394345,
+          "oddsRatioLower": 0.952278280304051,
+          "oddsRatioUpper": 1.02775996245175
+        },
+        {
+          "term": "Q262",
+          "estimate": -0.0133644910710097,
+          "standardError": 0.000583294501689467,
+          "zValue": -22.912081345359,
+          "pValue": 3.52113506186184e-116,
+          "oddsRatio": 0.986724417227682,
+          "oddsRatioLower": 0.985597002712345,
+          "oddsRatioUpper": 0.987853121381162
+        }
+      ]
+    },
+    {
+      "id": "NZL_Q263_Q165_Q260_Q262",
+      "outcome": "Q263",
+      "predictors": ["Q165", "Q260", "Q262"],
+      "countries": "NZL",
+      "filteredRows": 1000,
+      "completeObservations": 754,
+      "excludedMissingAny": 246,
+      "events": 572,
+      "nonEvents": 182,
+      "converged": true,
+      "iterations": 4,
+      "logLikelihood": -416.375381570874,
+      "aic": 840.750763141749,
+      "mcfaddenPseudoRSquared": 0.00080090348300943,
+      "coefficients": [
+        {
+          "term": "(Intercept)",
+          "estimate": 1.30111816532074,
+          "standardError": 0.325370369622878,
+          "zValue": 3.99888338581292,
+          "pValue": 6.36420255089339e-05,
+          "oddsRatio": 3.67340184260891,
+          "oddsRatioLower": 1.94138951050324,
+          "oddsRatioUpper": 6.95063047589286
+        },
+        {
+          "term": "Q165",
+          "estimate": -0.0700097295110109,
+          "standardError": 0.176585577639474,
+          "zValue": -0.396463462344283,
+          "pValue": 0.691763157046611,
+          "oddsRatio": 0.932384748214143,
+          "oddsRatioLower": 0.659606982841647,
+          "oddsRatioUpper": 1.31796864089757
+        },
+        {
+          "term": "Q260",
+          "estimate": -0.119276421863388,
+          "standardError": 0.172443281723856,
+          "zValue": -0.691684945165874,
+          "pValue": 0.48913520336195,
+          "oddsRatio": 0.887562425190482,
+          "oddsRatioLower": 0.633016340105706,
+          "oddsRatioUpper": 1.24446559859491
+        },
+        {
+          "term": "Q262",
+          "estimate": -0.00110829264392334,
+          "standardError": 0.005294999388958,
+          "zValue": -0.209309305348465,
+          "pValue": 0.834206788044797,
+          "oddsRatio": 0.998892321285544,
+          "oddsRatioLower": 0.988579414957195,
+          "oddsRatioUpper": 1.00931281233124
+        }
+      ]
+    }
+  ]
+}

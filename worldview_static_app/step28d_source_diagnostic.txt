@@ -1,0 +1,4 @@
+Step 28d could not find a row-aligned source containing all requested variables.
+Expected rows: 65447
+WVS_Dataset/WVS7_Individual.rds: rows=97220; requested columns found=Q18,Q19,Q20,Q21,Q22,Q23,Q24,Q25,Q26,Q238
+worldview_static_app/data/worldview-wave7-teaching-data-v1.0.0.csv: rows=65447; requested columns found=

@@ -1,0 +1,7 @@
+"check","passed"
+"html_chart_fallback_added",TRUE
+"bar_chart_selectors_added",TRUE
+"svg_export_retained",TRUE
+"canvas_export_retained",TRUE
+"png_output_used",TRUE
+"deployment_synced_when_present",TRUE

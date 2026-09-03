@@ -1,0 +1,7 @@
+"check","passed"
+"multiple_predictor_select_added",TRUE
+"matrix_inversion_added",TRUE
+"multiple_ols_added",TRUE
+"binary_outcome_warning_added",TRUE
+"ordinal_outcome_warning_added",TRUE
+"singular_model_guard_added",TRUE

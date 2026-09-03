@@ -1,0 +1,6 @@
+Source frame: WVS7_Individual.rds
+Browser rows: 65447
+Source rows: 97220
+Signature columns: B_COUNTRY_ALPHA, B_COUNTRY, Q260, Q262, Q263, Q165, Q166, Q167, Q168, Q177, Q178, Q179, Q180, Q181, Q182, Q183, Q184, Q185, Q186, Q187, Q188, Q189, Q190, Q191, Q192, Q193, Q194, Q195, Q275, Q288, Q289
+Unambiguous match rate: 0.000031
+Unmatched or ambiguous rows: 65445

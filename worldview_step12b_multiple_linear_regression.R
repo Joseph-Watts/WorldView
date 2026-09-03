@@ -1,0 +1,63 @@
+# WorldView Online - Step 12b
+# Upgrade simple OLS to multiple linear regression with one outcome and
+# one or more predictors. Adds outcome-type guidance and model safeguards.
+
+app_dir <- "worldview_static_app"
+index_path <- file.path(app_dir, "index.html")
+js_path <- file.path(app_dir, "assets", "regression.js")
+css_path <- file.path(app_dir, "assets", "styles.css")
+
+if (!all(file.exists(c(index_path, js_path, css_path)))) {
+  stop("Run Step 12 first. Required regression files were not found.")
+}
+
+html <- paste(readLines(index_path, warn = FALSE), collapse = "\n")
+html <- sub(
+  '<span>Predictor variable</span>\n            <select id="regression-predictor" required></select>',
+  '<span>Predictor variables</span>\n            <select id="regression-predictor" multiple size="8" required aria-describedby="regression-predictor-help"></select>\n            <small id="regression-predictor-help" class="field-help">Select one or more predictors. Use Ctrl or Command to select several.</small>',
+  html,
+  fixed = TRUE
+)
+html <- sub(
+  "Fit a simple ordinary least-squares model with one outcome and one predictor.",
+  "Fit an ordinary least-squares model with one outcome and one or more predictors.",
+  html,
+  fixed = TRUE
+)
+writeLines(html, index_path, useBytes = TRUE)
+
+js <- '"use strict";
+const regressionPaths={data:"data/worldview-browser-data-v1.0.0.json",codebook:"data/worldview-codebook-v1.0.0.json"};
+const regressionState={data:null,variables:[],countries:[],lastRows:[]};
+const esc=v=>String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll("\\\"","&quot;");
+const fmt=(v,d=3)=>v===null||!Number.isFinite(v)?"Not available":new Intl.NumberFormat("en-NZ",{maximumFractionDigits:d,minimumFractionDigits:d}).format(v);
+function parseCols(o){const n=Object.keys(o),l=o[n[0]].length;if(!n.length||!n.every(k=>o[k].length===l))throw Error("Invalid browser data");return{columns:o,length:l};}
+function selected(id){return[...document.getElementById(id).selectedOptions].map(o=>o.value);}
+function transpose(a){return a[0].map((_,i)=>a.map(r=>r[i]));}
+function multiply(a,b){const bt=transpose(b);return a.map(r=>bt.map(c=>r.reduce((s,v,i)=>s+v*c[i],0)));}
+function invert(a){const n=a.length,m=a.map((r,i)=>[...r,...Array.from({length:n},(_,j)=>i===j?1:0)]);for(let i=0;i<n;i++){let p=i;for(let r=i+1;r<n;r++)if(Math.abs(m[r][i])>Math.abs(m[p][i]))p=r;if(Math.abs(m[p][i])<1e-12)return null;[m[i],m[p]]=[m[p],m[i]];const q=m[i][i];m[i]=m[i].map(v=>v/q);for(let r=0;r<n;r++){if(r===i)continue;const f=m[r][i];m[r]=m[r].map((v,j)=>v-f*m[i][j]);}}return m.map(r=>r.slice(n));}
+function normalCdf(x){const s=x<0?-1:1,z=Math.abs(x)/Math.sqrt(2),t=1/(1+.3275911*z),e=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-.284496736)*t+.254829592)*t*Math.exp(-z*z);return .5*(1+s*e);}
+function fit(outcome,predictors,codes,title){const allow=new Set(codes),cc=regressionState.data.columns.B_COUNTRY_ALPHA,rows=[];let filtered=0;for(let i=0;i<regressionState.data.length;i++){if(allow.size&&!allow.has(cc[i]))continue;filtered++;const vals=[regressionState.data.columns[outcome][i],...predictors.map(p=>regressionState.data.columns[p][i])];if(vals.some(v=>v===null||v===""))continue;const nums=vals.map(Number);if(nums.every(Number.isFinite))rows.push(nums);}const n=rows.length,k=predictors.length+1,base={title,filtered,n,excluded:filtered-n};if(n<Math.max(10,k+2))return{...base,status:"insufficient"};const y=rows.map(r=>[r[0]]),X=rows.map(r=>[1,...r.slice(1)]),xt=transpose(X),inv=invert(multiply(xt,X));if(!inv)return{...base,status:"singular"};const beta=multiply(multiply(inv,xt),y).map(r=>r[0]);const fitted=X.map(r=>r.reduce((s,v,j)=>s+v*beta[j],0)),mean=y.reduce((s,r)=>s+r[0],0)/n;let sse=0,sst=0;for(let i=0;i<n;i++){sse+=(y[i][0]-fitted[i])**2;sst+=(y[i][0]-mean)**2;}const df=n-k,s2=sse/df,se=inv.map((r,i)=>Math.sqrt(s2*r[i])),terms=["Intercept",...predictors],coef=beta.map((b,i)=>{const t=b/se[i],p=2*(1-normalCdf(Math.abs(t))),c=1.959963984540054;return{term:terms[i],estimate:b,se:se[i],t,p,lower:b-c*se[i],upper:b+c*se[i]};});const r2=1-sse/sst;return{...base,status:"ok",df,coef,r2,adjR2:1-(1-r2)*(n-1)/df,rse:Math.sqrt(s2),f:(r2/predictors.length)/((1-r2)/df)};}
+function outcomeAdvice(v){if(v.analysisType==="binary")return"This binary outcome is being analysed as a linear probability model. Logistic regression is generally preferable; fitted values may fall outside 0 to 1.";if(v.id==="Q275")return"Education is ordered. OLS treats adjacent education levels as equally spaced; ordinal logistic regression may be preferable.";if(v.analysisType==="ordinal")return"This ordered outcome is treated as a numerical scale with equally spaced categories.";return"This numerical outcome is suitable for OLS subject to linearity and residual assumptions.";}
+function card(r,out,preds){if(r.status!=="ok")return`<section class="regression-card"><h3>${esc(r.title)}</h3><p class="suppression-note">${r.status==="singular"?"The model matrix is singular. Remove duplicate or non-varying predictors.":"Too few complete observations are available."}</p></section>`;const rows=r.coef.map(c=>`<tr><td>${esc(c.term)}</td><td>${fmt(c.estimate)}</td><td>${fmt(c.se)}</td><td>${fmt(c.t)}</td><td>${c.p<.001?"&lt; 0.001":fmt(c.p)}</td><td>${fmt(c.lower)} to ${fmt(c.upper)}</td></tr>`).join("");return`<section class="regression-card"><h3>${esc(r.title)}</h3><div class="model-fit-grid"><div><strong>${fmt(r.n,0)}</strong><span>Complete observations</span></div><div><strong>${fmt(r.r2)}</strong><span>R squared</span></div><div><strong>${fmt(r.adjR2)}</strong><span>Adjusted R squared</span></div><div><strong>${fmt(r.rse)}</strong><span>Residual standard error</span></div><div><strong>${fmt(r.f)}</strong><span>F statistic</span></div></div><div class="table-wrap"><table class="results-table"><thead><tr><th>Term</th><th>Estimate</th><th>SE</th><th>t</th><th>Approx. p</th><th>Approx. 95% CI</th></tr></thead><tbody>${rows}</tbody></table></div><p class="model-note">${esc(outcomeAdvice(out))}</p><p class="model-note">Predictors: ${preds.map(p=>`${p.id}: ${p.correlationRepresentation}`).join("; ")}. Rows missing any model variable were excluded (${r.excluded}).</p></section>`;}
+function calculate(e){e.preventDefault();const oid=document.getElementById("regression-outcome").value,pids=selected("regression-predictor");if(!pids.length||pids.includes(oid)){document.getElementById("regression-message").textContent=!pids.length?"Select at least one predictor.":"The outcome cannot also be a predictor.";return;}const out=regressionState.variables.find(v=>v.id===oid),preds=pids.map(id=>regressionState.variables.find(v=>v.id===id)),countries=selected("regression-countries"),map=new Map(regressionState.countries.map(c=>[c.code,c.name])),sep=document.querySelector("input[name=regression-country-mode]:checked").value==="separate";const specs=sep&&countries.length>1?countries.map(c=>({title:map.get(c)||c,codes:[c]})):[{title:countries.length?countries.map(c=>map.get(c)||c).join(", "):"All countries combined",codes:countries}],results=specs.map(s=>fit(oid,pids,s.codes,s.title));document.getElementById("regression-title").textContent=`${oid} predicted by ${pids.join(", ")}`;document.getElementById("regression-message").textContent=outcomeAdvice(out);document.getElementById("regression-results").innerHTML=results.map(r=>card(r,out,preds)).join("");document.getElementById("regression-download").hidden=false;regressionState.lastRows=results.flatMap(r=>r.status==="ok"?r.coef.map(c=>({country:r.title,outcome:oid,predictors:pids.join(";"),term:c.term,estimate:c.estimate,se:c.se,t:c.t,p:c.p,ci_lower:c.lower,ci_upper:c.upper,n:r.n,r_squared:r.r2,adjusted_r_squared:r.adjR2})):[]);}
+function download(){if(!regressionState.lastRows.length)return;const cols=Object.keys(regressionState.lastRows[0]),q=v=>`"${String(v??"").replaceAll("\\\"","\\\"\\\"")}"`,text=[cols.join(","),...regressionState.lastRows.map(r=>cols.map(c=>q(r[c])).join(","))].join("\\n"),a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type:"text/csv"}));a.download="worldview-multiple-linear-regression.csv";a.click();URL.revokeObjectURL(a.href);}
+function reset(){document.getElementById("regression-form").reset();document.getElementById("regression-outcome").value="Q177";[...document.getElementById("regression-predictor").options].forEach(o=>o.selected=["Q165","Q260","Q262"].includes(o.value));[...document.getElementById("regression-countries").options].forEach(o=>o.selected=o.value==="NZL");document.getElementById("regression-results").innerHTML="";document.getElementById("regression-download").hidden=true;}
+async function init(){const loading=document.getElementById("regression-loading");try{const[d,c]=await Promise.all([fetch(regressionPaths.data).then(r=>r.json()),fetch(regressionPaths.codebook).then(r=>r.json())]);regressionState.data=parseCols(d);regressionState.variables=c.variables.filter(v=>v.correlationEligible);const pairs=new Map();for(let i=0;i<regressionState.data.length;i++)pairs.set(regressionState.data.columns.B_COUNTRY_ALPHA[i],regressionState.data.columns.B_COUNTRY[i]);regressionState.countries=[...pairs].map(([code,name])=>({code,name})).sort((a,b)=>a.name.localeCompare(b.name));const o=document.getElementById("regression-outcome"),p=document.getElementById("regression-predictor");regressionState.variables.forEach(v=>{o.add(new Option(`${v.id}: ${v.displayName}`,v.id));p.add(new Option(`${v.id}: ${v.displayName}`,v.id));});o.value="Q177";[...p.options].forEach(x=>x.selected=["Q165","Q260","Q262"].includes(x.value));const cs=document.getElementById("regression-countries");regressionState.countries.forEach(c=>{const x=new Option(`${c.name} (${c.code})`,c.code);if(c.code==="NZL")x.selected=true;cs.add(x);});loading.hidden=true;document.getElementById("regression-form").hidden=false;}catch(e){loading.textContent=`Regression data could not be loaded: ${e.message}`;}}
+document.addEventListener("DOMContentLoaded",()=>{document.getElementById("regression-form").addEventListener("submit",calculate);document.getElementById("regression-reset").addEventListener("click",reset);document.getElementById("regression-download").addEventListener("click",download);init();});
+'
+writeLines(js, js_path, useBytes = TRUE)
+
+css <- paste(readLines(css_path, warn = FALSE), collapse = "\n")
+if (!grepl("Step 12b: multiple regression", css, fixed = TRUE)) {
+  cat('\n/* Step 12b: multiple regression */\n#regression-predictor { min-height: 190px; }\n', file = css_path, append = TRUE)
+}
+
+validation <- data.frame(
+  check = c("multiple_predictor_select_added","matrix_inversion_added","multiple_ols_added","binary_outcome_warning_added","ordinal_outcome_warning_added","singular_model_guard_added"),
+  passed = c(grepl('id="regression-predictor" multiple', html, fixed=TRUE),grepl("function invert",js,fixed=TRUE),grepl("predictors.length+1",js,fixed=TRUE),grepl("linear probability model",js,fixed=TRUE),grepl("ordered outcome",js,fixed=TRUE),grepl('status:"singular"',js,fixed=TRUE)),
+  stringsAsFactors = FALSE
+)
+write.csv(validation,file.path(app_dir,"step12b_validation_checks.csv"),row.names=FALSE)
+if(!all(validation$passed))stop("Step 12b validation failed")
+cat("\nStep 12b completed successfully.\nRestart with:\n  servr::httd(\"worldview_static_app\", browser = TRUE)\n")

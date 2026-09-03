@@ -1,11 +1,11 @@
 {
-  "dataVersion": "WV7-WORLDVIEW-1.0.0",
+  "dataVersion": "WV7-WORLDVIEW-1.1.0",
   "source": "World Values Survey Wave 7",
   "samplingSeed": 382,
   "maximumParticipantsPerCountry": 1000,
   "countryCount": 66,
   "participantCount": 65447,
-  "studentVariableCount": 29,
-  "exportColumnCount": 32,
-  "variables": ["Q165", "Q166", "Q167", "Q168", "Q177", "Q178", "Q179", "Q180", "Q181", "Q182", "Q183", "Q184", "Q185", "Q186", "Q187", "Q188", "Q189", "Q190", "Q191", "Q192", "Q193", "Q194", "Q195", "Q260", "Q262", "Q263", "Q275", "Q288", "Q289"]
+  "studentVariableCount": 39,
+  "exportColumnCount": 42,
+  "variables": ["Q18", "Q19", "Q20", "Q21", "Q22", "Q23", "Q24", "Q25", "Q26", "Q165", "Q166", "Q167", "Q168", "Q177", "Q178", "Q179", "Q180", "Q181", "Q182", "Q183", "Q184", "Q185", "Q186", "Q187", "Q188", "Q189", "Q190", "Q191", "Q192", "Q193", "Q194", "Q195", "Q238", "Q260", "Q262", "Q263", "Q275", "Q288", "Q289"]
 }

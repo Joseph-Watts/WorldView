@@ -1,0 +1,7 @@
+"check","passed"
+"anova_relative_tolerance_helper_added",TRUE
+"anova_table_checks_use_relative_tolerance",TRUE
+"group_mean_checks_remain_tight",TRUE
+"group_sd_checks_remain_tight",TRUE
+"exact_count_checks_retained",TRUE
+"exact_df_checks_retained",TRUE

@@ -1,0 +1,170 @@
+WORLDVIEW NEW-VARIABLE SOURCE DIAGNOSTIC
+Source: WVS_Dataset/WVS7_Individual.rds
+Selected frame: WVS7_Individual.rds
+
+DATA FRAMES FOUND
+               frame  rows columns requested_found
+ WVS7_Individual.rds 97220     299              10
+                                   requested_names
+ Q18, Q19, Q20, Q21, Q22, Q23, Q24, Q25, Q26, Q238
+
+VARIABLE Q18
+class: ordered, factor
+typeof: integer
+length: 97220
+nonmissing original: 96291
+unique original: 2
+direct numeric nonmissing: 96291
+character numeric nonmissing: 0
+factor-code nonmissing: 96291
+levels: Mentioned | Not mentioned
+label attribute: 
+labels attribute: [none]
+first original values: Mentioned | Mentioned | Mentioned | Mentioned | Mentioned | Mentioned | Not mentioned | Not mentioned | Mentioned | Mentioned | Mentioned | Mentioned | Not mentioned | Not mentioned | Mentioned | Mentioned | Mentioned | Not mentioned | Mentioned | Mentioned
+first direct numeric: 1 | 1 | 1 | 1 | 1 | 1 | 2 | 2 | 1 | 1 | 1 | 1 | 2 | 2 | 1 | 1 | 1 | 2 | 1 | 1
+unclass typeof: integer
+
+VARIABLE Q19
+class: ordered, factor
+typeof: integer
+length: 97220
+nonmissing original: 96064
+unique original: 2
+direct numeric nonmissing: 96064
+character numeric nonmissing: 0
+factor-code nonmissing: 96064
+levels: Mentioned | Not mentioned
+label attribute: 
+labels attribute: [none]
+first original values: Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned
+first direct numeric: 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 1 | 2 | 2 | 2 | 2 | 2
+unclass typeof: integer
+
+VARIABLE Q20
+class: ordered, factor
+typeof: integer
+length: 97220
+nonmissing original: 95759
+unique original: 2
+direct numeric nonmissing: 95759
+character numeric nonmissing: 0
+factor-code nonmissing: 95759
+levels: Mentioned | Not mentioned
+label attribute: 
+labels attribute: [none]
+first original values: Mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned
+first direct numeric: 1 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 1 | 2 | 2 | 2 | 2 | 2 | 1 | 2 | 2 | 2 | 2 | 2
+unclass typeof: integer
+
+VARIABLE Q21
+class: ordered, factor
+typeof: integer
+length: 97220
+nonmissing original: 95914
+unique original: 2
+direct numeric nonmissing: 95914
+character numeric nonmissing: 0
+factor-code nonmissing: 95914
+levels: Mentioned | Not mentioned
+label attribute: 
+labels attribute: [none]
+first original values: Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned
+first direct numeric: 2 | 2 | 2 | 2 | 2 | 2 | 2 | 1 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2
+unclass typeof: integer
+
+VARIABLE Q22
+class: ordered, factor
+typeof: integer
+length: 97220
+nonmissing original: 93083
+unique original: 2
+direct numeric nonmissing: 93083
+character numeric nonmissing: 0
+factor-code nonmissing: 93083
+levels: Mentioned | Not mentioned
+label attribute: 
+labels attribute: [none]
+first original values: Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned
+first direct numeric: 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2
+unclass typeof: integer
+
+VARIABLE Q23
+class: ordered, factor
+typeof: integer
+length: 97220
+nonmissing original: 96027
+unique original: 2
+direct numeric nonmissing: 96027
+character numeric nonmissing: 0
+factor-code nonmissing: 96027
+levels: Mentioned | Not mentioned
+label attribute: 
+labels attribute: [none]
+first original values: Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned
+first direct numeric: 2 | 2 | 2 | 2 | 2 | 2 | 2 | 1 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2
+unclass typeof: integer
+
+VARIABLE Q24
+class: ordered, factor
+typeof: integer
+length: 97220
+nonmissing original: 96213
+unique original: 2
+direct numeric nonmissing: 96213
+character numeric nonmissing: 0
+factor-code nonmissing: 96213
+levels: Mentioned | Not mentioned
+label attribute: 
+labels attribute: [none]
+first original values: Mentioned | Not mentioned | Mentioned | Not mentioned | Mentioned | Mentioned | Not mentioned | Mentioned | Not mentioned | Mentioned | Mentioned | Mentioned | Not mentioned | Not mentioned | Mentioned | Mentioned | Mentioned | Not mentioned | Mentioned | Not mentioned
+first direct numeric: 1 | 2 | 1 | 2 | 1 | 1 | 2 | 1 | 2 | 1 | 1 | 1 | 2 | 2 | 1 | 1 | 1 | 2 | 1 | 2
+unclass typeof: integer
+
+VARIABLE Q25
+class: ordered, factor
+typeof: integer
+length: 97220
+nonmissing original: 94777
+unique original: 2
+direct numeric nonmissing: 94777
+character numeric nonmissing: 0
+factor-code nonmissing: 94777
+levels: Mentioned | Not mentioned
+label attribute: 
+labels attribute: [none]
+first original values: Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned
+first direct numeric: 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2
+unclass typeof: integer
+
+VARIABLE Q26
+class: ordered, factor
+typeof: integer
+length: 97220
+nonmissing original: 96030
+unique original: 2
+direct numeric nonmissing: 96030
+character numeric nonmissing: 0
+factor-code nonmissing: 96030
+levels: Mentioned | Not mentioned
+label attribute: 
+labels attribute: [none]
+first original values: Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned | Not mentioned
+first direct numeric: 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2
+unclass typeof: integer
+
+VARIABLE Q238
+class: ordered, factor
+typeof: integer
+length: 97220
+nonmissing original: 92331
+unique original: 4
+direct numeric nonmissing: 92331
+character numeric nonmissing: 0
+factor-code nonmissing: 92331
+levels: Very good | Fairly good | Fairly bad | Very bad
+label attribute: 
+labels attribute: [none]
+first original values: Fairly good | Fairly good | Fairly good | Fairly good | Fairly good | Very good | Very good | Very good | Very good | Fairly good | Very good | Very good | Very good | Very good | Very good | Fairly good | Very good | Very good | Very good | Very good
+first direct numeric: 2 | 2 | 2 | 2 | 2 | 1 | 1 | 1 | 1 | 2 | 1 | 1 | 1 | 1 | 1 | 2 | 1 | 1 | 1 | 1
+unclass typeof: integer
+

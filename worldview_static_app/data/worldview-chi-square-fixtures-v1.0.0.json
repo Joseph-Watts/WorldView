@@ -1,0 +1,497 @@
+{
+  "fixtureVersion": "1.0.0",
+  "dataVersion": "WV7-WORLDVIEW-1.0.0",
+  "model": "Pearson chi-square test of independence",
+  "rules": {
+    "referenceImplementation": "R stats::chisq.test without continuity correction",
+    "missingData": "Complete cases for both categorical variables",
+    "effectSize": "Cramers V"
+  },
+  "cases": [
+    {
+      "id": "NZL_Q165_BY_Q260",
+      "rowVariable": "Q165",
+      "columnVariable": "Q260",
+      "countries": "NZL",
+      "completeObservations": 778,
+      "rowCount": 2,
+      "columnCount": 2,
+      "degreesFreedom": 1,
+      "chiSquare": 9.82359339064663,
+      "pValue": 0.00172287409532495,
+      "cramersV": 0.112368708825883,
+      "expectedBelowFive": 0,
+      "totalCells": 4,
+      "cells": [
+        {
+          "row": "No",
+          "column": "Female",
+          "observed": 169,
+          "expected": 190.457583547558,
+          "rowPercentage": 50.297619047619,
+          "columnPercentage": 38.3219954648526
+        },
+        {
+          "row": "No",
+          "column": "Male",
+          "observed": 167,
+          "expected": 145.542416452442,
+          "rowPercentage": 49.702380952381,
+          "columnPercentage": 49.5548961424332
+        },
+        {
+          "row": "Yes",
+          "column": "Female",
+          "observed": 272,
+          "expected": 250.542416452442,
+          "rowPercentage": 61.5384615384615,
+          "columnPercentage": 61.6780045351474
+        },
+        {
+          "row": "Yes",
+          "column": "Male",
+          "observed": 170,
+          "expected": 191.457583547558,
+          "rowPercentage": 38.4615384615385,
+          "columnPercentage": 50.4451038575668
+        }
+      ]
+    },
+    {
+      "id": "NZL_Q289_BY_Q165",
+      "rowVariable": "Q289",
+      "columnVariable": "Q165",
+      "countries": "NZL",
+      "completeObservations": 751,
+      "rowCount": 9,
+      "columnCount": 2,
+      "degreesFreedom": 8,
+      "chiSquare": 347.469573633882,
+      "pValue": 3.14029521071842e-70,
+      "cramersV": 0.680202810706913,
+      "expectedBelowFive": 9,
+      "totalCells": 18,
+      "cells": [
+        {
+          "row": "Buddhist",
+          "column": "No",
+          "observed": 1,
+          "expected": 2.62849533954727,
+          "rowPercentage": 16.6666666666667,
+          "columnPercentage": 0.303951367781155
+        },
+        {
+          "row": "Buddhist",
+          "column": "Yes",
+          "observed": 5,
+          "expected": 3.37150466045273,
+          "rowPercentage": 83.3333333333333,
+          "columnPercentage": 1.18483412322275
+        },
+        {
+          "row": "Catholic (Roman/Greek/etc)",
+          "column": "No",
+          "observed": 12,
+          "expected": 36.7989347536618,
+          "rowPercentage": 14.2857142857143,
+          "columnPercentage": 3.64741641337386
+        },
+        {
+          "row": "Catholic (Roman/Greek/etc)",
+          "column": "Yes",
+          "observed": 72,
+          "expected": 47.2010652463382,
+          "rowPercentage": 85.7142857142857,
+          "columnPercentage": 17.0616113744076
+        },
+        {
+          "row": "Do not belong to a denomination",
+          "column": "No",
+          "observed": 279,
+          "expected": 152.890812250333,
+          "rowPercentage": 79.9426934097421,
+          "columnPercentage": 84.8024316109423
+        },
+        {
+          "row": "Do not belong to a denomination",
+          "column": "Yes",
+          "observed": 70,
+          "expected": 196.109187749667,
+          "rowPercentage": 20.0573065902579,
+          "columnPercentage": 16.5876777251185
+        },
+        {
+          "row": "Hindu",
+          "column": "No",
+          "observed": 0,
+          "expected": 3.94274300932091,
+          "rowPercentage": 0,
+          "columnPercentage": 0
+        },
+        {
+          "row": "Hindu",
+          "column": "Yes",
+          "observed": 9,
+          "expected": 5.05725699067909,
+          "rowPercentage": 100,
+          "columnPercentage": 2.13270142180095
+        },
+        {
+          "row": "Jew",
+          "column": "No",
+          "observed": 0,
+          "expected": 0.438082556591212,
+          "rowPercentage": 0,
+          "columnPercentage": 0
+        },
+        {
+          "row": "Jew",
+          "column": "Yes",
+          "observed": 1,
+          "expected": 0.561917443408788,
+          "rowPercentage": 100,
+          "columnPercentage": 0.23696682464455
+        },
+        {
+          "row": "Muslim",
+          "column": "No",
+          "observed": 0,
+          "expected": 3.06657789613848,
+          "rowPercentage": 0,
+          "columnPercentage": 0
+        },
+        {
+          "row": "Muslim",
+          "column": "Yes",
+          "observed": 7,
+          "expected": 3.93342210386152,
+          "rowPercentage": 100,
+          "columnPercentage": 1.65876777251185
+        },
+        {
+          "row": "Orthodox (Russian/Greek/etc.)",
+          "column": "No",
+          "observed": 0,
+          "expected": 0.438082556591212,
+          "rowPercentage": 0,
+          "columnPercentage": 0
+        },
+        {
+          "row": "Orthodox (Russian/Greek/etc.)",
+          "column": "Yes",
+          "observed": 1,
+          "expected": 0.561917443408788,
+          "rowPercentage": 100,
+          "columnPercentage": 0.23696682464455
+        },
+        {
+          "row": "Other",
+          "column": "No",
+          "observed": 3,
+          "expected": 6.57123834886818,
+          "rowPercentage": 20,
+          "columnPercentage": 0.911854103343465
+        },
+        {
+          "row": "Other",
+          "column": "Yes",
+          "observed": 12,
+          "expected": 8.42876165113182,
+          "rowPercentage": 80,
+          "columnPercentage": 2.8436018957346
+        },
+        {
+          "row": "Other Christian (Jehova withness...)",
+          "column": "No",
+          "observed": 34,
+          "expected": 122.225033288948,
+          "rowPercentage": 12.1863799283154,
+          "columnPercentage": 10.3343465045593
+        },
+        {
+          "row": "Other Christian (Jehova withness...)",
+          "column": "Yes",
+          "observed": 245,
+          "expected": 156.774966711052,
+          "rowPercentage": 87.8136200716846,
+          "columnPercentage": 58.0568720379147
+        }
+      ]
+    },
+    {
+      "id": "AUS_NZL_COUNTRY_BY_Q167",
+      "rowVariable": "COUNTRY",
+      "columnVariable": "Q167",
+      "countries": ["AUS", "NZL"],
+      "completeObservations": 1761,
+      "rowCount": 2,
+      "columnCount": 2,
+      "degreesFreedom": 1,
+      "chiSquare": 2.42191423873109,
+      "pValue": 0.119648642495386,
+      "cramersV": 0.0370851211627894,
+      "expectedBelowFive": 0,
+      "totalCells": 4,
+      "cells": [
+        {
+          "row": "Australia",
+          "column": "No",
+          "observed": 710,
+          "expected": 724.190800681431,
+          "rowPercentage": 72.8205128205128,
+          "columnPercentage": 54.2813455657492
+        },
+        {
+          "row": "Australia",
+          "column": "Yes",
+          "observed": 265,
+          "expected": 250.809199318569,
+          "rowPercentage": 27.1794871794872,
+          "columnPercentage": 58.4988962472406
+        },
+        {
+          "row": "New Zealand",
+          "column": "No",
+          "observed": 598,
+          "expected": 583.809199318569,
+          "rowPercentage": 76.0814249363868,
+          "columnPercentage": 45.7186544342508
+        },
+        {
+          "row": "New Zealand",
+          "column": "Yes",
+          "observed": 188,
+          "expected": 202.190800681431,
+          "rowPercentage": 23.9185750636132,
+          "columnPercentage": 41.5011037527594
+        }
+      ]
+    },
+    {
+      "id": "ALL_Q165_BY_Q167",
+      "rowVariable": "Q165",
+      "columnVariable": "Q167",
+      "countries": "ALL",
+      "completeObservations": 58531,
+      "rowCount": 2,
+      "columnCount": 2,
+      "degreesFreedom": 1,
+      "chiSquare": 13490.0385545655,
+      "pValue": 0,
+      "cramersV": 0.480080010661502,
+      "expectedBelowFive": 0,
+      "totalCells": 4,
+      "cells": [
+        {
+          "row": "No",
+          "column": "No",
+          "observed": 9393,
+          "expected": 4135.75486494336,
+          "rowPercentage": 90.282583621684,
+          "columnPercentage": 40.370481798255
+        },
+        {
+          "row": "No",
+          "column": "Yes",
+          "observed": 1011,
+          "expected": 6268.24513505664,
+          "rowPercentage": 9.71741637831603,
+          "columnPercentage": 2.86694646098004
+        },
+        {
+          "row": "Yes",
+          "column": "No",
+          "observed": 13874,
+          "expected": 19131.2451350566,
+          "rowPercentage": 28.82789286679,
+          "columnPercentage": 59.629518201745
+        },
+        {
+          "row": "Yes",
+          "column": "Yes",
+          "observed": 34253,
+          "expected": 28995.7548649434,
+          "rowPercentage": 71.17210713321,
+          "columnPercentage": 97.13305353902
+        }
+      ]
+    },
+    {
+      "id": "NZL_Q177_BY_Q260",
+      "rowVariable": "Q177",
+      "columnVariable": "Q260",
+      "countries": "NZL",
+      "completeObservations": 944,
+      "rowCount": 10,
+      "columnCount": 2,
+      "degreesFreedom": 9,
+      "chiSquare": 9.50951224047438,
+      "pValue": 0.39162997834272,
+      "cramersV": 0.100367503944056,
+      "expectedBelowFive": 4,
+      "totalCells": 20,
+      "cells": [
+        {
+          "row": "1",
+          "column": "Female",
+          "observed": 357,
+          "expected": 352.171610169492,
+          "rowPercentage": 58.5245901639344,
+          "columnPercentage": 65.5045871559633
+        },
+        {
+          "row": "1",
+          "column": "Male",
+          "observed": 253,
+          "expected": 257.828389830508,
+          "rowPercentage": 41.4754098360656,
+          "columnPercentage": 63.4085213032581
+        },
+        {
+          "row": "10",
+          "column": "Female",
+          "observed": 9,
+          "expected": 9.23728813559322,
+          "rowPercentage": 56.25,
+          "columnPercentage": 1.65137614678899
+        },
+        {
+          "row": "10",
+          "column": "Male",
+          "observed": 7,
+          "expected": 6.76271186440678,
+          "rowPercentage": 43.75,
+          "columnPercentage": 1.75438596491228
+        },
+        {
+          "row": "2",
+          "column": "Female",
+          "observed": 68,
+          "expected": 75.6302966101695,
+          "rowPercentage": 51.9083969465649,
+          "columnPercentage": 12.4770642201835
+        },
+        {
+          "row": "2",
+          "column": "Male",
+          "observed": 63,
+          "expected": 55.3697033898305,
+          "rowPercentage": 48.0916030534351,
+          "columnPercentage": 15.7894736842105
+        },
+        {
+          "row": "3",
+          "column": "Female",
+          "observed": 46,
+          "expected": 43.2997881355932,
+          "rowPercentage": 61.3333333333333,
+          "columnPercentage": 8.44036697247707
+        },
+        {
+          "row": "3",
+          "column": "Male",
+          "observed": 29,
+          "expected": 31.7002118644068,
+          "rowPercentage": 38.6666666666667,
+          "columnPercentage": 7.26817042606516
+        },
+        {
+          "row": "4",
+          "column": "Female",
+          "observed": 18,
+          "expected": 16.7425847457627,
+          "rowPercentage": 62.0689655172414,
+          "columnPercentage": 3.30275229357798
+        },
+        {
+          "row": "4",
+          "column": "Male",
+          "observed": 11,
+          "expected": 12.2574152542373,
+          "rowPercentage": 37.9310344827586,
+          "columnPercentage": 2.75689223057644
+        },
+        {
+          "row": "5",
+          "column": "Female",
+          "observed": 18,
+          "expected": 17.8972457627119,
+          "rowPercentage": 58.0645161290323,
+          "columnPercentage": 3.30275229357798
+        },
+        {
+          "row": "5",
+          "column": "Male",
+          "observed": 13,
+          "expected": 13.1027542372881,
+          "rowPercentage": 41.9354838709677,
+          "columnPercentage": 3.25814536340852
+        },
+        {
+          "row": "6",
+          "column": "Female",
+          "observed": 13,
+          "expected": 11.5466101694915,
+          "rowPercentage": 65,
+          "columnPercentage": 2.38532110091743
+        },
+        {
+          "row": "6",
+          "column": "Male",
+          "observed": 7,
+          "expected": 8.45338983050847,
+          "rowPercentage": 35,
+          "columnPercentage": 1.75438596491228
+        },
+        {
+          "row": "7",
+          "column": "Female",
+          "observed": 14,
+          "expected": 12.7012711864407,
+          "rowPercentage": 63.6363636363636,
+          "columnPercentage": 2.56880733944954
+        },
+        {
+          "row": "7",
+          "column": "Male",
+          "observed": 8,
+          "expected": 9.29872881355932,
+          "rowPercentage": 36.3636363636364,
+          "columnPercentage": 2.00501253132832
+        },
+        {
+          "row": "8",
+          "column": "Female",
+          "observed": 1,
+          "expected": 4.04131355932203,
+          "rowPercentage": 14.2857142857143,
+          "columnPercentage": 0.18348623853211
+        },
+        {
+          "row": "8",
+          "column": "Male",
+          "observed": 6,
+          "expected": 2.95868644067797,
+          "rowPercentage": 85.7142857142857,
+          "columnPercentage": 1.50375939849624
+        },
+        {
+          "row": "9",
+          "column": "Female",
+          "observed": 1,
+          "expected": 1.73199152542373,
+          "rowPercentage": 33.3333333333333,
+          "columnPercentage": 0.18348623853211
+        },
+        {
+          "row": "9",
+          "column": "Male",
+          "observed": 2,
+          "expected": 1.26800847457627,
+          "rowPercentage": 66.6666666666667,
+          "columnPercentage": 0.50125313283208
+        }
+      ]
+    }
+  ]
+}

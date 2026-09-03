@@ -1,0 +1,7 @@
+WorldView Step 29 data installation
+Participant rows: 65447
+Runtime columns: 42
+Student variables in manifest: 39
+Data version: WV7-WORLDVIEW-1.1.0
+Checks passed: 7 of 7
+Backup folder: worldview_static_app/data/before_step29

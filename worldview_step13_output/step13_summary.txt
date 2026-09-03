@@ -1,0 +1,5 @@
+WorldView Step 13 regression fixtures
+Reference cases: 5
+Coefficient rows: 22
+Validation checks passed: 6 of 6
+Fixture output: worldview_static_app/data/worldview-regression-fixtures-v1.0.0.json

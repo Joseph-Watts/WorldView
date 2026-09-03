@@ -1,0 +1,7 @@
+"check","passed"
+"five_reference_cases_created",TRUE
+"five_predictor_case_created",TRUE
+"binary_linear_probability_case_created",TRUE
+"all_cases_have_at_least_10_complete_rows",TRUE
+"all_coefficient_estimates_finite",TRUE
+"fixture_json_created",TRUE

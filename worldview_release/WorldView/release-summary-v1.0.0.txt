@@ -1,0 +1,7 @@
+WorldView static release v1.0.0
+Release folder: \\file/Usersj$/jwa349/Home/My Documents/GitHub/PSYC382_WVS7_Shiny/worldview_release/WorldView
+Release validation checks passed: 14 of 14
+Release files: 18
+Release size MB: 34.402
+ZIP created: TRUE
+ZIP path: \\file/Usersj$/jwa349/Home/My Documents/GitHub/PSYC382_WVS7_Shiny/WorldView-static-v1.0.0.zip

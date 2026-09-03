@@ -1,0 +1,8 @@
+"check","passed"
+"logistic_comparison_helper_added",TRUE
+"z_tolerance_updated",TRUE
+"estimate_tolerance_updated",TRUE
+"standard_error_tolerance_updated",TRUE
+"odds_ratio_relative_tolerance_added",TRUE
+"exact_count_checks_retained",TRUE
+"exact_convergence_check_retained",TRUE

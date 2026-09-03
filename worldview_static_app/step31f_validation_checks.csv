@@ -1,0 +1,8 @@
+"check","passed"
+"about_navigation_present",TRUE
+"about_page_present",TRUE
+"about_router_created",TRUE
+"about_router_linked",TRUE
+"capture_phase_handler_added",TRUE
+"other_pages_hidden_when_about_selected",TRUE
+"about_hash_supported",TRUE

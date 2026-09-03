@@ -1,0 +1,45 @@
+WorldView Models copy update
+============================
+
+Copy the contents of this package into the ROOT of your current WorldView
+repository, preserving the folder structure, and replace the existing file.
+
+REPLACE:
+  worldview_deployment/assets/step28-enhancements.js
+
+Changes:
+
+1. Home page feature card 03
+
+Old:
+  Examine associations
+  Calculate flexible Pearson correlations between eligible processed variables.
+
+New:
+  Model relationships and differences
+  Explore associations and group differences using correlations, linear and
+  logistic regression, ANOVA, and chi-square tests.
+
+The link remains directed to the Models page and now reads:
+  Open models
+
+2. Models page heading
+
+Adds the introductory text:
+
+  Explore associations, predictions, and group differences using correlations,
+  linear and logistic regression, ANOVA, and chi-square tests.
+
+This restores introductory text beneath the Models heading and makes it
+consistent with the other main pages.
+
+Testing:
+1. In RStudio run:
+     servr::httd("worldview_deployment")
+2. Hard refresh with Ctrl+F5.
+3. Check Home feature card 03.
+4. Open Models and check the text beneath the Models heading.
+5. Confirm all Models sub-tabs still work.
+6. Run /validation.html.
+
+No WVS data rebuild is required.

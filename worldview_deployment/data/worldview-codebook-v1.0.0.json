@@ -1,29 +1,35 @@
 {
   "title": "WorldView WVS Wave 7 Codebook",
   "version": "1.0.0",
-  "dataVersion": "WV7-WORLDVIEW-1.0.0",
-  "variableCount": 29,
+  "dataVersion": "WV7-WORLDVIEW-1.2.0",
+  "variableCount": 39,
   "generalPreprocessing": {
     "source": "World Values Survey Wave 7",
-    "scope": "WorldView teaching subset containing 29 displayed variables and no more than 1,000 participants per country.",
+    "scope": "WorldView teaching subset containing 39 displayed variables and no more than 1000 participants per country.",
     "missingValues": "Negative source values are converted to missing values. The original WVS negative codes are not treated as substantive response categories.",
     "categoricalValues": "Student-facing categories use the processed labels and ordering from the WorldView pipeline.",
     "correlations": "Pearson correlations use pairwise complete observations and the documented numerical representations. Multi-category nominal variables are excluded."
   },
   "variables": [
     {
-      "id": "Q18",
+      "id": "Q8",
       "displayName": "Important child quality: independence",
+      "group": "Social values, norms and stereotypes",
+      "topic": "Social values, norms and stereotypes",
+      "sourceQuestionLabel": "Here is a list of qualities that children can be encouraged to learn at home. Which, if any, do you consider to be especially important? Please choose up to five! Independence",
+      "displayType": "ordered factor",
       "analysisType": "ordinal",
+      "ordered": true,
       "correlationEligible": true,
       "correlationRepresentation": "Ordered response categories represented by their WorldView order",
-      "topic": "Social values, norms and stereotypes",
-      "validCountInFullProcessedData": 64906,
-      "missingCountInFullProcessedData": 541,
+      "missingRule": "Negative WVS missing/non-response codes are converted to missing values before WorldView analyses.",
+      "interpretationNote": "Response categories are ordered. WorldView uses their ordered numerical positions for numerical analyses.",
+      "validCountInFullProcessedData": 96182,
+      "missingCountInFullProcessedData": 1038,
       "levels": [
         {
           "value": 1,
-          "label": "Mentioned",
+          "label": "Important",
           "displayOrder": 1
         },
         {
@@ -31,21 +37,31 @@
           "label": "Not mentioned",
           "displayOrder": 2
         }
-      ]
+      ],
+      "validRange": {
+        "minimum": 1,
+        "maximum": 2
+      }
     },
     {
-      "id": "Q19",
+      "id": "Q9",
       "displayName": "Important child quality: hard work",
+      "group": "Social values, norms and stereotypes",
+      "topic": "Social values, norms and stereotypes",
+      "sourceQuestionLabel": "Here is a list of qualities that children can be encouraged to learn at home. Which, if any, do you consider to be especially important? Please choose up to five! Hard work",
+      "displayType": "ordered factor",
       "analysisType": "ordinal",
+      "ordered": true,
       "correlationEligible": true,
       "correlationRepresentation": "Ordered response categories represented by their WorldView order",
-      "topic": "Social values, norms and stereotypes",
-      "validCountInFullProcessedData": 64762,
-      "missingCountInFullProcessedData": 685,
+      "missingRule": "Negative WVS missing/non-response codes are converted to missing values before WorldView analyses.",
+      "interpretationNote": "Response categories are ordered. WorldView uses their ordered numerical positions for numerical analyses.",
+      "validCountInFullProcessedData": 96528,
+      "missingCountInFullProcessedData": 692,
       "levels": [
         {
           "value": 1,
-          "label": "Mentioned",
+          "label": "Important",
           "displayOrder": 1
         },
         {
@@ -53,21 +69,31 @@
           "label": "Not mentioned",
           "displayOrder": 2
         }
-      ]
+      ],
+      "validRange": {
+        "minimum": 1,
+        "maximum": 2
+      }
     },
     {
-      "id": "Q20",
+      "id": "Q10",
       "displayName": "Important child quality: feeling of responsibility",
+      "group": "Social values, norms and stereotypes",
+      "topic": "Social values, norms and stereotypes",
+      "sourceQuestionLabel": "Here is a list of qualities that children can be encouraged to learn at home. Which, if any, do you consider to be especially important? Please choose up to five! Feeling of responsibility",
+      "displayType": "ordered factor",
       "analysisType": "ordinal",
+      "ordered": true,
       "correlationEligible": true,
       "correlationRepresentation": "Ordered response categories represented by their WorldView order",
-      "topic": "Social values, norms and stereotypes",
-      "validCountInFullProcessedData": 64557,
-      "missingCountInFullProcessedData": 890,
+      "missingRule": "Negative WVS missing/non-response codes are converted to missing values before WorldView analyses.",
+      "interpretationNote": "Response categories are ordered. WorldView uses their ordered numerical positions for numerical analyses.",
+      "validCountInFullProcessedData": 96667,
+      "missingCountInFullProcessedData": 553,
       "levels": [
         {
           "value": 1,
-          "label": "Mentioned",
+          "label": "Important",
           "displayOrder": 1
         },
         {
@@ -75,21 +101,31 @@
           "label": "Not mentioned",
           "displayOrder": 2
         }
-      ]
+      ],
+      "validRange": {
+        "minimum": 1,
+        "maximum": 2
+      }
     },
     {
-      "id": "Q21",
+      "id": "Q11",
       "displayName": "Important child quality: imagination",
+      "group": "Social values, norms and stereotypes",
+      "topic": "Social values, norms and stereotypes",
+      "sourceQuestionLabel": "Here is a list of qualities that children can be encouraged to learn at home. Which, if any, do you consider to be especially important? Please choose up to five! Imagination",
+      "displayType": "ordered factor",
       "analysisType": "ordinal",
+      "ordered": true,
       "correlationEligible": true,
       "correlationRepresentation": "Ordered response categories represented by their WorldView order",
-      "topic": "Social values, norms and stereotypes",
-      "validCountInFullProcessedData": 64669,
-      "missingCountInFullProcessedData": 778,
+      "missingRule": "Negative WVS missing/non-response codes are converted to missing values before WorldView analyses.",
+      "interpretationNote": "Response categories are ordered. WorldView uses their ordered numerical positions for numerical analyses.",
+      "validCountInFullProcessedData": 96017,
+      "missingCountInFullProcessedData": 1203,
       "levels": [
         {
           "value": 1,
-          "label": "Mentioned",
+          "label": "Important",
           "displayOrder": 1
         },
         {
@@ -97,21 +133,31 @@
           "label": "Not mentioned",
           "displayOrder": 2
         }
-      ]
+      ],
+      "validRange": {
+        "minimum": 1,
+        "maximum": 2
+      }
     },
     {
-      "id": "Q22",
+      "id": "Q12",
       "displayName": "Important child quality: tolerance and respect for other people",
+      "group": "Social values, norms and stereotypes",
+      "topic": "Social values, norms and stereotypes",
+      "sourceQuestionLabel": "Here is a list of qualities that children can be encouraged to learn at home. Which, if any, do you consider to be especially important? Please choose up to five! Tolerance and respect for other people",
+      "displayType": "ordered factor",
       "analysisType": "ordinal",
+      "ordered": true,
       "correlationEligible": true,
       "correlationRepresentation": "Ordered response categories represented by their WorldView order",
-      "topic": "Social values, norms and stereotypes",
-      "validCountInFullProcessedData": 62594,
-      "missingCountInFullProcessedData": 2853,
+      "missingRule": "Negative WVS missing/non-response codes are converted to missing values before WorldView analyses.",
+      "interpretationNote": "Response categories are ordered. WorldView uses their ordered numerical positions for numerical analyses.",
+      "validCountInFullProcessedData": 96577,
+      "missingCountInFullProcessedData": 643,
       "levels": [
         {
           "value": 1,
-          "label": "Mentioned",
+          "label": "Important",
           "displayOrder": 1
         },
         {
@@ -119,21 +165,31 @@
           "label": "Not mentioned",
           "displayOrder": 2
         }
-      ]
+      ],
+      "validRange": {
+        "minimum": 1,
+        "maximum": 2
+      }
     },
     {
-      "id": "Q23",
+      "id": "Q13",
       "displayName": "Important child quality: thrift, saving money and things",
+      "group": "Social values, norms and stereotypes",
+      "topic": "Social values, norms and stereotypes",
+      "sourceQuestionLabel": "Here is a list of qualities that children can be encouraged to learn at home. Which, if any, do you consider to be especially important? Please choose up to five! Thrift, saving money and things",
+      "displayType": "ordered factor",
       "analysisType": "ordinal",
+      "ordered": true,
       "correlationEligible": true,
       "correlationRepresentation": "Ordered response categories represented by their WorldView order",
-      "topic": "Social values, norms and stereotypes",
-      "validCountInFullProcessedData": 64738,
-      "missingCountInFullProcessedData": 709,
+      "missingRule": "Negative WVS missing/non-response codes are converted to missing values before WorldView analyses.",
+      "interpretationNote": "Response categories are ordered. WorldView uses their ordered numerical positions for numerical analyses.",
+      "validCountInFullProcessedData": 96104,
+      "missingCountInFullProcessedData": 1116,
       "levels": [
         {
           "value": 1,
-          "label": "Mentioned",
+          "label": "Important",
           "displayOrder": 1
         },
         {
@@ -141,21 +197,31 @@
           "label": "Not mentioned",
           "displayOrder": 2
         }
-      ]
+      ],
+      "validRange": {
+        "minimum": 1,
+        "maximum": 2
+      }
     },
     {
-      "id": "Q24",
+      "id": "Q14",
       "displayName": "Important child quality: determination and perseverance",
+      "group": "Social values, norms and stereotypes",
+      "topic": "Social values, norms and stereotypes",
+      "sourceQuestionLabel": "Here is a list of qualities that children can be encouraged to learn at home. Which, if any, do you consider to be especially important? Please choose up to five! Determination, perseverance",
+      "displayType": "ordered factor",
       "analysisType": "ordinal",
+      "ordered": true,
       "correlationEligible": true,
       "correlationRepresentation": "Ordered response categories represented by their WorldView order",
-      "topic": "Social values, norms and stereotypes",
-      "validCountInFullProcessedData": 64859,
-      "missingCountInFullProcessedData": 588,
+      "missingRule": "Negative WVS missing/non-response codes are converted to missing values before WorldView analyses.",
+      "interpretationNote": "Response categories are ordered. WorldView uses their ordered numerical positions for numerical analyses.",
+      "validCountInFullProcessedData": 96089,
+      "missingCountInFullProcessedData": 1131,
       "levels": [
         {
           "value": 1,
-          "label": "Mentioned",
+          "label": "Important",
           "displayOrder": 1
         },
         {
@@ -163,21 +229,31 @@
           "label": "Not mentioned",
           "displayOrder": 2
         }
-      ]
+      ],
+      "validRange": {
+        "minimum": 1,
+        "maximum": 2
+      }
     },
     {
-      "id": "Q25",
+      "id": "Q15",
       "displayName": "Important child quality: religious faith",
+      "group": "Social values, norms and stereotypes",
+      "topic": "Social values, norms and stereotypes",
+      "sourceQuestionLabel": "Here is a list of qualities that children can be encouraged to learn at home. Which, if any, do you consider to be especially important? Please choose up to five! Religious faith",
+      "displayType": "ordered factor",
       "analysisType": "ordinal",
+      "ordered": true,
       "correlationEligible": true,
       "correlationRepresentation": "Ordered response categories represented by their WorldView order",
-      "topic": "Social values, norms and stereotypes",
-      "validCountInFullProcessedData": 63731,
-      "missingCountInFullProcessedData": 1716,
+      "missingRule": "Negative WVS missing/non-response codes are converted to missing values before WorldView analyses.",
+      "interpretationNote": "Response categories are ordered. WorldView uses their ordered numerical positions for numerical analyses.",
+      "validCountInFullProcessedData": 96109,
+      "missingCountInFullProcessedData": 1111,
       "levels": [
         {
           "value": 1,
-          "label": "Mentioned",
+          "label": "Important",
           "displayOrder": 1
         },
         {
@@ -185,21 +261,31 @@
           "label": "Not mentioned",
           "displayOrder": 2
         }
-      ]
+      ],
+      "validRange": {
+        "minimum": 1,
+        "maximum": 2
+      }
     },
     {
-      "id": "Q26",
+      "id": "Q16",
       "displayName": "Important child quality: unselfishness",
+      "group": "Social values, norms and stereotypes",
+      "topic": "Social values, norms and stereotypes",
+      "sourceQuestionLabel": "Here is a list of qualities that children can be encouraged to learn at home. Which, if any, do you consider to be especially important? Please choose up to five! Not being selfish (unselfishness)",
+      "displayType": "ordered factor",
       "analysisType": "ordinal",
+      "ordered": true,
       "correlationEligible": true,
       "correlationRepresentation": "Ordered response categories represented by their WorldView order",
-      "topic": "Social values, norms and stereotypes",
-      "validCountInFullProcessedData": 64734,
-      "missingCountInFullProcessedData": 713,
+      "missingRule": "Negative WVS missing/non-response codes are converted to missing values before WorldView analyses.",
+      "interpretationNote": "Response categories are ordered. WorldView uses their ordered numerical positions for numerical analyses.",
+      "validCountInFullProcessedData": 96096,
+      "missingCountInFullProcessedData": 1124,
       "levels": [
         {
           "value": 1,
-          "label": "Mentioned",
+          "label": "Important",
           "displayOrder": 1
         },
         {
@@ -207,12 +293,17 @@
           "label": "Not mentioned",
           "displayOrder": 2
         }
-      ]
+      ],
+      "validRange": {
+        "minimum": 1,
+        "maximum": 2
+      }
     },
     {
       "id": "Q165",
       "displayName": "Believe in: God",
       "group": "Religious values",
+      "topic": "Religious values",
       "sourceQuestionLabel": "Believe in: God",
       "displayType": "factor",
       "analysisType": "binary",
@@ -233,13 +324,16 @@
           "label": "No"
         }
       ],
-      "validRange": null,
-      "topic": "Religious values"
+      "validRange": {
+        "minimum": 0,
+        "maximum": 1
+      }
     },
     {
       "id": "Q166",
       "displayName": "Believe in: life after death",
       "group": "Religious values",
+      "topic": "Religious values",
       "sourceQuestionLabel": "Believe in: life after death",
       "displayType": "factor",
       "analysisType": "binary",
@@ -260,13 +354,16 @@
           "label": "No"
         }
       ],
-      "validRange": null,
-      "topic": "Religious values"
+      "validRange": {
+        "minimum": 0,
+        "maximum": 1
+      }
     },
     {
       "id": "Q167",
       "displayName": "Believe in: hell",
       "group": "Religious values",
+      "topic": "Religious values",
       "sourceQuestionLabel": "Believe in: hell",
       "displayType": "factor",
       "analysisType": "binary",
@@ -287,13 +384,16 @@
           "label": "No"
         }
       ],
-      "validRange": null,
-      "topic": "Religious values"
+      "validRange": {
+        "minimum": 0,
+        "maximum": 1
+      }
     },
     {
       "id": "Q168",
       "displayName": "Believe in: heaven",
       "group": "Religious values",
+      "topic": "Religious values",
       "sourceQuestionLabel": "Believe in: heaven",
       "displayType": "factor",
       "analysisType": "binary",
@@ -314,13 +414,16 @@
           "label": "No"
         }
       ],
-      "validRange": null,
-      "topic": "Religious values"
+      "validRange": {
+        "minimum": 0,
+        "maximum": 1
+      }
     },
     {
       "id": "Q177",
       "displayName": "Justifiable: Claiming government benefits to which you are not entitled",
       "group": "Ethical values and norms",
+      "topic": "Ethical values",
       "sourceQuestionLabel": "Justifiable: Claiming government benefits to which you are not entitled",
       "displayType": "ordered factor",
       "analysisType": "ordinal",
@@ -373,13 +476,16 @@
           "label": "Always justifiable"
         }
       ],
-      "validRange": null,
-      "topic": "Ethical values"
+      "validRange": {
+        "minimum": 1,
+        "maximum": 10
+      }
     },
     {
       "id": "Q178",
       "displayName": "Justifiable: Avoiding a fare on public transport",
       "group": "Ethical values and norms",
+      "topic": "Ethical values",
       "sourceQuestionLabel": "Justifiable: Avoiding a fare on public transport",
       "displayType": "ordered factor",
       "analysisType": "ordinal",
@@ -432,13 +538,16 @@
           "label": "Always justifiable"
         }
       ],
-      "validRange": null,
-      "topic": "Ethical values"
+      "validRange": {
+        "minimum": 1,
+        "maximum": 10
+      }
     },
     {
       "id": "Q179",
       "displayName": "Justifiable: Stealing property",
       "group": "Ethical values and norms",
+      "topic": "Ethical values",
       "sourceQuestionLabel": "Justifiable: Stealing property",
       "displayType": "ordered factor",
       "analysisType": "ordinal",
@@ -491,13 +600,16 @@
           "label": "Always justifiable"
         }
       ],
-      "validRange": null,
-      "topic": "Ethical values"
+      "validRange": {
+        "minimum": 1,
+        "maximum": 10
+      }
     },
     {
       "id": "Q180",
       "displayName": "Justifiable: Cheating on taxes",
       "group": "Ethical values and norms",
+      "topic": "Ethical values",
       "sourceQuestionLabel": "Justifiable: Cheating on taxes",
       "displayType": "ordered factor",
       "analysisType": "ordinal",
@@ -550,13 +662,16 @@
           "label": "Always justifiable"
         }
       ],
-      "validRange": null,
-      "topic": "Ethical values"
+      "validRange": {
+        "minimum": 1,
+        "maximum": 10
+      }
     },
     {
       "id": "Q181",
       "displayName": "Justifiable: Someone accepting a bribe in the course of their duties",
       "group": "Ethical values and norms",
+      "topic": "Ethical values",
       "sourceQuestionLabel": "Justifiable: Someone accepting a bribe in the course of their duties",
       "displayType": "ordered factor",
       "analysisType": "ordinal",
@@ -609,13 +724,16 @@
           "label": "Always justifiable"
         }
       ],
-      "validRange": null,
-      "topic": "Ethical values"
+      "validRange": {
+        "minimum": 1,
+        "maximum": 10
+      }
     },
     {
       "id": "Q182",
       "displayName": "Justifiable: Homosexuality",
       "group": "Ethical values and norms",
+      "topic": "Ethical values",
       "sourceQuestionLabel": "Justifiable: Homosexuality",
       "displayType": "ordered factor",
       "analysisType": "ordinal",
@@ -668,13 +786,16 @@
           "label": "Always justifiable"
         }
       ],
-      "validRange": null,
-      "topic": "Ethical values"
+      "validRange": {
+        "minimum": 1,
+        "maximum": 10
+      }
     },
     {
       "id": "Q183",
       "displayName": "Justifiable: Prostitution",
       "group": "Ethical values and norms",
+      "topic": "Ethical values",
       "sourceQuestionLabel": "Justifiable: Prostitution",
       "displayType": "ordered factor",
       "analysisType": "ordinal",
@@ -727,13 +848,16 @@
           "label": "Always justifiable"
         }
       ],
-      "validRange": null,
-      "topic": "Ethical values"
+      "validRange": {
+        "minimum": 1,
+        "maximum": 10
+      }
     },
     {
       "id": "Q184",
       "displayName": "Justifiable: Abortion",
       "group": "Ethical values and norms",
+      "topic": "Ethical values",
       "sourceQuestionLabel": "Justifiable: Abortion",
       "displayType": "ordered factor",
       "analysisType": "ordinal",
@@ -786,13 +910,16 @@
           "label": "Always justifiable"
         }
       ],
-      "validRange": null,
-      "topic": "Ethical values"
+      "validRange": {
+        "minimum": 1,
+        "maximum": 10
+      }
     },
     {
       "id": "Q185",
       "displayName": "Justifiable: Divorce",
       "group": "Ethical values and norms",
+      "topic": "Ethical values",
       "sourceQuestionLabel": "Justifiable: Divorce",
       "displayType": "ordered factor",
       "analysisType": "ordinal",
@@ -845,13 +972,16 @@
           "label": "Always justifiable"
         }
       ],
-      "validRange": null,
-      "topic": "Ethical values"
+      "validRange": {
+        "minimum": 1,
+        "maximum": 10
+      }
     },
     {
       "id": "Q186",
       "displayName": "Justifiable: Sex before marriage",
       "group": "Ethical values and norms",
+      "topic": "Ethical values",
       "sourceQuestionLabel": "Justifiable: Sex before marriage",
       "displayType": "ordered factor",
       "analysisType": "ordinal",
@@ -904,13 +1034,16 @@
           "label": "Always justifiable"
         }
       ],
-      "validRange": null,
-      "topic": "Ethical values"
+      "validRange": {
+        "minimum": 1,
+        "maximum": 10
+      }
     },
     {
       "id": "Q187",
       "displayName": "Justifiable: Suicide",
       "group": "Ethical values and norms",
+      "topic": "Ethical values",
       "sourceQuestionLabel": "Justifiable: Suicide",
       "displayType": "ordered factor",
       "analysisType": "ordinal",
@@ -963,13 +1096,16 @@
           "label": "Always justifiable"
         }
       ],
-      "validRange": null,
-      "topic": "Ethical values"
+      "validRange": {
+        "minimum": 1,
+        "maximum": 10
+      }
     },
     {
       "id": "Q188",
       "displayName": "Justifiable: Euthanasia",
       "group": "Ethical values and norms",
+      "topic": "Ethical values",
       "sourceQuestionLabel": "Justifiable: Euthanasia",
       "displayType": "ordered factor",
       "analysisType": "ordinal",
@@ -1022,13 +1158,16 @@
           "label": "Always justifiable"
         }
       ],
-      "validRange": null,
-      "topic": "Ethical values"
+      "validRange": {
+        "minimum": 1,
+        "maximum": 10
+      }
     },
     {
       "id": "Q189",
       "displayName": "Justifiable: For a man to beat his wife",
       "group": "Ethical values and norms",
+      "topic": "Ethical values",
       "sourceQuestionLabel": "Justifiable: For a man to beat his wife",
       "displayType": "ordered factor",
       "analysisType": "ordinal",
@@ -1081,13 +1220,16 @@
           "label": "Always justifiable"
         }
       ],
-      "validRange": null,
-      "topic": "Ethical values"
+      "validRange": {
+        "minimum": 1,
+        "maximum": 10
+      }
     },
     {
       "id": "Q190",
       "displayName": "Justifiable: Parents beating children",
       "group": "Ethical values and norms",
+      "topic": "Ethical values",
       "sourceQuestionLabel": "Justifiable: Parents beating children",
       "displayType": "ordered factor",
       "analysisType": "ordinal",
@@ -1140,13 +1282,16 @@
           "label": "Always justifiable"
         }
       ],
-      "validRange": null,
-      "topic": "Ethical values"
+      "validRange": {
+        "minimum": 1,
+        "maximum": 10
+      }
     },
     {
       "id": "Q191",
       "displayName": "Justifiable: Violence against other people",
       "group": "Ethical values and norms",
+      "topic": "Ethical values",
       "sourceQuestionLabel": "Justifiable: Violence against other people",
       "displayType": "ordered factor",
       "analysisType": "ordinal",
@@ -1199,13 +1344,16 @@
           "label": "Always justifiable"
         }
       ],
-      "validRange": null,
-      "topic": "Ethical values"
+      "validRange": {
+        "minimum": 1,
+        "maximum": 10
+      }
     },
     {
       "id": "Q192",
       "displayName": "Justifiable: Terrorism as a political, ideological or religious mean",
       "group": "Ethical values and norms",
+      "topic": "Ethical values",
       "sourceQuestionLabel": "Justifiable: Terrorism as a political, ideological or religious mean",
       "displayType": "ordered factor",
       "analysisType": "ordinal",
@@ -1258,13 +1406,16 @@
           "label": "Always justifiable"
         }
       ],
-      "validRange": null,
-      "topic": "Ethical values"
+      "validRange": {
+        "minimum": 1,
+        "maximum": 10
+      }
     },
     {
       "id": "Q193",
       "displayName": "Justifiable: Having casual sex",
       "group": "Ethical values and norms",
+      "topic": "Ethical values",
       "sourceQuestionLabel": "Justifiable: Having casual sex",
       "displayType": "ordered factor",
       "analysisType": "ordinal",
@@ -1317,13 +1468,16 @@
           "label": "Always justifiable"
         }
       ],
-      "validRange": null,
-      "topic": "Ethical values"
+      "validRange": {
+        "minimum": 1,
+        "maximum": 10
+      }
     },
     {
       "id": "Q194",
       "displayName": "Justifiable: Political violence",
       "group": "Ethical values and norms",
+      "topic": "Ethical values",
       "sourceQuestionLabel": "Justifiable: Political violence",
       "displayType": "ordered factor",
       "analysisType": "ordinal",
@@ -1376,13 +1530,16 @@
           "label": "Always justifiable"
         }
       ],
-      "validRange": null,
-      "topic": "Ethical values"
+      "validRange": {
+        "minimum": 1,
+        "maximum": 10
+      }
     },
     {
       "id": "Q195",
       "displayName": "Justifiable: Death penalty",
       "group": "Ethical values and norms",
+      "topic": "Ethical values",
       "sourceQuestionLabel": "Justifiable: Death penalty",
       "displayType": "ordered factor",
       "analysisType": "ordinal",
@@ -1435,18 +1592,26 @@
           "label": "Always justifiable"
         }
       ],
-      "validRange": null,
-      "topic": "Ethical values"
+      "validRange": {
+        "minimum": 1,
+        "maximum": 10
+      }
     },
     {
-      "id": "Q238",
+      "id": "Q235",
       "displayName": "Having a strong leader who does not have to bother with parliament and elections",
+      "group": "Political culture and political regimes",
+      "topic": "Political culture and political regimes",
+      "sourceQuestionLabel": "I'm going to describe various types of political systems and ask what you think about each as a way of governing this country. For each one, would you say it is a very good, fairly good, fairly bad or very bad way of governing this country? Having a strong leader who does not have to bother with parliament and elections",
+      "displayType": "ordered factor",
       "analysisType": "ordinal",
+      "ordered": true,
       "correlationEligible": true,
       "correlationRepresentation": "Ordered response categories represented by their WorldView order",
-      "topic": "Political culture and political regimes",
-      "validCountInFullProcessedData": 62110,
-      "missingCountInFullProcessedData": 3337,
+      "missingRule": "Negative WVS missing/non-response codes are converted to missing values before WorldView analyses.",
+      "interpretationNote": "Response categories are ordered. WorldView uses their ordered numerical positions for numerical analyses.",
+      "validCountInFullProcessedData": 91413,
+      "missingCountInFullProcessedData": 5807,
       "levels": [
         {
           "value": 1,
@@ -1460,7 +1625,7 @@
         },
         {
           "value": 3,
-          "label": "Fairly bad",
+          "label": "Fairly Bad",
           "displayOrder": 3
         },
         {
@@ -1468,12 +1633,17 @@
           "label": "Very bad",
           "displayOrder": 4
         }
-      ]
+      ],
+      "validRange": {
+        "minimum": 1,
+        "maximum": 4
+      }
     },
     {
       "id": "Q260",
       "displayName": "Sex",
       "group": "Demographics",
+      "topic": "Demographic and socioeconomic variables",
       "sourceQuestionLabel": "Sex",
       "displayType": "factor",
       "analysisType": "binary",
@@ -1494,13 +1664,16 @@
           "label": "Female"
         }
       ],
-      "validRange": null,
-      "topic": "Demographic and socioeconomic variables"
+      "validRange": {
+        "minimum": 0,
+        "maximum": 1
+      }
     },
     {
       "id": "Q262",
       "displayName": "Age",
       "group": "Demographics",
+      "topic": "Demographic and socioeconomic variables",
       "sourceQuestionLabel": "Age",
       "displayType": "integer",
       "analysisType": "integer",
@@ -1515,13 +1688,13 @@
       "validRange": {
         "minimum": 16,
         "maximum": 103
-      },
-      "topic": "Demographic and socioeconomic variables"
+      }
     },
     {
       "id": "Q263",
       "displayName": "Respondent immigrant",
       "group": "Demographics",
+      "topic": "Demographic and socioeconomic variables",
       "sourceQuestionLabel": "Respondent immigrant",
       "displayType": "factor",
       "analysisType": "binary",
@@ -1542,13 +1715,16 @@
           "label": "I am an immigrant to this country (born outside this country)"
         }
       ],
-      "validRange": null,
-      "topic": "Demographic and socioeconomic variables"
+      "validRange": {
+        "minimum": 0,
+        "maximum": 1
+      }
     },
     {
       "id": "Q275",
       "displayName": "Highest educational level: Respondent [ISCED 2011]",
       "group": "Demographics",
+      "topic": "Demographic and socioeconomic variables",
       "sourceQuestionLabel": "Highest educational level: Respondent [ISCED 2011]",
       "displayType": "ordered factor",
       "analysisType": "ordinal",
@@ -1597,13 +1773,16 @@
           "label": "Doctoral or equivalent (ISCED 8)"
         }
       ],
-      "validRange": null,
-      "topic": "Demographic and socioeconomic variables"
+      "validRange": {
+        "minimum": 1,
+        "maximum": 9
+      }
     },
     {
       "id": "Q288",
       "displayName": "Scale of incomes",
       "group": "Demographics",
+      "topic": "Demographic and socioeconomic variables",
       "sourceQuestionLabel": "Scale of incomes",
       "displayType": "ordered factor",
       "analysisType": "ordinal",
@@ -1656,13 +1835,16 @@
           "label": "Tenth step"
         }
       ],
-      "validRange": null,
-      "topic": "Demographic and socioeconomic variables"
+      "validRange": {
+        "minimum": 1,
+        "maximum": 10
+      }
     },
     {
       "id": "Q289",
       "displayName": "Religious denominations - major groups",
       "group": "Demographics",
+      "topic": "Demographic and socioeconomic variables",
       "sourceQuestionLabel": "Religious denominations - major groups",
       "displayType": "factor",
       "analysisType": "nominal",
@@ -1715,8 +1897,7 @@
           "label": "Other"
         }
       ],
-      "validRange": null,
-      "topic": "Demographic and socioeconomic variables"
+      "validRange": null
     }
   ]
 }

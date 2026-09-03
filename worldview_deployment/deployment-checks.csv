@@ -1,9 +1,6 @@
 "check","passed"
-"about_navigation_present",TRUE
-"about_page_present",TRUE
-"download_navigation_absent",TRUE
-"download_page_absent",TRUE
-"all_three_developers_credited",TRUE
-"obsolete_csv_links_absent",TRUE
-"required_runtime_files_present",TRUE
-"discontinued_csv_files_absent",TRUE
+"manifest_variable_count_matches_codebook",TRUE
+"manifest_variables_match_codebook",TRUE
+"browser_rows_match_manifest",TRUE
+"no_country_exceeds_configured_maximum",TRUE
+"worldview_ids_are_unique",TRUE

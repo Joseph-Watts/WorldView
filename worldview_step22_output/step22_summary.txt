@@ -1,5 +1,0 @@
-WorldView Step 22 chi-square fixtures
-Reference cases: 5
-Cell result rows: 50
-Validation checks passed: 7 of 7
-Fixture output: worldview_static_app/data/worldview-chi-square-fixtures-v1.0.0.json

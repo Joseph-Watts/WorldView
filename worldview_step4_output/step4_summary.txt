@@ -1,7 +1,0 @@
-WorldView Step 4 codebook build
-Codebook variables: 29
-Correlation-eligible variables: 28
-Correlation-ineligible variables: Q289
-Validation checks passed: 8 of 8
-JSON output: \\file/Usersj$/jwa349/Home/My Documents/GitHub/PSYC382_WVS7_Shiny/worldview_step3_output/public_data/worldview-codebook-v1.0.0.json
-CSV output: \\file/Usersj$/jwa349/Home/My Documents/GitHub/PSYC382_WVS7_Shiny/worldview_step3_output/public_data/worldview-codebook-v1.0.0.csv

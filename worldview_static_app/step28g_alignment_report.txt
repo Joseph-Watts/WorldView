@@ -1,6 +1,0 @@
-Source: WVS_Dataset/WVS7_Individual.rds
-Browser rows: 65447
-Source rows after country filter: 97220
-Browser countries: AND, ARG, ARM, AUS, BGD, BOL, BRA, CAN, CHL, CHN, COL, CYP, CZE, DEU, ECU, EGY, ETH, GBR, GRC, GTM, HKG, IDN, IND, IRN, IRQ, JOR, JPN, KAZ, KEN, KGZ, KOR, LBN, LBY, MAC, MAR, MDV, MEX, MMR, MNG, MYS, NGA, NIC, NIR, NLD, NZL, PAK, PER, PHL, PRI, ROU, RUS, SGP, SRB, SVK, THA, TJK, TUN, TUR, TWN, UKR, URY, USA, UZB, VEN, VNM, ZWE
-Best ordering: source_country_filter
-Mean shared-variable row agreement: 0.00000000

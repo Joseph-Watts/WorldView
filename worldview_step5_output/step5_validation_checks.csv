@@ -1,8 +1,0 @@
-"check","passed"
-"browser_data_has_65447_rows",TRUE
-"all_required_columns_present",TRUE
-"all_numeric_variables_are_numeric",TRUE
-"eight_correlation_cases_created",TRUE
-"five_summary_cases_created",TRUE
-"all_reference_correlations_succeeded",TRUE
-"fixture_json_created",TRUE

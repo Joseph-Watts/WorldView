@@ -1,9 +1,0 @@
-WorldView Step 3 revised sample and export
-Sampled rows: 65447
-Countries: 66
-Maximum participants in any country: 1000
-Export columns: 42
-Student variables: 39
-Validation checks passed: 10 of 10
-Sampling seed: 382
-Data version: WV7-WORLDVIEW-1.1.0

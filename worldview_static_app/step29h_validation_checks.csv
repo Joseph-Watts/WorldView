@@ -1,9 +1,0 @@
-"check","passed"
-"static_loader_removed",TRUE
-"dynamic_loader_helper_added",TRUE
-"search_control_used_as_anchor",TRUE
-"spinner_only_markup_added",TRUE
-"visible_loading_text_removed",TRUE
-"screen_reader_label_retained",TRUE
-"loader_still_removed_after_render",TRUE
-"spinner_centered_below_search",TRUE

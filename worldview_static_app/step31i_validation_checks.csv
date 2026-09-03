@@ -1,9 +1,0 @@
-"check","passed"
-"about_link_uses_data_route",TRUE
-"about_link_inside_primary_navigation",TRUE
-"about_link_is_not_button",TRUE
-"about_page_has_data_page",TRUE
-"about_route_is_allowed",TRUE
-"download_route_removed",TRUE
-"workaround_script_removed",TRUE
-"developer_name_encoding_fixed",TRUE

@@ -1,9 +1,0 @@
-"check","passed"
-"exactly_29_codebook_records",TRUE
-"variable_ids_match_approved_list",TRUE
-"all_display_names_present",TRUE
-"all_variables_have_analysis_type",TRUE
-"all_factor_variables_have_levels",TRUE
-"only_q289_is_correlation_ineligible",TRUE
-"json_file_created",TRUE
-"csv_file_created",TRUE

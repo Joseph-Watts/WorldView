@@ -1,4 +1,14 @@
-.Rproj.user
+# Operating-system and editor files
+.DS_Store
+Thumbs.db
+
+# R/RStudio session state
 .Rhistory
 .RData
 .Ruserdata
+.Rproj.user/
+.Renviron
+
+# Temporary build artefacts
+*.tmp
+*.bak

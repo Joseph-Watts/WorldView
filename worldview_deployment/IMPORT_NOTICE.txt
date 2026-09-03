@@ -1,0 +1,2 @@
+The exact current worldview_deployment folder is copied here by IMPORT_FROM_EXISTING.ps1.
+This preserves the latest student-facing app and runtime data without changing the old repository.

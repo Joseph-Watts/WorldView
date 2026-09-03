@@ -1,5 +1,0 @@
-WorldView Step 16 logistic fixtures
-Reference cases: 5
-Coefficient rows: 22
-Validation checks passed: 6 of 6
-Fixture output: worldview_static_app/data/worldview-logistic-fixtures-v1.0.0.json

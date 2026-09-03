@@ -1,7 +1,0 @@
-"check","passed"
-"exactly_29_student_variables",TRUE
-"all_required_columns_present",TRUE
-"country_names_all_resolved",TRUE
-"country_alpha_all_present",TRUE
-"no_negative_processed_numeric_values",TRUE
-"all_rows_retained_before_sampling",TRUE

@@ -1,45 +1,73 @@
-WorldView Models copy update
-============================
+WorldView analysis + codebook fixes
+===================================
 
-Copy the contents of this package into the ROOT of your current WorldView
-repository, preserving the folder structure, and replace the existing file.
+Copy this package into the ROOT of your current WorldView repository and
+replace the existing files when prompted.
 
 REPLACE:
+  worldview_deployment/assets/regression.js
+  worldview_deployment/assets/models.js
   worldview_deployment/assets/step28-enhancements.js
+  worldview_deployment/assets/branding.css
 
-Changes:
+FIX 1 — Linear regression
+-------------------------
+The linear-regression JavaScript is now isolated inside its own scope so it
+cannot collide with functions/constants from the other analysis scripts.
+Initialization also performs clearer checks and reports an explicit error
+instead of remaining indefinitely on "Loading regression data...".
 
-1. Home page feature card 03
+FIX 2 — Correlation method
+--------------------------
+The correlation selector now changes the actual calculation:
 
-Old:
-  Examine associations
-  Calculate flexible Pearson correlations between eligible processed variables.
+  Pearson  = ordinary Pearson product-moment correlation
+  Spearman = Pearson correlation of average ranks
+  Kendall  = Kendall tau-b, including ties
 
-New:
-  Model relationships and differences
-  Explore associations and group differences using correlations, linear and
-  logistic regression, ANOVA, and chi-square tests.
+The result heading, statistic label, explanatory text, CSV output, and
+approximate significance test now reflect the selected method.
 
-The link remains directed to the Models page and now reads:
-  Open models
+Pearson retains its Fisher-z approximate confidence interval.
+Spearman and Kendall omit a confidence interval rather than incorrectly
+displaying a Pearson interval. Their displayed p-values are explicitly
+large-sample approximations.
 
-2. Models page heading
+FIX 3 — Codebook expandability
+------------------------------
+The Codebook page now displays browsing instructions explaining that:
 
-Adds the introductory text:
+  - topic/category bars can be selected to expand/collapse their variables;
+  - individual variable rows can be selected to reveal details;
+  - a disclosure arrow indicates expandable sections.
 
-  Explore associations, predictions, and group differences using correlations,
-  linear and logistic regression, ANOVA, and chi-square tests.
+Visible disclosure arrows are also added to both category bars and variables.
 
-This restores introductory text beneath the Models heading and makes it
-consistent with the other main pages.
+TESTING
+-------
+In RStudio:
 
-Testing:
-1. In RStudio run:
-     servr::httd("worldview_deployment")
-2. Hard refresh with Ctrl+F5.
-3. Check Home feature card 03.
-4. Open Models and check the text beneath the Models heading.
-5. Confirm all Models sub-tabs still work.
-6. Run /validation.html.
+  servr::httd("worldview_deployment")
+
+Then hard-refresh with Ctrl+F5.
+
+Test:
+1. Models > Linear regression
+   - "Loading regression data..." should disappear.
+   - Outcome, predictors, and countries should populate.
+   - Fit a simple model and confirm results appear.
+
+2. Models > Correlation
+   - Run the same two variables using Pearson, Spearman, and Kendall.
+   - The result label should change (Pearson r / Spearman rho / Kendall tau-b).
+   - In most real datasets the reported coefficient should also change.
+   - Download CSV and confirm the "method" column matches the selection.
+
+3. Codebook
+   - Confirm the new instruction box appears.
+   - Confirm arrows appear on topic bars and variable rows.
+   - Confirm both levels expand/collapse.
+
+4. Open /validation.html and run the existing checks.
 
 No WVS data rebuild is required.

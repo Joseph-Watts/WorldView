@@ -47,3 +47,44 @@
     margin-bottom: 0.8rem;
   }
 }
+
+
+/* Codebook disclosure guidance */
+.codebook-expand-help {
+  margin: -0.4rem 0 1.2rem;
+}
+
+.codebook-topic-heading,
+.variable-card > summary {
+  position: relative;
+  padding-right: 2.5rem !important;
+}
+
+.codebook-topic-heading::after,
+.variable-card > summary::after {
+  content: "⌄";
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-56%);
+  font-size: 1.35rem;
+  line-height: 1;
+  color: var(--teal-dark);
+  font-weight: 800;
+  transition: transform 0.15s ease;
+}
+
+.codebook-topic-section[open] > .codebook-topic-heading::after,
+.variable-card[open] > summary::after {
+  transform: translateY(-42%) rotate(180deg);
+}
+
+/* Hide the browser's default marker so only one disclosure arrow is shown. */
+.codebook-topic-heading::-webkit-details-marker,
+.variable-card > summary::-webkit-details-marker {
+  display: none;
+}
+.codebook-topic-heading,
+.variable-card > summary {
+  list-style: none;
+}

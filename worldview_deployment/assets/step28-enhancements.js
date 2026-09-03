@@ -281,6 +281,23 @@ function worldviewUpdateModelsCopy(){
   }
 }
 
+
+function worldviewAddCodebookInstructions(){
+  const page=document.getElementById("page-codebook");
+  if(!page || page.querySelector(".codebook-expand-help"))return;
+
+  const heading=page.querySelector(".page-heading");
+  if(!heading)return;
+
+  const help=document.createElement("div");
+  help.className="notice subtle codebook-expand-help";
+  help.innerHTML=
+    "<strong>How to browse the codebook:</strong> " +
+    "Select a topic bar to expand or collapse the variables in that category. " +
+    "Then select an individual variable row to open its question, coding, response values, and interpretation details. " +
+    "The downward arrow indicates an expandable section.";
+  heading.insertAdjacentElement("afterend",help);
+}
 document.addEventListener("DOMContentLoaded",async()=>{
   worldviewLoadBrandingStyles();
   worldviewReplaceBrandMark();
@@ -288,6 +305,7 @@ document.addEventListener("DOMContentLoaded",async()=>{
   worldviewUpdateHeroHeading();
   worldviewRemoveModelsHeadingText();
   worldviewUpdateModelsCopy();
+  worldviewAddCodebookInstructions();
   worldviewUpdateDescribeCompareCard();
   worldviewUpdateDevelopers();
   worldviewSpaceCorrelationMethodHelp();

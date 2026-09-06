@@ -1,30 +1,68 @@
-WorldView World Map topic-grouping update
-========================================
+WorldView codebook simplification
+================================
 
-Copy the contents of this package into the ROOT of your current WorldView
-repository, preserving the folder structure, and replace the existing file.
+This migration makes processed numeric values the single authoritative coding
+shown in the Codebook and used by WorldView.
 
-REPLACE:
-  worldview_deployment/assets/step28-enhancements.js
+It DOES NOT change the underlying browser dataset, so existing model results
+and validation fixtures remain unchanged.
 
-Change
-------
-The World Map variable selector is now grouped under the same WorldView topic
-headings used by the other analysis pages.
+Canonical binary coding
+-----------------------
+Q165-Q168   0 = No; 1 = Yes
+Q260        0 = Female; 1 = Male
+Q263        0 = Immigrant to this country; 1 = Born in this country
 
-This update also makes variable grouping robust to controls that populate
-asynchronously after page load, which was why the World Map selector could
-remain as one flat list even when other pages were grouped correctly.
+Q263 is renamed to:
+  Respondent immigrant status
+
+This neutral label avoids implying that 1 must mean immigrant while preserving
+the existing numerical data.
+
+Codebook page
+-------------
+The expanded variable card is simplified to:
+- Question / description
+- Topic
+- Variable type
+- Processed values
+- Missing-data treatment
+
+The duplicated user-facing fields are removed:
+- Display type
+- Correlation use
+- Correlation coding
+- Valid/missing counts
+- Generic interpretation boilerplate
+
+Processed categorical values are shown as:
+  Value | Label
+
+The Value column is the actual processed value used by WorldView.
+
+Apply
+-----
+1. Extract this ZIP.
+2. Copy apply_codebook_simplification.R into the ROOT of your WorldView repo.
+3. In RStudio, with the repo as the working directory, run:
+
+   source("apply_codebook_simplification.R")
+
+4. Serve:
+   servr::httd("worldview_deployment")
+
+5. Hard refresh with Ctrl+F5.
+
+Files modified by the script
+----------------------------
+worldview_deployment/data/worldview-codebook-v1.0.0.json
+worldview_deployment/assets/app.js
+R/worldview_build.R
+
+No data rebuild is required.
 
 Testing
 -------
-1. Run:
-     servr::httd("worldview_deployment")
-2. Hard-refresh with Ctrl+F5.
-3. Open Visualisations > World map.
-4. Open the Variable dropdown and confirm variables are nested under topic
-   headings.
-5. Check Phylogeny and the other variable selectors remain grouped normally.
-6. Run /validation.html.
-
-No WVS data rebuild is required.
+Check Q165-Q168, Q260 and Q263 in the Codebook.
+Then check Summary, Visualisations and Models to confirm existing results are
+unchanged, and run /validation.html.

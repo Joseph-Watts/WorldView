@@ -73,13 +73,16 @@ function renderLevels(variable) {
     return "<p>Not specified</p>";
   }
 
-  return `<ol class="level-list">${variable.levels.map(level =>
-    `<li value="${escapeHtml(level.displayOrder)}">${escapeHtml(level.label)}</li>`
-  ).join("")}</ol>`;
+  return `<div class="table-wrap"><table class="results-table codebook-values-table">
+    <thead><tr><th>Value</th><th>Label</th></tr></thead>
+    <tbody>${variable.levels.map(level => `<tr>
+      <td>${escapeHtml(level.value ?? level.displayOrder ?? "")}</td>
+      <td>${escapeHtml(level.label)}</td>
+    </tr>`).join("")}</tbody>
+  </table></div>`;
 }
 
 function variableCard(variable) {
-  const eligible = variable.correlationEligible ? "Correlation eligible" : "Not correlation eligible";
   return `
     <details class="variable-card" id="${escapeHtml(variable.id)}">
       <summary>
@@ -88,20 +91,16 @@ function variableCard(variable) {
         <span class="variable-badge">${escapeHtml(variable.analysisType)}</span>
       </summary>
       <div class="variable-details">
+        <h3>Question / description</h3>
+        <p>${escapeHtml(variable.sourceQuestionLabel || variable.displayName)}</p>
         <dl class="detail-grid">
           <div><dt>Topic</dt><dd>${escapeHtml(variable.group)}</dd></div>
-          <div><dt>Display type</dt><dd>${escapeHtml(variable.displayType)}</dd></div>
-          <div><dt>Correlation use</dt><dd>${eligible}</dd></div>
-          <div><dt>Correlation coding</dt><dd>${escapeHtml(variable.correlationRepresentation)}</dd></div>
-          <div><dt>Valid in full processed data</dt><dd>${formatNumber(variable.validCountInFullProcessedData)}</dd></div>
-          <div><dt>Missing in full processed data</dt><dd>${formatNumber(variable.missingCountInFullProcessedData)}</dd></div>
+          <div><dt>Variable type</dt><dd>${escapeHtml(variable.analysisType)}</dd></div>
         </dl>
         <h3>Processed values</h3>
         ${renderLevels(variable)}
         <h3>Missing-data treatment</h3>
         <p>${escapeHtml(variable.missingRule)}</p>
-        <h3>Interpretation</h3>
-        <p>${escapeHtml(variable.interpretationNote)}</p>
       </div>
     </details>`;
 }

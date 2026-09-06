@@ -7,8 +7,8 @@
     "source": "World Values Survey Wave 7",
     "scope": "WorldView teaching subset containing 39 displayed variables and no more than 1000 participants per country.",
     "missingValues": "Negative source values are converted to missing values. The original WVS negative codes are not treated as substantive response categories.",
-    "categoricalValues": "Student-facing categories use the processed labels and ordering from the WorldView pipeline.",
-    "correlations": "Pearson correlations use pairwise complete observations and the documented numerical representations. Multi-category nominal variables are excluded."
+    "categoricalValues": "The processed values shown in the codebook are the values used throughout WorldView analyses and visualisations.",
+    "correlations": "Numerical analyses use the processed values shown for each variable. Multi-category nominal variables are excluded from numerical correlation."
   },
   "variables": [
     {
@@ -23,7 +23,7 @@
       "correlationEligible": true,
       "correlationRepresentation": "Ordered response categories represented by their WorldView order",
       "missingRule": "Negative WVS missing/non-response codes are converted to missing values before WorldView analyses.",
-      "interpretationNote": "Response categories are ordered. WorldView uses their ordered numerical positions for numerical analyses.",
+      "interpretationNote": "Analyses use the ordered processed values shown above.",
       "validCountInFullProcessedData": 96182,
       "missingCountInFullProcessedData": 1038,
       "levels": [
@@ -55,7 +55,7 @@
       "correlationEligible": true,
       "correlationRepresentation": "Ordered response categories represented by their WorldView order",
       "missingRule": "Negative WVS missing/non-response codes are converted to missing values before WorldView analyses.",
-      "interpretationNote": "Response categories are ordered. WorldView uses their ordered numerical positions for numerical analyses.",
+      "interpretationNote": "Analyses use the ordered processed values shown above.",
       "validCountInFullProcessedData": 96528,
       "missingCountInFullProcessedData": 692,
       "levels": [
@@ -87,7 +87,7 @@
       "correlationEligible": true,
       "correlationRepresentation": "Ordered response categories represented by their WorldView order",
       "missingRule": "Negative WVS missing/non-response codes are converted to missing values before WorldView analyses.",
-      "interpretationNote": "Response categories are ordered. WorldView uses their ordered numerical positions for numerical analyses.",
+      "interpretationNote": "Analyses use the ordered processed values shown above.",
       "validCountInFullProcessedData": 96667,
       "missingCountInFullProcessedData": 553,
       "levels": [
@@ -119,7 +119,7 @@
       "correlationEligible": true,
       "correlationRepresentation": "Ordered response categories represented by their WorldView order",
       "missingRule": "Negative WVS missing/non-response codes are converted to missing values before WorldView analyses.",
-      "interpretationNote": "Response categories are ordered. WorldView uses their ordered numerical positions for numerical analyses.",
+      "interpretationNote": "Analyses use the ordered processed values shown above.",
       "validCountInFullProcessedData": 96017,
       "missingCountInFullProcessedData": 1203,
       "levels": [
@@ -151,7 +151,7 @@
       "correlationEligible": true,
       "correlationRepresentation": "Ordered response categories represented by their WorldView order",
       "missingRule": "Negative WVS missing/non-response codes are converted to missing values before WorldView analyses.",
-      "interpretationNote": "Response categories are ordered. WorldView uses their ordered numerical positions for numerical analyses.",
+      "interpretationNote": "Analyses use the ordered processed values shown above.",
       "validCountInFullProcessedData": 96577,
       "missingCountInFullProcessedData": 643,
       "levels": [
@@ -183,7 +183,7 @@
       "correlationEligible": true,
       "correlationRepresentation": "Ordered response categories represented by their WorldView order",
       "missingRule": "Negative WVS missing/non-response codes are converted to missing values before WorldView analyses.",
-      "interpretationNote": "Response categories are ordered. WorldView uses their ordered numerical positions for numerical analyses.",
+      "interpretationNote": "Analyses use the ordered processed values shown above.",
       "validCountInFullProcessedData": 96104,
       "missingCountInFullProcessedData": 1116,
       "levels": [
@@ -215,7 +215,7 @@
       "correlationEligible": true,
       "correlationRepresentation": "Ordered response categories represented by their WorldView order",
       "missingRule": "Negative WVS missing/non-response codes are converted to missing values before WorldView analyses.",
-      "interpretationNote": "Response categories are ordered. WorldView uses their ordered numerical positions for numerical analyses.",
+      "interpretationNote": "Analyses use the ordered processed values shown above.",
       "validCountInFullProcessedData": 96089,
       "missingCountInFullProcessedData": 1131,
       "levels": [
@@ -247,7 +247,7 @@
       "correlationEligible": true,
       "correlationRepresentation": "Ordered response categories represented by their WorldView order",
       "missingRule": "Negative WVS missing/non-response codes are converted to missing values before WorldView analyses.",
-      "interpretationNote": "Response categories are ordered. WorldView uses their ordered numerical positions for numerical analyses.",
+      "interpretationNote": "Analyses use the ordered processed values shown above.",
       "validCountInFullProcessedData": 96109,
       "missingCountInFullProcessedData": 1111,
       "levels": [
@@ -279,7 +279,7 @@
       "correlationEligible": true,
       "correlationRepresentation": "Ordered response categories represented by their WorldView order",
       "missingRule": "Negative WVS missing/non-response codes are converted to missing values before WorldView analyses.",
-      "interpretationNote": "Response categories are ordered. WorldView uses their ordered numerical positions for numerical analyses.",
+      "interpretationNote": "Analyses use the ordered processed values shown above.",
       "validCountInFullProcessedData": 96096,
       "missingCountInFullProcessedData": 1124,
       "levels": [
@@ -309,19 +309,21 @@
       "analysisType": "binary",
       "ordered": false,
       "correlationEligible": true,
-      "correlationRepresentation": "No = 0; Yes = 1",
+      "correlationRepresentation": "0 = No; 1 = Yes",
       "missingRule": "Negative source values, including non-response and not-asked codes, are treated as missing. Missing rows are excluded only from the specific summary or correlation being calculated.",
-      "interpretationNote": "The two displayed categories are represented numerically for correlation analysis as documented in correlationRepresentation.",
+      "interpretationNote": "Analyses use the processed 0/1 values shown above.",
       "validCountInFullProcessedData": 92529,
       "missingCountInFullProcessedData": 4691,
       "levels": [
         {
-          "displayOrder": 1,
-          "label": "Yes"
+          "value": 0,
+          "label": "No",
+          "displayOrder": 0
         },
         {
-          "displayOrder": 2,
-          "label": "No"
+          "value": 1,
+          "label": "Yes",
+          "displayOrder": 1
         }
       ],
       "validRange": {
@@ -339,19 +341,21 @@
       "analysisType": "binary",
       "ordered": false,
       "correlationEligible": true,
-      "correlationRepresentation": "No = 0; Yes = 1",
+      "correlationRepresentation": "0 = No; 1 = Yes",
       "missingRule": "Negative source values, including non-response and not-asked codes, are treated as missing. Missing rows are excluded only from the specific summary or correlation being calculated.",
-      "interpretationNote": "The two displayed categories are represented numerically for correlation analysis as documented in correlationRepresentation.",
+      "interpretationNote": "Analyses use the processed 0/1 values shown above.",
       "validCountInFullProcessedData": 89625,
       "missingCountInFullProcessedData": 7595,
       "levels": [
         {
-          "displayOrder": 1,
-          "label": "Yes"
+          "value": 0,
+          "label": "No",
+          "displayOrder": 0
         },
         {
-          "displayOrder": 2,
-          "label": "No"
+          "value": 1,
+          "label": "Yes",
+          "displayOrder": 1
         }
       ],
       "validRange": {
@@ -369,19 +373,21 @@
       "analysisType": "binary",
       "ordered": false,
       "correlationEligible": true,
-      "correlationRepresentation": "No = 0; Yes = 1",
+      "correlationRepresentation": "0 = No; 1 = Yes",
       "missingRule": "Negative source values, including non-response and not-asked codes, are treated as missing. Missing rows are excluded only from the specific summary or correlation being calculated.",
-      "interpretationNote": "The two displayed categories are represented numerically for correlation analysis as documented in correlationRepresentation.",
+      "interpretationNote": "Analyses use the processed 0/1 values shown above.",
       "validCountInFullProcessedData": 90076,
       "missingCountInFullProcessedData": 7144,
       "levels": [
         {
-          "displayOrder": 1,
-          "label": "Yes"
+          "value": 0,
+          "label": "No",
+          "displayOrder": 0
         },
         {
-          "displayOrder": 2,
-          "label": "No"
+          "value": 1,
+          "label": "Yes",
+          "displayOrder": 1
         }
       ],
       "validRange": {
@@ -399,19 +405,21 @@
       "analysisType": "binary",
       "ordered": false,
       "correlationEligible": true,
-      "correlationRepresentation": "No = 0; Yes = 1",
+      "correlationRepresentation": "0 = No; 1 = Yes",
       "missingRule": "Negative source values, including non-response and not-asked codes, are treated as missing. Missing rows are excluded only from the specific summary or correlation being calculated.",
-      "interpretationNote": "The two displayed categories are represented numerically for correlation analysis as documented in correlationRepresentation.",
+      "interpretationNote": "Analyses use the processed 0/1 values shown above.",
       "validCountInFullProcessedData": 90249,
       "missingCountInFullProcessedData": 6971,
       "levels": [
         {
-          "displayOrder": 1,
-          "label": "Yes"
+          "value": 0,
+          "label": "No",
+          "displayOrder": 0
         },
         {
-          "displayOrder": 2,
-          "label": "No"
+          "value": 1,
+          "label": "Yes",
+          "displayOrder": 1
         }
       ],
       "validRange": {
@@ -431,7 +439,7 @@
       "correlationEligible": true,
       "correlationRepresentation": "Categories represented by their WorldView order, beginning at 1",
       "missingRule": "Negative source values, including non-response and not-asked codes, are treated as missing. Missing rows are excluded only from the specific summary or correlation being calculated.",
-      "interpretationNote": "Response categories are ordered. For summaries and correlations, WorldView uses their ordered numerical positions.",
+      "interpretationNote": "Analyses use the ordered processed values shown above.",
       "validCountInFullProcessedData": 95532,
       "missingCountInFullProcessedData": 1688,
       "levels": [
@@ -493,7 +501,7 @@
       "correlationEligible": true,
       "correlationRepresentation": "Categories represented by their WorldView order, beginning at 1",
       "missingRule": "Negative source values, including non-response and not-asked codes, are treated as missing. Missing rows are excluded only from the specific summary or correlation being calculated.",
-      "interpretationNote": "Response categories are ordered. For summaries and correlations, WorldView uses their ordered numerical positions.",
+      "interpretationNote": "Analyses use the ordered processed values shown above.",
       "validCountInFullProcessedData": 93681,
       "missingCountInFullProcessedData": 3539,
       "levels": [
@@ -555,7 +563,7 @@
       "correlationEligible": true,
       "correlationRepresentation": "Categories represented by their WorldView order, beginning at 1",
       "missingRule": "Negative source values, including non-response and not-asked codes, are treated as missing. Missing rows are excluded only from the specific summary or correlation being calculated.",
-      "interpretationNote": "Response categories are ordered. For summaries and correlations, WorldView uses their ordered numerical positions.",
+      "interpretationNote": "Analyses use the ordered processed values shown above.",
       "validCountInFullProcessedData": 96315,
       "missingCountInFullProcessedData": 905,
       "levels": [
@@ -617,7 +625,7 @@
       "correlationEligible": true,
       "correlationRepresentation": "Categories represented by their WorldView order, beginning at 1",
       "missingRule": "Negative source values, including non-response and not-asked codes, are treated as missing. Missing rows are excluded only from the specific summary or correlation being calculated.",
-      "interpretationNote": "Response categories are ordered. For summaries and correlations, WorldView uses their ordered numerical positions.",
+      "interpretationNote": "Analyses use the ordered processed values shown above.",
       "validCountInFullProcessedData": 95941,
       "missingCountInFullProcessedData": 1279,
       "levels": [
@@ -679,7 +687,7 @@
       "correlationEligible": true,
       "correlationRepresentation": "Categories represented by their WorldView order, beginning at 1",
       "missingRule": "Negative source values, including non-response and not-asked codes, are treated as missing. Missing rows are excluded only from the specific summary or correlation being calculated.",
-      "interpretationNote": "Response categories are ordered. For summaries and correlations, WorldView uses their ordered numerical positions.",
+      "interpretationNote": "Analyses use the ordered processed values shown above.",
       "validCountInFullProcessedData": 96026,
       "missingCountInFullProcessedData": 1194,
       "levels": [
@@ -741,7 +749,7 @@
       "correlationEligible": true,
       "correlationRepresentation": "Categories represented by their WorldView order, beginning at 1",
       "missingRule": "Negative source values, including non-response and not-asked codes, are treated as missing. Missing rows are excluded only from the specific summary or correlation being calculated.",
-      "interpretationNote": "Response categories are ordered. For summaries and correlations, WorldView uses their ordered numerical positions.",
+      "interpretationNote": "Analyses use the ordered processed values shown above.",
       "validCountInFullProcessedData": 89705,
       "missingCountInFullProcessedData": 7515,
       "levels": [
@@ -803,7 +811,7 @@
       "correlationEligible": true,
       "correlationRepresentation": "Categories represented by their WorldView order, beginning at 1",
       "missingRule": "Negative source values, including non-response and not-asked codes, are treated as missing. Missing rows are excluded only from the specific summary or correlation being calculated.",
-      "interpretationNote": "Response categories are ordered. For summaries and correlations, WorldView uses their ordered numerical positions.",
+      "interpretationNote": "Analyses use the ordered processed values shown above.",
       "validCountInFullProcessedData": 88469,
       "missingCountInFullProcessedData": 8751,
       "levels": [
@@ -865,7 +873,7 @@
       "correlationEligible": true,
       "correlationRepresentation": "Categories represented by their WorldView order, beginning at 1",
       "missingRule": "Negative source values, including non-response and not-asked codes, are treated as missing. Missing rows are excluded only from the specific summary or correlation being calculated.",
-      "interpretationNote": "Response categories are ordered. For summaries and correlations, WorldView uses their ordered numerical positions.",
+      "interpretationNote": "Analyses use the ordered processed values shown above.",
       "validCountInFullProcessedData": 94945,
       "missingCountInFullProcessedData": 2275,
       "levels": [
@@ -927,7 +935,7 @@
       "correlationEligible": true,
       "correlationRepresentation": "Categories represented by their WorldView order, beginning at 1",
       "missingRule": "Negative source values, including non-response and not-asked codes, are treated as missing. Missing rows are excluded only from the specific summary or correlation being calculated.",
-      "interpretationNote": "Response categories are ordered. For summaries and correlations, WorldView uses their ordered numerical positions.",
+      "interpretationNote": "Analyses use the ordered processed values shown above.",
       "validCountInFullProcessedData": 95291,
       "missingCountInFullProcessedData": 1929,
       "levels": [
@@ -989,7 +997,7 @@
       "correlationEligible": true,
       "correlationRepresentation": "Categories represented by their WorldView order, beginning at 1",
       "missingRule": "Negative source values, including non-response and not-asked codes, are treated as missing. Missing rows are excluded only from the specific summary or correlation being calculated.",
-      "interpretationNote": "Response categories are ordered. For summaries and correlations, WorldView uses their ordered numerical positions.",
+      "interpretationNote": "Analyses use the ordered processed values shown above.",
       "validCountInFullProcessedData": 92406,
       "missingCountInFullProcessedData": 4814,
       "levels": [
@@ -1051,7 +1059,7 @@
       "correlationEligible": true,
       "correlationRepresentation": "Categories represented by their WorldView order, beginning at 1",
       "missingRule": "Negative source values, including non-response and not-asked codes, are treated as missing. Missing rows are excluded only from the specific summary or correlation being calculated.",
-      "interpretationNote": "Response categories are ordered. For summaries and correlations, WorldView uses their ordered numerical positions.",
+      "interpretationNote": "Analyses use the ordered processed values shown above.",
       "validCountInFullProcessedData": 94854,
       "missingCountInFullProcessedData": 2366,
       "levels": [
@@ -1113,7 +1121,7 @@
       "correlationEligible": true,
       "correlationRepresentation": "Categories represented by their WorldView order, beginning at 1",
       "missingRule": "Negative source values, including non-response and not-asked codes, are treated as missing. Missing rows are excluded only from the specific summary or correlation being calculated.",
-      "interpretationNote": "Response categories are ordered. For summaries and correlations, WorldView uses their ordered numerical positions.",
+      "interpretationNote": "Analyses use the ordered processed values shown above.",
       "validCountInFullProcessedData": 93246,
       "missingCountInFullProcessedData": 3974,
       "levels": [
@@ -1175,7 +1183,7 @@
       "correlationEligible": true,
       "correlationRepresentation": "Categories represented by their WorldView order, beginning at 1",
       "missingRule": "Negative source values, including non-response and not-asked codes, are treated as missing. Missing rows are excluded only from the specific summary or correlation being calculated.",
-      "interpretationNote": "Response categories are ordered. For summaries and correlations, WorldView uses their ordered numerical positions.",
+      "interpretationNote": "Analyses use the ordered processed values shown above.",
       "validCountInFullProcessedData": 93144,
       "missingCountInFullProcessedData": 4076,
       "levels": [
@@ -1237,7 +1245,7 @@
       "correlationEligible": true,
       "correlationRepresentation": "Categories represented by their WorldView order, beginning at 1",
       "missingRule": "Negative source values, including non-response and not-asked codes, are treated as missing. Missing rows are excluded only from the specific summary or correlation being calculated.",
-      "interpretationNote": "Response categories are ordered. For summaries and correlations, WorldView uses their ordered numerical positions.",
+      "interpretationNote": "Analyses use the ordered processed values shown above.",
       "validCountInFullProcessedData": 96186,
       "missingCountInFullProcessedData": 1034,
       "levels": [
@@ -1299,7 +1307,7 @@
       "correlationEligible": true,
       "correlationRepresentation": "Categories represented by their WorldView order, beginning at 1",
       "missingRule": "Negative source values, including non-response and not-asked codes, are treated as missing. Missing rows are excluded only from the specific summary or correlation being calculated.",
-      "interpretationNote": "Response categories are ordered. For summaries and correlations, WorldView uses their ordered numerical positions.",
+      "interpretationNote": "Analyses use the ordered processed values shown above.",
       "validCountInFullProcessedData": 96198,
       "missingCountInFullProcessedData": 1022,
       "levels": [
@@ -1361,7 +1369,7 @@
       "correlationEligible": true,
       "correlationRepresentation": "Categories represented by their WorldView order, beginning at 1",
       "missingRule": "Negative source values, including non-response and not-asked codes, are treated as missing. Missing rows are excluded only from the specific summary or correlation being calculated.",
-      "interpretationNote": "Response categories are ordered. For summaries and correlations, WorldView uses their ordered numerical positions.",
+      "interpretationNote": "Analyses use the ordered processed values shown above.",
       "validCountInFullProcessedData": 92697,
       "missingCountInFullProcessedData": 4523,
       "levels": [
@@ -1423,7 +1431,7 @@
       "correlationEligible": true,
       "correlationRepresentation": "Categories represented by their WorldView order, beginning at 1",
       "missingRule": "Negative source values, including non-response and not-asked codes, are treated as missing. Missing rows are excluded only from the specific summary or correlation being calculated.",
-      "interpretationNote": "Response categories are ordered. For summaries and correlations, WorldView uses their ordered numerical positions.",
+      "interpretationNote": "Analyses use the ordered processed values shown above.",
       "validCountInFullProcessedData": 89470,
       "missingCountInFullProcessedData": 7750,
       "levels": [
@@ -1485,7 +1493,7 @@
       "correlationEligible": true,
       "correlationRepresentation": "Categories represented by their WorldView order, beginning at 1",
       "missingRule": "Negative source values, including non-response and not-asked codes, are treated as missing. Missing rows are excluded only from the specific summary or correlation being calculated.",
-      "interpretationNote": "Response categories are ordered. For summaries and correlations, WorldView uses their ordered numerical positions.",
+      "interpretationNote": "Analyses use the ordered processed values shown above.",
       "validCountInFullProcessedData": 92427,
       "missingCountInFullProcessedData": 4793,
       "levels": [
@@ -1547,7 +1555,7 @@
       "correlationEligible": true,
       "correlationRepresentation": "Categories represented by their WorldView order, beginning at 1",
       "missingRule": "Negative source values, including non-response and not-asked codes, are treated as missing. Missing rows are excluded only from the specific summary or correlation being calculated.",
-      "interpretationNote": "Response categories are ordered. For summaries and correlations, WorldView uses their ordered numerical positions.",
+      "interpretationNote": "Analyses use the ordered processed values shown above.",
       "validCountInFullProcessedData": 94751,
       "missingCountInFullProcessedData": 2469,
       "levels": [
@@ -1609,7 +1617,7 @@
       "correlationEligible": true,
       "correlationRepresentation": "Ordered response categories represented by their WorldView order",
       "missingRule": "Negative WVS missing/non-response codes are converted to missing values before WorldView analyses.",
-      "interpretationNote": "Response categories are ordered. WorldView uses their ordered numerical positions for numerical analyses.",
+      "interpretationNote": "Analyses use the ordered processed values shown above.",
       "validCountInFullProcessedData": 91413,
       "missingCountInFullProcessedData": 5807,
       "levels": [
@@ -1649,19 +1657,21 @@
       "analysisType": "binary",
       "ordered": false,
       "correlationEligible": true,
-      "correlationRepresentation": "Female = 0; Male = 1",
+      "correlationRepresentation": "0 = Female; 1 = Male",
       "missingRule": "Negative source values, including non-response and not-asked codes, are treated as missing. Missing rows are excluded only from the specific summary or correlation being calculated.",
-      "interpretationNote": "The two displayed categories are represented numerically for correlation analysis as documented in correlationRepresentation.",
+      "interpretationNote": "Analyses use the processed 0/1 values shown above.",
       "validCountInFullProcessedData": 97125,
       "missingCountInFullProcessedData": 95,
       "levels": [
         {
-          "displayOrder": 1,
-          "label": "Male"
+          "value": 0,
+          "label": "Female",
+          "displayOrder": 0
         },
         {
-          "displayOrder": 2,
-          "label": "Female"
+          "value": 1,
+          "label": "Male",
+          "displayOrder": 1
         }
       ],
       "validRange": {
@@ -1681,7 +1691,7 @@
       "correlationEligible": true,
       "correlationRepresentation": "Processed integer value",
       "missingRule": "Negative source values, including non-response and not-asked codes, are treated as missing. Missing rows are excluded only from the specific summary or correlation being calculated.",
-      "interpretationNote": "The processed integer value is used directly in analyses.",
+      "interpretationNote": "Analyses use the processed integer value directly.",
       "validCountInFullProcessedData": 96709,
       "missingCountInFullProcessedData": 511,
       "levels": [],
@@ -1692,7 +1702,7 @@
     },
     {
       "id": "Q263",
-      "displayName": "Respondent immigrant",
+      "displayName": "Respondent immigrant status",
       "group": "Demographics",
       "topic": "Demographic and socioeconomic variables",
       "sourceQuestionLabel": "Respondent immigrant",
@@ -1700,19 +1710,21 @@
       "analysisType": "binary",
       "ordered": false,
       "correlationEligible": true,
-      "correlationRepresentation": "Immigrant = 0; born in this country = 1",
+      "correlationRepresentation": "0 = Immigrant to this country; 1 = Born in this country",
       "missingRule": "Negative source values, including non-response and not-asked codes, are treated as missing. Missing rows are excluded only from the specific summary or correlation being calculated.",
-      "interpretationNote": "The two displayed categories are represented numerically for correlation analysis as documented in correlationRepresentation.",
+      "interpretationNote": "Analyses use the processed 0/1 values shown above.",
       "validCountInFullProcessedData": 96836,
       "missingCountInFullProcessedData": 384,
       "levels": [
         {
-          "displayOrder": 1,
-          "label": "I am born in this country"
+          "value": 0,
+          "label": "Immigrant to this country (born outside this country)",
+          "displayOrder": 0
         },
         {
-          "displayOrder": 2,
-          "label": "I am an immigrant to this country (born outside this country)"
+          "value": 1,
+          "label": "Born in this country",
+          "displayOrder": 1
         }
       ],
       "validRange": {
@@ -1732,7 +1744,7 @@
       "correlationEligible": true,
       "correlationRepresentation": "Categories represented by their WorldView order, beginning at 1",
       "missingRule": "Negative source values, including non-response and not-asked codes, are treated as missing. Missing rows are excluded only from the specific summary or correlation being calculated.",
-      "interpretationNote": "Response categories are ordered. For summaries and correlations, WorldView uses their ordered numerical positions.",
+      "interpretationNote": "Analyses use the ordered processed values shown above.",
       "validCountInFullProcessedData": 96149,
       "missingCountInFullProcessedData": 1071,
       "levels": [
@@ -1790,7 +1802,7 @@
       "correlationEligible": true,
       "correlationRepresentation": "Categories represented by their WorldView order, beginning at 1",
       "missingRule": "Negative source values, including non-response and not-asked codes, are treated as missing. Missing rows are excluded only from the specific summary or correlation being calculated.",
-      "interpretationNote": "Response categories are ordered. For summaries and correlations, WorldView uses their ordered numerical positions.",
+      "interpretationNote": "Analyses use the ordered processed values shown above.",
       "validCountInFullProcessedData": 94259,
       "missingCountInFullProcessedData": 2961,
       "levels": [

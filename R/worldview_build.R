@@ -296,7 +296,8 @@ wv_make_record <- function(var_id, row, raw_value, base_value, recoded_value, br
     wv_source_label(raw_value),
     var_id
   )
-  levels <- template_record$levels %||% wv_level_records(
+  if (identical(var_id, "Q263")) display_name <- "Respondent immigrant status"
+  generated_levels <- wv_level_records(
     base_value,
     recoded_value,
     display_type,
@@ -304,6 +305,8 @@ wv_make_record <- function(var_id, row, raw_value, base_value, recoded_value, br
     row[["R_recode"]],
     var_id
   )
+  # Numeric processed values are the source of truth for category ordering.
+  levels <- if (length(generated_levels)) generated_levels else template_record$levels %||% list()
 
   list(
     id = var_id,

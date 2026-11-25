@@ -309,19 +309,23 @@
       "analysisType": "binary",
       "ordered": false,
       "correlationEligible": true,
-      "correlationRepresentation": "No = 0; Yes = 1",
+      "correlationRepresentation": "Yes = 1; No = 0",
       "missingRule": "Negative source values, including non-response and not-asked codes, are treated as missing. Missing rows are excluded only from the specific summary or correlation being calculated.",
-      "interpretationNote": "The two displayed categories are represented numerically for correlation analysis as documented in correlationRepresentation.",
+      "interpretationNote": "The mean is the proportion of valid responses with WorldView value 1.",
       "validCountInFullProcessedData": 92529,
       "missingCountInFullProcessedData": 4691,
       "levels": [
         {
-          "displayOrder": 1,
-          "label": "Yes"
+          "label": "Yes",
+          "value": 1,
+          "wvsCode": 1,
+          "displayOrder": 1
         },
         {
-          "displayOrder": 2,
-          "label": "No"
+          "label": "No",
+          "value": 0,
+          "wvsCode": 2,
+          "displayOrder": 2
         }
       ],
       "validRange": {
@@ -339,19 +343,23 @@
       "analysisType": "binary",
       "ordered": false,
       "correlationEligible": true,
-      "correlationRepresentation": "No = 0; Yes = 1",
+      "correlationRepresentation": "Yes = 1; No = 0",
       "missingRule": "Negative source values, including non-response and not-asked codes, are treated as missing. Missing rows are excluded only from the specific summary or correlation being calculated.",
-      "interpretationNote": "The two displayed categories are represented numerically for correlation analysis as documented in correlationRepresentation.",
+      "interpretationNote": "The mean is the proportion of valid responses with WorldView value 1.",
       "validCountInFullProcessedData": 89625,
       "missingCountInFullProcessedData": 7595,
       "levels": [
         {
-          "displayOrder": 1,
-          "label": "Yes"
+          "label": "Yes",
+          "value": 1,
+          "wvsCode": 1,
+          "displayOrder": 1
         },
         {
-          "displayOrder": 2,
-          "label": "No"
+          "label": "No",
+          "value": 0,
+          "wvsCode": 2,
+          "displayOrder": 2
         }
       ],
       "validRange": {
@@ -369,19 +377,23 @@
       "analysisType": "binary",
       "ordered": false,
       "correlationEligible": true,
-      "correlationRepresentation": "No = 0; Yes = 1",
+      "correlationRepresentation": "Yes = 1; No = 0",
       "missingRule": "Negative source values, including non-response and not-asked codes, are treated as missing. Missing rows are excluded only from the specific summary or correlation being calculated.",
-      "interpretationNote": "The two displayed categories are represented numerically for correlation analysis as documented in correlationRepresentation.",
+      "interpretationNote": "The mean is the proportion of valid responses with WorldView value 1.",
       "validCountInFullProcessedData": 90076,
       "missingCountInFullProcessedData": 7144,
       "levels": [
         {
-          "displayOrder": 1,
-          "label": "Yes"
+          "label": "Yes",
+          "value": 1,
+          "wvsCode": 1,
+          "displayOrder": 1
         },
         {
-          "displayOrder": 2,
-          "label": "No"
+          "label": "No",
+          "value": 0,
+          "wvsCode": 2,
+          "displayOrder": 2
         }
       ],
       "validRange": {
@@ -399,19 +411,23 @@
       "analysisType": "binary",
       "ordered": false,
       "correlationEligible": true,
-      "correlationRepresentation": "No = 0; Yes = 1",
+      "correlationRepresentation": "Yes = 1; No = 0",
       "missingRule": "Negative source values, including non-response and not-asked codes, are treated as missing. Missing rows are excluded only from the specific summary or correlation being calculated.",
-      "interpretationNote": "The two displayed categories are represented numerically for correlation analysis as documented in correlationRepresentation.",
+      "interpretationNote": "The mean is the proportion of valid responses with WorldView value 1.",
       "validCountInFullProcessedData": 90249,
       "missingCountInFullProcessedData": 6971,
       "levels": [
         {
-          "displayOrder": 1,
-          "label": "Yes"
+          "label": "Yes",
+          "value": 1,
+          "wvsCode": 1,
+          "displayOrder": 1
         },
         {
-          "displayOrder": 2,
-          "label": "No"
+          "label": "No",
+          "value": 0,
+          "wvsCode": 2,
+          "displayOrder": 2
         }
       ],
       "validRange": {
@@ -1649,19 +1665,23 @@
       "analysisType": "binary",
       "ordered": false,
       "correlationEligible": true,
-      "correlationRepresentation": "Female = 0; Male = 1",
+      "correlationRepresentation": "Male = 1; Female = 0",
       "missingRule": "Negative source values, including non-response and not-asked codes, are treated as missing. Missing rows are excluded only from the specific summary or correlation being calculated.",
-      "interpretationNote": "The two displayed categories are represented numerically for correlation analysis as documented in correlationRepresentation.",
+      "interpretationNote": "The mean is the proportion of valid responses with WorldView value 1.",
       "validCountInFullProcessedData": 97125,
       "missingCountInFullProcessedData": 95,
       "levels": [
         {
-          "displayOrder": 1,
-          "label": "Male"
+          "label": "Male",
+          "value": 1,
+          "wvsCode": 1,
+          "displayOrder": 1
         },
         {
-          "displayOrder": 2,
-          "label": "Female"
+          "label": "Female",
+          "value": 0,
+          "wvsCode": 2,
+          "displayOrder": 2
         }
       ],
       "validRange": {
@@ -1700,19 +1720,23 @@
       "analysisType": "binary",
       "ordered": false,
       "correlationEligible": true,
-      "correlationRepresentation": "Immigrant = 0; born in this country = 1",
+      "correlationRepresentation": "I am born in this country = 1; I am an immigrant to this country (born outside this country) = 0",
       "missingRule": "Negative source values, including non-response and not-asked codes, are treated as missing. Missing rows are excluded only from the specific summary or correlation being calculated.",
-      "interpretationNote": "The two displayed categories are represented numerically for correlation analysis as documented in correlationRepresentation.",
+      "interpretationNote": "The mean is the proportion of valid responses with WorldView value 1.",
       "validCountInFullProcessedData": 96836,
       "missingCountInFullProcessedData": 384,
       "levels": [
         {
-          "displayOrder": 1,
-          "label": "I am born in this country"
+          "label": "I am born in this country",
+          "value": 1,
+          "wvsCode": 1,
+          "displayOrder": 1
         },
         {
-          "displayOrder": 2,
-          "label": "I am an immigrant to this country (born outside this country)"
+          "label": "I am an immigrant to this country (born outside this country)",
+          "value": 0,
+          "wvsCode": 2,
+          "displayOrder": 2
         }
       ],
       "validRange": {

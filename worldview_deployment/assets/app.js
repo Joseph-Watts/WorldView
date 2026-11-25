@@ -65,6 +65,32 @@ function variableSearchText(variable) {
   ].join(" ").toLowerCase();
 }
 
+function responseLabel(variable, value) {
+  if (value == null || value === "") return "Missing";
+  if (variable.analysisType === "binary") {
+    const matches = variable.levels.filter(level =>
+      level.value != null && String(level.value) === String(value));
+    return matches.map(level => level.label).join(" / ") || String(value);
+  }
+  if (variable.analysisType === "ordinal") {
+    const match = variable.levels?.find(level => String(level.displayOrder) === String(value));
+    if (match) return match.label;
+  }
+  return String(value);
+}
+
+function responseCodingTable(variable) {
+  const rows = variable.levels.map(level => `
+    <tr><th scope="row">${escapeHtml(level.label)}</th>
+      <td>${escapeHtml(level.value ?? "Missing")}</td><td>${escapeHtml(level.wvsCode)}</td></tr>`);
+  return `<h3>Response coding</h3>
+    <div class="table-wrap"><table class="results-table" aria-label="Response coding for ${escapeHtml(variable.id)}">
+      <thead><tr><th scope="col">Response</th><th scope="col">Value used in WorldView</th>
+        <th scope="col">Original WVS code</th></tr></thead>
+      <tbody>${rows.join("")}</tbody>
+    </table></div>`;
+}
+
 function renderLevels(variable) {
   if (!Array.isArray(variable.levels) || variable.levels.length === 0) {
     if (variable.validRange) {
@@ -92,12 +118,11 @@ function variableCard(variable) {
           <div><dt>Topic</dt><dd>${escapeHtml(variable.group)}</dd></div>
           <div><dt>Display type</dt><dd>${escapeHtml(variable.displayType)}</dd></div>
           <div><dt>Correlation use</dt><dd>${eligible}</dd></div>
-          <div><dt>Correlation coding</dt><dd>${escapeHtml(variable.correlationRepresentation)}</dd></div>
+          ${variable.analysisType === "binary" ? "" : `<div><dt>Correlation coding</dt><dd>${escapeHtml(variable.correlationRepresentation)}</dd></div>`}
           <div><dt>Valid in full processed data</dt><dd>${formatNumber(variable.validCountInFullProcessedData)}</dd></div>
           <div><dt>Missing in full processed data</dt><dd>${formatNumber(variable.missingCountInFullProcessedData)}</dd></div>
         </dl>
-        <h3>Processed values</h3>
-        ${renderLevels(variable)}
+        ${variable.analysisType === "binary" ? responseCodingTable(variable) : `<h3>Processed values</h3>${renderLevels(variable)}`}
         <h3>Missing-data treatment</h3>
         <p>${escapeHtml(variable.missingRule)}</p>
         <h3>Interpretation</h3>

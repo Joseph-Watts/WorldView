@@ -269,6 +269,22 @@ wv_level_records <- function(base_value, recoded_value, display_type, analysis_t
   })
 }
 
+wv_binary_levels <- function(raw_value, base_value, row, var_id) {
+  source_codes <- attr(raw_value, "labels", exact = TRUE)
+  source_codes <- source_codes[!is.na(source_codes) & source_codes >= 0]
+  if (!length(source_codes)) stop("Missing WVS response labels for ", var_id, call. = FALSE)
+  responses <- factor(names(source_codes), levels = levels(base_value), ordered = is.ordered(base_value))
+  recoded <- wv_apply_recode(responses, row$R_recode[[1]], var_id)
+  values <- wv_browser_value(responses, recoded, row$Variable_Display_Type[[1]], var_id)
+  if (!all(is.na(values) | values %in% c(0, 1))) {
+    stop("Binary response codes must be 0 or 1 for ", var_id, call. = FALSE)
+  }
+  lapply(seq_along(source_codes), function(i) {
+    list(label = names(source_codes)[[i]], value = unname(values[[i]]),
+         wvsCode = unname(source_codes[[i]]), displayOrder = i)
+  })
+}
+
 wv_valid_range <- function(x) {
   if (!is.numeric(x) && !is.integer(x)) return(NULL)
   values <- x[is.finite(x)]
@@ -296,14 +312,24 @@ wv_make_record <- function(var_id, row, raw_value, base_value, recoded_value, br
     wv_source_label(raw_value),
     var_id
   )
-  levels <- template_record$levels %||% wv_level_records(
-    base_value,
-    recoded_value,
-    display_type,
-    analysis_type,
-    row[["R_recode"]],
-    var_id
-  )
+  representation <- template_record$correlationRepresentation %||% wv_default_representation(analysis_type)
+  interpretation <- template_record$interpretationNote %||% wv_default_interpretation(analysis_type)
+  if (identical(analysis_type, "binary")) {
+    levels <- wv_binary_levels(raw_value, base_value, row, var_id)
+    representation <- paste(vapply(levels, function(level) {
+      paste(level$label, "=", if (is.na(level$value)) "Missing" else level$value)
+    }, character(1)), collapse = "; ")
+    interpretation <- "The mean is the proportion of valid responses with WorldView value 1."
+  } else {
+    levels <- template_record$levels %||% wv_level_records(
+      base_value,
+      recoded_value,
+      display_type,
+      analysis_type,
+      row[["R_recode"]],
+      var_id
+    )
+  }
 
   list(
     id = var_id,
@@ -315,9 +341,9 @@ wv_make_record <- function(var_id, row, raw_value, base_value, recoded_value, br
     analysisType = analysis_type,
     ordered = template_record$ordered %||% identical(display_type, "factor_ordered"),
     correlationEligible = template_record$correlationEligible %||% !identical(analysis_type, "nominal"),
-    correlationRepresentation = template_record$correlationRepresentation %||% wv_default_representation(analysis_type),
+    correlationRepresentation = representation,
     missingRule = template_record$missingRule %||% "Negative WVS missing/non-response codes are converted to missing values before WorldView analyses.",
-    interpretationNote = template_record$interpretationNote %||% wv_default_interpretation(analysis_type),
+    interpretationNote = interpretation,
     validCountInFullProcessedData = sum(!is.na(browser_value) & browser_value != ""),
     missingCountInFullProcessedData = sum(is.na(browser_value) | browser_value == ""),
     levels = levels,
@@ -349,6 +375,75 @@ wv_write_gz_json <- function(data, path) {
   con <- gzfile(path, open = "wt", encoding = "UTF-8")
   on.exit(close(con), add = TRUE)
   jsonlite::write_json(data, con, dataframe = "columns", na = "null", auto_unbox = TRUE, digits = NA)
+}
+
+# Compute references from the actual teaching sample, including one model of each
+# applicable type. The fixed release fixtures are maintained separately.
+wv_sample_reference <- function(sampled, records) {
+  ids <- vapply(records, function(record) record$id, character(1))
+  summaries <- lapply(ids, function(id) {
+    x <- sampled[[id]]
+    valid <- x[!is.na(x) & x != ""]
+    list(variable = id, valid = length(valid),
+         mean = if (is.numeric(valid) && length(valid)) mean(valid) else NULL)
+  })
+  models <- list()
+  # Use one country to keep R's pairwise Kendall reference inexpensive.
+  country <- if ("KEN" %in% sampled$B_COUNTRY_ALPHA) "KEN" else sampled$B_COUNTRY_ALPHA[[1]]
+  part <- sampled[sampled$B_COUNTRY_ALPHA == country, , drop = FALSE]
+  numeric_ids <- ids[vapply(part[ids], function(x) is.numeric(x) && length(unique(na.omit(x))) > 1L, logical(1))]
+  pair <- head(unique(c(intersect(c("Q165", "Q167"), numeric_ids), numeric_ids)), 2)
+  if (length(pair) == 2L) {
+    both <- na.omit(part[pair])
+    x <- both[[1]]
+    y <- both[[2]]
+    if (length(x) >= 10 && length(unique(x)) > 1L && length(unique(y)) > 1L) {
+      kendall <- cor.test(x, y, method = "kendall", exact = FALSE, continuity = FALSE)
+      models$correlation <- list(variable1 = pair[1], variable2 = pair[2], countries = country,
+                                 n = length(x), pearson = cor(x, y),
+                                 tau = unname(kendall$estimate), p = kendall$p.value)
+      models$regression <- list(outcome = pair[2], predictors = as.list(pair[1]), countries = country,
+                                slope = unname(coef(lm(y ~ x))[2]))
+    }
+  }
+  binary_ids <- intersect(ids[vapply(records, function(r) r$analysisType == "binary", logical(1))], numeric_ids)
+  if (length(binary_ids)) {
+    outcome <- binary_ids[[1]]
+    predictors <- setdiff(numeric_ids, outcome)
+    if (length(predictors)) {
+      predictor <- predictors[[1]]
+      both <- na.omit(part[c(outcome, predictor)])
+      if (nrow(both) >= 20 && length(unique(both[[1]])) == 2 && length(unique(both[[2]])) > 1) {
+        fit <- suppressWarnings(glm(both[[1]] ~ both[[2]], family = binomial()))
+        if (fit$converged && !fit$boundary && all(is.finite(coef(fit))) &&
+            all(fitted(fit) > 1e-8 & fitted(fit) < 1 - 1e-8)) {
+          models$logistic <- list(outcome = outcome, predictors = as.list(predictor),
+                                  countries = country, aic = AIC(fit))
+        }
+      }
+    }
+  }
+  groups <- head(unique(sampled$B_COUNTRY_ALPHA), 2)
+  if (length(groups) == 2 && length(numeric_ids)) {
+    outcome <- numeric_ids[[1]]
+    by_country <- sampled[sampled$B_COUNTRY_ALPHA %in% groups & !is.na(sampled[[outcome]]), ]
+    if (all(table(factor(by_country$B_COUNTRY_ALPHA, levels = groups)) >= 2)) {
+      f <- anova(lm(by_country[[outcome]] ~ by_country$B_COUNTRY_ALPHA))[1, "F value"]
+      if (is.finite(f)) models$anova <- list(outcome = outcome, groupingVariable = "COUNTRY",
+                                             countries = groups, f = f)
+    }
+  }
+  categorical <- ids[vapply(records, function(r) r$analysisType != "integer", logical(1))]
+  if (length(categorical)) {
+    id <- categorical[[1]]
+    counts <- table(sampled[[id]], sampled$B_COUNTRY_ALPHA)
+    if (all(dim(counts) >= 2) && all(colSums(counts) > 0)) {
+      chi <- suppressWarnings(chisq.test(counts, correct = FALSE))
+      models$chiSquare <- list(rowVariable = id, columnVariable = "COUNTRY",
+                               countries = "ALL", statistic = unname(chi$statistic))
+    }
+  }
+  list(summaries = unname(summaries), models = models)
 }
 
 build_worldview <- function(
@@ -471,6 +566,10 @@ build_worldview <- function(
   )
   jsonlite::write_json(built_codebook, codebook_json, pretty = TRUE, auto_unbox = TRUE, na = "null", null = "null", digits = NA)
 
+  jsonlite::write_json(wv_sample_reference(sampled, records),
+                       file.path(data_dir, "worldview-sample-reference.json"),
+                       auto_unbox = TRUE, null = "null", digits = NA, pretty = TRUE)
+
   manifest <- list(
     dataVersion = settings$data_version,
     source = "World Values Survey Wave 7",
@@ -480,7 +579,7 @@ build_worldview <- function(
     participantCount = nrow(sampled),
     studentVariableCount = length(selected_vars),
     exportColumnCount = ncol(sampled),
-    variables = selected_vars
+    variables = I(selected_vars)
   )
   jsonlite::write_json(manifest, manifest_json, pretty = TRUE, auto_unbox = TRUE, digits = NA)
 
@@ -495,7 +594,7 @@ build_worldview <- function(
     ),
     passed = c(
       manifest$studentVariableCount == built_codebook$variableCount,
-      identical(manifest$variables, vapply(built_codebook$variables, function(x) x$id, character(1))),
+      identical(as.character(manifest$variables), vapply(built_codebook$variables, function(x) x$id, character(1))),
       nrow(sampled) == manifest$participantCount,
       all(counts <= settings$maximum_participants_per_country),
       !anyDuplicated(sampled$WORLDVIEW_ID)

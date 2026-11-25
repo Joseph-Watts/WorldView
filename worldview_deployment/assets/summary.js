@@ -92,20 +92,6 @@ function numericStatistics(values, totalN) {
   };
 }
 
-function displayLabel(variable, value) {
-  if (variable.id === "Q289") return String(value);
-  if (["Q165", "Q166", "Q167", "Q168"].includes(variable.id)) return Number(value) === 1 ? "Yes" : "No";
-  if (variable.id === "Q260") return Number(value) === 1 ? "Male" : "Female";
-  if (variable.id === "Q263") return Number(value) === 1
-    ? "I am born in this country"
-    : "I am an immigrant to this country (born outside this country)";
-  if (Array.isArray(variable.levels) && variable.levels.length) {
-    const match = variable.levels.find(level => Number(level.displayOrder) === Number(value));
-    return match ? match.label : String(value);
-  }
-  return String(value);
-}
-
 function frequencyStatistics(variable, values, totalN) {
   const counts = new Map();
   values.forEach(value => {
@@ -115,14 +101,14 @@ function frequencyStatistics(variable, values, totalN) {
   const validN = values.length;
   let keys = [...counts.keys()];
   if (variable.id !== "Q289") keys.sort((a, b) => Number(a) - Number(b));
-  else keys.sort((a, b) => displayLabel(variable, a).localeCompare(displayLabel(variable, b)));
+  else keys.sort((a, b) => responseLabel(variable, a).localeCompare(responseLabel(variable, b)));
   return {
     totalN,
     validN,
     missingN: totalN - validN,
     categories: keys.map(key => ({
       value: key,
-      label: displayLabel(variable, key),
+      label: responseLabel(variable, key),
       count: counts.get(key),
       percentage: validN ? 100 * counts.get(key) / validN : null
     }))

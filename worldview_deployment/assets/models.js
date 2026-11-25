@@ -75,18 +75,6 @@
     return METHODS[value] ? value : "pearson";
   }
 
-  function normalCdf(x) {
-    const sign = x < 0 ? -1 : 1;
-    const z = Math.abs(x) / Math.sqrt(2);
-    const t = 1 / (1 + 0.3275911 * z);
-    const erf =
-      1 -
-      (((((1.061405429 * t - 1.453152027) * t + 1.421413741) * t - 0.284496736) * t + 0.254829592) *
-        t *
-        Math.exp(-z * z));
-    return 0.5 * (1 + sign * erf);
-  }
-
   function pearson(x, y) {
     const n = x.length;
     const meanX = x.reduce((a, b) => a + b, 0) / n;
@@ -130,41 +118,6 @@
     return pearson(ranks(x), ranks(y));
   }
 
-  function kendallTauB(x, y) {
-    let concordant = 0;
-    let discordant = 0;
-    let tiesX = 0;
-    let tiesY = 0;
-
-    for (let i = 0; i < x.length - 1; i += 1) {
-      for (let j = i + 1; j < x.length; j += 1) {
-        const sx = Math.sign(x[j] - x[i]);
-        const sy = Math.sign(y[j] - y[i]);
-
-        if (sx === 0 && sy === 0) continue;
-        if (sx === 0) {
-          tiesX += 1;
-        } else if (sy === 0) {
-          tiesY += 1;
-        } else if (sx === sy) {
-          concordant += 1;
-        } else {
-          discordant += 1;
-        }
-      }
-    }
-
-    const denominator =
-      Math.sqrt((concordant + discordant + tiesX) * (concordant + discordant + tiesY));
-    return denominator === 0 ? null : (concordant - discordant) / denominator;
-  }
-
-  function calculateStatistic(method, x, y) {
-    if (method === "spearman") return spearman(x, y);
-    if (method === "kendall") return kendallTauB(x, y);
-    return pearson(x, y);
-  }
-
   function inferentialSummary(method, statistic, n) {
     if (statistic === null || !Number.isFinite(statistic)) {
       return { lower: null, upper: null, pApprox: null };
@@ -180,7 +133,7 @@
       return {
         lower,
         upper,
-        pApprox: 2 * (1 - normalCdf(t))
+        pApprox: 2 * (1 - worldviewNormalCdf(t))
       };
     }
 
@@ -191,19 +144,9 @@
       return {
         lower: null,
         upper: null,
-        pApprox: 2 * (1 - normalCdf(t))
+        pApprox: 2 * (1 - worldviewNormalCdf(t))
       };
     }
-
-    // Simple large-sample normal approximation for Kendall tau-b.
-    // Ties affect the exact variance, so this is deliberately labelled approximate.
-    const variance = (2 * (2 * n + 5)) / (9 * n * (n - 1));
-    const z = Math.abs(statistic) / Math.sqrt(variance);
-    return {
-      lower: null,
-      upper: null,
-      pApprox: 2 * (1 - normalCdf(z))
-    };
   }
 
   function correlationResult(variable1, variable2, codes, title, method) {
@@ -257,7 +200,8 @@
       return { ...base, status: "no_variation" };
     }
 
-    const statistic = calculateStatistic(method, x, y);
+    if (method === "kendall") return { ...base, status: "ok", ...kendallSummary(x, y) };
+    const statistic = method === "spearman" ? spearman(x, y) : pearson(x, y);
     if (statistic === null) return { ...base, status: "no_variation" };
 
     const inference = inferentialSummary(method, statistic, n);
@@ -327,7 +271,7 @@
         result.method === "spearman"
           ? " Spearman significance uses a large-sample approximation."
           : result.method === "kendall"
-            ? " Kendall significance uses an approximate large-sample normal test."
+            ? " Kendall significance uses a tie-adjusted large-sample normal test."
             : ""
       }</p>
     </section>`;
@@ -429,8 +373,8 @@
     const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download =
-      `worldview-${chosenMethod()}-correlation-${document.getElementById("model-variable-1").value}-${document.getElementById("model-variable-2").value}.csv`;
+    const result = state.lastRows[0];
+    link.download = `worldview-${result.method}-correlation-${result.variable_1}-${result.variable_2}.csv`;
     document.body.appendChild(link);
     link.click();
     URL.revokeObjectURL(link.href);

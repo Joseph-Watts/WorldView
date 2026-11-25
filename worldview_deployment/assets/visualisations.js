@@ -48,20 +48,6 @@ function visualCountryMode() {
   return document.querySelector("input[name=visual-country-mode]:checked").value;
 }
 
-function visualDisplayLabel(variable, value) {
-  if (variable.id === "Q289") return String(value);
-  if (["Q165", "Q166", "Q167", "Q168"].includes(variable.id)) return Number(value) === 1 ? "Yes" : "No";
-  if (variable.id === "Q260") return Number(value) === 1 ? "Male" : "Female";
-  if (variable.id === "Q263") return Number(value) === 1
-    ? "I am born in this country"
-    : "I am an immigrant to this country (born outside this country)";
-  if (Array.isArray(variable.levels)) {
-    const match = variable.levels.find(level => Number(level.displayOrder) === Number(value));
-    if (match) return match.label;
-  }
-  return String(value);
-}
-
 function ageBand(age, scheme) {
   const value = Number(age);
   if (!Number.isFinite(value)) return null;
@@ -83,8 +69,9 @@ function ageBand(age, scheme) {
 }
 
 function categoryOrder(variable, values) {
-  if (["Q165", "Q166", "Q167", "Q168", "Q260", "Q263"].includes(variable.id)) {
-    return ["0", "1"];
+  if (variable.analysisType === "binary") {
+    return [...new Set(variable.levels.map(level => level.value).filter(value => value != null))]
+      .sort((a, b) => a - b).map(String);
   }
 
   if (variable.id === "Q262") {
@@ -143,7 +130,7 @@ function groupGraphData(variable, countryCodes) {
         category: String(category),
         label: variable.id === "Q262"
           ? String(category)
-          : visualDisplayLabel(variable, category),
+          : responseLabel(variable, category),
         count,
         percentage: valid.length ? 100 * count / valid.length : 0
       };

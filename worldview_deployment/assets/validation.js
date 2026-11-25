@@ -677,13 +677,13 @@ function testChiSquareFixtures(data, chiSquareFixtures) {
 
 function displayValue(value) {
   if (typeof value === "number") return Number.isInteger(value) ? String(value) : value.toPrecision(10);
-  return String(value);
+  return String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 }
 
 function render() {
   const body = document.getElementById("validation-results");
   body.innerHTML = checks.map(check => `<tr>
-    <td>${check.name}</td><td>${displayValue(check.expected)}</td><td>${displayValue(check.actual)}</td>
+    <td>${displayValue(check.name)}</td><td>${displayValue(check.expected)}</td><td>${displayValue(check.actual)}</td>
     <td><span class="validation-badge ${check.status}">${check.status === "pass" ? "Pass" : check.status === "warning" ? "Warning" : "Fail"}</span></td>
   </tr>`).join("");
   const passed = checks.filter(check => check.status === "pass").length;
@@ -703,30 +703,101 @@ function render() {
   status.classList.toggle("validation-failure", failed > 0);
 }
 
+async function loadFixture(path) {
+  const response = await fetch(path);
+  if (!response.ok) throw new Error(`${path} returned ${response.status}`);
+  return response.json();
+}
+
+function checkIds(label, expected, actual) {
+  const a = [...expected].sort();
+  const b = [...actual].sort();
+  addCheck(label, a.join(", "), b.join(", "), JSON.stringify(a) === JSON.stringify(b));
+}
+
+function testSampleReference(data, reference) {
+  for (const test of reference.summaries) {
+    const values = data.columns[test.variable].filter(value => value != null && value !== "");
+    addCheck(`${test.variable} valid responses`, test.valid, values.length, values.length === test.valid);
+    if (test.mean != null) {
+      const mean = values.reduce((sum, value) => sum + value, 0) / values.length;
+      addCheck(`${test.variable} mean`, test.mean, mean, closeEnough(mean, test.mean, 1e-10));
+    }
+  }
+
+  const models = reference.models;
+  if (models.correlation) {
+    const test = models.correlation;
+    const actual = correlation(data, test);
+    addCheck("Pearson correlation", test.pearson, actual.correlation, closeEnough(actual.correlation, test.pearson, 1e-10));
+    testKendall(data, test);
+  }
+  for (const [model, run, field, tolerance] of [
+    ["regression", browserRegression, "slope", 1e-9],
+    ["logistic", browserLogisticRegression, "aic", 0.001],
+    ["anova", browserAnova, "f", 1e-7],
+    ["chiSquare", browserChiSquare, "statistic", 1e-7]
+  ]) {
+    const test = models[model];
+    if (!test) continue;
+    const result = run(data, test);
+    const actual = { slope: result.coefficients?.[1]?.estimate, aic: result.aic,
+      f: result.fStatistic, statistic: result.chiSquare }[field];
+    addCheck(`${model} ${field}`, test[field], actual, closeEnough(actual, test[field], tolerance));
+  }
+}
+
+function testKendall(data, test) {
+  const x = [], y = [];
+  for (const i of indicesFor(data, test.countries)) {
+    const a = data.columns[test.variable1][i], b = data.columns[test.variable2][i];
+    if (a == null || b == null || a === "" || b === "") continue;
+    x.push(a); y.push(b);
+  }
+  const result = kendallSummary(x, y);
+  const label = `Kendall ${test.variable1}/${test.variable2} (${test.countries})`;
+  addCheck(`${label} complete pairs`, test.n, x.length, x.length === test.n);
+  addCheck(`${label} tau-b`, test.tau, result.statistic, closeEnough(result.statistic, test.tau, 1e-10));
+  addCheck(`${label} p-value`, test.p, result.pApprox, closeEnough(result.pApprox, test.p, 2e-7));
+}
+
 async function runValidation() {
   try {
-    const [manifest, rawData, codebook, fixtures, regressionFixtures, logisticFixtures, anovaFixtures, chiSquareFixtures] = await Promise.all(
-      Object.values(paths).map(path => fetch(path).then(response => {
-        if (!response.ok) throw new Error(`${path} returned ${response.status}`);
-        return response.json();
-      }))
+    const [manifest, rawData, codebook, reference] = await Promise.all(
+      [paths.manifest, paths.data, paths.codebook, "data/worldview-sample-reference.json"].map(loadFixture)
     );
     const data = columnsFrom(rawData);
+    const ids = manifest.variables;
+    const codebookIds = codebook.variables.map(variable => variable.id);
     addCheck("Manifest participant count", manifest.participantCount, data.length, manifest.participantCount === data.length);
-    addCheck("Manifest variable count", 39, manifest.studentVariableCount, manifest.studentVariableCount === 39);
-    addCheck("Codebook variable count", 39, codebook.variables.length, codebook.variables.length === 39);
-    addCheck("Only Q289 is correlation-ineligible", "Q289", codebook.variables.filter(v => !v.correlationEligible).map(v => v.id).join(","), codebook.variables.filter(v => !v.correlationEligible).map(v => v.id).join(",") === "Q289");
-    testSummaryFixtures(data, fixtures);
-    testCorrelationFixtures(data, fixtures);
-    testRegressionFixtures(data, regressionFixtures);
-    testLogisticFixtures(data, logisticFixtures);
-    testAnovaFixtures(data, anovaFixtures);
-    testChiSquareFixtures(data, chiSquareFixtures);
-    render();
+    addCheck("Manifest variable count", ids.length, manifest.studentVariableCount, manifest.studentVariableCount === ids.length);
+    addCheck("Codebook variable count", ids.length, codebook.variableCount, codebook.variableCount === ids.length);
+    addCheck("Unique manifest IDs", ids.length, new Set(ids).size, new Set(ids).size === ids.length);
+    checkIds("Codebook variables", ids, codebookIds);
+    checkIds("Browser columns", [...new Set(["WORLDVIEW_ID", "B_COUNTRY", "B_COUNTRY_ALPHA", ...ids])], Object.keys(rawData));
+    checkIds("Sample reference variables", ids, reference.summaries.map(test => test.variable));
+    if (checks.every(check => check.passed)) {
+      testSampleReference(data, reference);
+      if (new URLSearchParams(location.search).get("suite") === "release") {
+        // These immutable R results exercise the original release configuration.
+        const [fixtures, regression, logistic, anova, chiSquare] = await Promise.all(
+          [paths.fixtures, paths.regressionFixtures, paths.logisticFixtures, paths.anovaFixtures, paths.chiSquareFixtures].map(loadFixture)
+        );
+        testSummaryFixtures(data, fixtures);
+        testCorrelationFixtures(data, fixtures);
+        testRegressionFixtures(data, regression);
+        testLogisticFixtures(data, logistic);
+        testAnovaFixtures(data, anova);
+        testChiSquareFixtures(data, chiSquare);
+        testKendall(data, { countries: "KEN", variable1: "Q165", variable2: "Q167",
+          n: 950, tau: 0.0633987910138826, p: 0.0508132868581856 });
+      }
+    }
   } catch (error) {
     console.error(error);
-    document.getElementById("validation-status").textContent = `Validation could not run: ${error.message}`;
+    addCheck("Validation completed", "All requested checks ran", error.message, false);
   }
+  render();
 }
 
 document.addEventListener("DOMContentLoaded", runValidation);

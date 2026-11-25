@@ -1,0 +1,230 @@
+{
+  "summaries": [
+    {
+      "variable": "Q8",
+      "valid": 64656,
+      "mean": 1.5830704033655
+    },
+    {
+      "variable": "Q9",
+      "valid": 64954,
+      "mean": 1.4612494996459
+    },
+    {
+      "variable": "Q10",
+      "valid": 65064,
+      "mean": 1.34770379933604
+    },
+    {
+      "variable": "Q11",
+      "valid": 64560,
+      "mean": 1.78678748451053
+    },
+    {
+      "variable": "Q12",
+      "valid": 65018,
+      "mean": 1.37215847919038
+    },
+    {
+      "variable": "Q13",
+      "valid": 64609,
+      "mean": 1.69754987695213
+    },
+    {
+      "variable": "Q14",
+      "valid": 64603,
+      "mean": 1.66690401374549
+    },
+    {
+      "variable": "Q15",
+      "valid": 64601,
+      "mean": 1.63800869955573
+    },
+    {
+      "variable": "Q16",
+      "valid": 64626,
+      "mean": 1.71735833874911
+    },
+    {
+      "variable": "Q165",
+      "valid": 61882,
+      "mean": 0.82927183995346
+    },
+    {
+      "variable": "Q166",
+      "valid": 59810,
+      "mean": 0.655091121885972
+    },
+    {
+      "variable": "Q167",
+      "valid": 60080,
+      "mean": 0.604577230359521
+    },
+    {
+      "variable": "Q168",
+      "valid": 60233,
+      "mean": 0.696445470091146
+    },
+    {
+      "variable": "Q177",
+      "valid": 64296,
+      "mean": 3.01073161627473
+    },
+    {
+      "variable": "Q178",
+      "valid": 62678,
+      "mean": 2.86344490889945
+    },
+    {
+      "variable": "Q179",
+      "valid": 64841,
+      "mean": 1.8359988279021
+    },
+    {
+      "variable": "Q180",
+      "valid": 64597,
+      "mean": 2.24011951019397
+    },
+    {
+      "variable": "Q181",
+      "valid": 64675,
+      "mean": 1.98552763819095
+    },
+    {
+      "variable": "Q182",
+      "valid": 59757,
+      "mean": 3.92566561239687
+    },
+    {
+      "variable": "Q183",
+      "valid": 58790,
+      "mean": 2.99982990304474
+    },
+    {
+      "variable": "Q184",
+      "valid": 63903,
+      "mean": 3.43304696180148
+    },
+    {
+      "variable": "Q185",
+      "valid": 64115,
+      "mean": 4.96013413397801
+    },
+    {
+      "variable": "Q186",
+      "valid": 61762,
+      "mean": 4.56468378614682
+    },
+    {
+      "variable": "Q187",
+      "valid": 63877,
+      "mean": 2.50565931399408
+    },
+    {
+      "variable": "Q188",
+      "valid": 62662,
+      "mean": 3.72958092623919
+    },
+    {
+      "variable": "Q189",
+      "valid": 63311,
+      "mean": 1.88782360095402
+    },
+    {
+      "variable": "Q190",
+      "valid": 64767,
+      "mean": 2.87655750613738
+    },
+    {
+      "variable": "Q191",
+      "valid": 64771,
+      "mean": 1.94452764354418
+    },
+    {
+      "variable": "Q192",
+      "valid": 62895,
+      "mean": 1.81593131409492
+    },
+    {
+      "variable": "Q193",
+      "valid": 59628,
+      "mean": 3.46471456362783
+    },
+    {
+      "variable": "Q194",
+      "valid": 62693,
+      "mean": 1.98312411273986
+    },
+    {
+      "variable": "Q195",
+      "valid": 63766,
+      "mean": 4.03084715992849
+    },
+    {
+      "variable": "Q235",
+      "valid": 61412,
+      "mean": 2.49544063049567
+    },
+    {
+      "variable": "Q260",
+      "valid": 65385,
+      "mean": 0.471606637608014
+    },
+    {
+      "variable": "Q262",
+      "valid": 65066,
+      "mean": 42.9429809731657
+    },
+    {
+      "variable": "Q263",
+      "valid": 65223,
+      "mean": 0.942274964353066
+    },
+    {
+      "variable": "Q275",
+      "valid": 64774,
+      "mean": 4.53144780313089
+    },
+    {
+      "variable": "Q288",
+      "valid": 63549,
+      "mean": 4.91005365938095
+    },
+    {
+      "variable": "Q289",
+      "valid": 64548,
+      "mean": null
+    }
+  ],
+  "models": {
+    "correlation": {
+      "variable1": "Q165",
+      "variable2": "Q167",
+      "countries": "KEN",
+      "n": 950,
+      "pearson": 0.0633987910138826,
+      "tau": 0.0633987910138826,
+      "p": 0.0508132868581856
+    },
+    "regression": {
+      "outcome": "Q167",
+      "predictors": [
+        "Q165"
+      ],
+      "countries": "KEN",
+      "slope": 0.657172995780521
+    },
+    "anova": {
+      "outcome": "Q8",
+      "groupingVariable": "COUNTRY",
+      "countries": ["AND", "ARG"],
+      "f": 32.4145859711315
+    },
+    "chiSquare": {
+      "rowVariable": "Q8",
+      "columnVariable": "COUNTRY",
+      "countries": "ALL",
+      "statistic": 5590.19321247833
+    }
+  }
+}

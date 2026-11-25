@@ -124,7 +124,9 @@ servr::httd("worldview_deployment")
 ```
 
 Open the local address printed by `servr`. The browser validation page is
-available at `/validation.html`.
+available at `/validation.html`. It checks the configured dataset against its manifest and
+R reference results from the same build. Use `/validation.html?suite=release` for the
+additional fixed numerical tests on the original teaching sample.
 
 ## Host for students
 

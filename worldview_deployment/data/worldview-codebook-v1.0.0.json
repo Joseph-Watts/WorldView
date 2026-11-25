@@ -28,13 +28,15 @@
       "missingCountInFullProcessedData": 1038,
       "levels": [
         {
-          "value": 1,
           "label": "Important",
+          "value": 1,
+          "wvsCode": 1,
           "displayOrder": 1
         },
         {
-          "value": 2,
           "label": "Not mentioned",
+          "value": 2,
+          "wvsCode": 2,
           "displayOrder": 2
         }
       ],
@@ -60,13 +62,15 @@
       "missingCountInFullProcessedData": 692,
       "levels": [
         {
-          "value": 1,
           "label": "Important",
+          "value": 1,
+          "wvsCode": 1,
           "displayOrder": 1
         },
         {
-          "value": 2,
           "label": "Not mentioned",
+          "value": 2,
+          "wvsCode": 2,
           "displayOrder": 2
         }
       ],
@@ -92,13 +96,15 @@
       "missingCountInFullProcessedData": 553,
       "levels": [
         {
-          "value": 1,
           "label": "Important",
+          "value": 1,
+          "wvsCode": 1,
           "displayOrder": 1
         },
         {
-          "value": 2,
           "label": "Not mentioned",
+          "value": 2,
+          "wvsCode": 2,
           "displayOrder": 2
         }
       ],
@@ -124,13 +130,15 @@
       "missingCountInFullProcessedData": 1203,
       "levels": [
         {
-          "value": 1,
           "label": "Important",
+          "value": 1,
+          "wvsCode": 1,
           "displayOrder": 1
         },
         {
-          "value": 2,
           "label": "Not mentioned",
+          "value": 2,
+          "wvsCode": 2,
           "displayOrder": 2
         }
       ],
@@ -156,13 +164,15 @@
       "missingCountInFullProcessedData": 643,
       "levels": [
         {
-          "value": 1,
           "label": "Important",
+          "value": 1,
+          "wvsCode": 1,
           "displayOrder": 1
         },
         {
-          "value": 2,
           "label": "Not mentioned",
+          "value": 2,
+          "wvsCode": 2,
           "displayOrder": 2
         }
       ],
@@ -188,13 +198,15 @@
       "missingCountInFullProcessedData": 1116,
       "levels": [
         {
-          "value": 1,
           "label": "Important",
+          "value": 1,
+          "wvsCode": 1,
           "displayOrder": 1
         },
         {
-          "value": 2,
           "label": "Not mentioned",
+          "value": 2,
+          "wvsCode": 2,
           "displayOrder": 2
         }
       ],
@@ -220,13 +232,15 @@
       "missingCountInFullProcessedData": 1131,
       "levels": [
         {
-          "value": 1,
           "label": "Important",
+          "value": 1,
+          "wvsCode": 1,
           "displayOrder": 1
         },
         {
-          "value": 2,
           "label": "Not mentioned",
+          "value": 2,
+          "wvsCode": 2,
           "displayOrder": 2
         }
       ],
@@ -252,13 +266,15 @@
       "missingCountInFullProcessedData": 1111,
       "levels": [
         {
-          "value": 1,
           "label": "Important",
+          "value": 1,
+          "wvsCode": 1,
           "displayOrder": 1
         },
         {
-          "value": 2,
           "label": "Not mentioned",
+          "value": 2,
+          "wvsCode": 2,
           "displayOrder": 2
         }
       ],
@@ -284,13 +300,15 @@
       "missingCountInFullProcessedData": 1124,
       "levels": [
         {
-          "value": 1,
           "label": "Important",
+          "value": 1,
+          "wvsCode": 1,
           "displayOrder": 1
         },
         {
-          "value": 2,
           "label": "Not mentioned",
+          "value": 2,
+          "wvsCode": 2,
           "displayOrder": 2
         }
       ],
@@ -452,44 +470,64 @@
       "missingCountInFullProcessedData": 1688,
       "levels": [
         {
-          "displayOrder": 1,
-          "label": "Never justifiable"
+          "label": "Never justifiable",
+          "value": 1,
+          "wvsCode": 1,
+          "displayOrder": 1
         },
         {
-          "displayOrder": 2,
-          "label": "2"
+          "label": "2",
+          "value": 2,
+          "wvsCode": 2,
+          "displayOrder": 2
         },
         {
-          "displayOrder": 3,
-          "label": "3"
+          "label": "3",
+          "value": 3,
+          "wvsCode": 3,
+          "displayOrder": 3
         },
         {
-          "displayOrder": 4,
-          "label": "4"
+          "label": "4",
+          "value": 4,
+          "wvsCode": 4,
+          "displayOrder": 4
         },
         {
-          "displayOrder": 5,
-          "label": "5"
+          "label": "5",
+          "value": 5,
+          "wvsCode": 5,
+          "displayOrder": 5
         },
         {
-          "displayOrder": 6,
-          "label": "6"
+          "label": "6",
+          "value": 6,
+          "wvsCode": 6,
+          "displayOrder": 6
         },
         {
-          "displayOrder": 7,
-          "label": "7"
+          "label": "7",
+          "value": 7,
+          "wvsCode": 7,
+          "displayOrder": 7
         },
         {
-          "displayOrder": 8,
-          "label": "8"
+          "label": "8",
+          "value": 8,
+          "wvsCode": 8,
+          "displayOrder": 8
         },
         {
-          "displayOrder": 9,
-          "label": "9"
+          "label": "9",
+          "value": 9,
+          "wvsCode": 9,
+          "displayOrder": 9
         },
         {
-          "displayOrder": 10,
-          "label": "Always justifiable"
+          "label": "Always justifiable",
+          "value": 10,
+          "wvsCode": 10,
+          "displayOrder": 10
         }
       ],
       "validRange": {
@@ -514,44 +552,64 @@
       "missingCountInFullProcessedData": 3539,
       "levels": [
         {
-          "displayOrder": 1,
-          "label": "Never justifiable"
+          "label": "Never justifiable",
+          "value": 1,
+          "wvsCode": 1,
+          "displayOrder": 1
         },
         {
-          "displayOrder": 2,
-          "label": "2"
+          "label": "2",
+          "value": 2,
+          "wvsCode": 2,
+          "displayOrder": 2
         },
         {
-          "displayOrder": 3,
-          "label": "3"
+          "label": "3",
+          "value": 3,
+          "wvsCode": 3,
+          "displayOrder": 3
         },
         {
-          "displayOrder": 4,
-          "label": "4"
+          "label": "4",
+          "value": 4,
+          "wvsCode": 4,
+          "displayOrder": 4
         },
         {
-          "displayOrder": 5,
-          "label": "5"
+          "label": "5",
+          "value": 5,
+          "wvsCode": 5,
+          "displayOrder": 5
         },
         {
-          "displayOrder": 6,
-          "label": "6"
+          "label": "6",
+          "value": 6,
+          "wvsCode": 6,
+          "displayOrder": 6
         },
         {
-          "displayOrder": 7,
-          "label": "7"
+          "label": "7",
+          "value": 7,
+          "wvsCode": 7,
+          "displayOrder": 7
         },
         {
-          "displayOrder": 8,
-          "label": "8"
+          "label": "8",
+          "value": 8,
+          "wvsCode": 8,
+          "displayOrder": 8
         },
         {
-          "displayOrder": 9,
-          "label": "9"
+          "label": "9",
+          "value": 9,
+          "wvsCode": 9,
+          "displayOrder": 9
         },
         {
-          "displayOrder": 10,
-          "label": "Always justifiable"
+          "label": "Always justifiable",
+          "value": 10,
+          "wvsCode": 10,
+          "displayOrder": 10
         }
       ],
       "validRange": {
@@ -576,44 +634,64 @@
       "missingCountInFullProcessedData": 905,
       "levels": [
         {
-          "displayOrder": 1,
-          "label": "Never justifiable"
+          "label": "Never justifiable",
+          "value": 1,
+          "wvsCode": 1,
+          "displayOrder": 1
         },
         {
-          "displayOrder": 2,
-          "label": "2"
+          "label": "2",
+          "value": 2,
+          "wvsCode": 2,
+          "displayOrder": 2
         },
         {
-          "displayOrder": 3,
-          "label": "3"
+          "label": "3",
+          "value": 3,
+          "wvsCode": 3,
+          "displayOrder": 3
         },
         {
-          "displayOrder": 4,
-          "label": "4"
+          "label": "4",
+          "value": 4,
+          "wvsCode": 4,
+          "displayOrder": 4
         },
         {
-          "displayOrder": 5,
-          "label": "5"
+          "label": "5",
+          "value": 5,
+          "wvsCode": 5,
+          "displayOrder": 5
         },
         {
-          "displayOrder": 6,
-          "label": "6"
+          "label": "6",
+          "value": 6,
+          "wvsCode": 6,
+          "displayOrder": 6
         },
         {
-          "displayOrder": 7,
-          "label": "7"
+          "label": "7",
+          "value": 7,
+          "wvsCode": 7,
+          "displayOrder": 7
         },
         {
-          "displayOrder": 8,
-          "label": "8"
+          "label": "8",
+          "value": 8,
+          "wvsCode": 8,
+          "displayOrder": 8
         },
         {
-          "displayOrder": 9,
-          "label": "9"
+          "label": "9",
+          "value": 9,
+          "wvsCode": 9,
+          "displayOrder": 9
         },
         {
-          "displayOrder": 10,
-          "label": "Always justifiable"
+          "label": "Always justifiable",
+          "value": 10,
+          "wvsCode": 10,
+          "displayOrder": 10
         }
       ],
       "validRange": {
@@ -638,44 +716,64 @@
       "missingCountInFullProcessedData": 1279,
       "levels": [
         {
-          "displayOrder": 1,
-          "label": "Never justifiable"
+          "label": "Never justifiable",
+          "value": 1,
+          "wvsCode": 1,
+          "displayOrder": 1
         },
         {
-          "displayOrder": 2,
-          "label": "2"
+          "label": "2",
+          "value": 2,
+          "wvsCode": 2,
+          "displayOrder": 2
         },
         {
-          "displayOrder": 3,
-          "label": "3"
+          "label": "3",
+          "value": 3,
+          "wvsCode": 3,
+          "displayOrder": 3
         },
         {
-          "displayOrder": 4,
-          "label": "4"
+          "label": "4",
+          "value": 4,
+          "wvsCode": 4,
+          "displayOrder": 4
         },
         {
-          "displayOrder": 5,
-          "label": "5"
+          "label": "5",
+          "value": 5,
+          "wvsCode": 5,
+          "displayOrder": 5
         },
         {
-          "displayOrder": 6,
-          "label": "6"
+          "label": "6",
+          "value": 6,
+          "wvsCode": 6,
+          "displayOrder": 6
         },
         {
-          "displayOrder": 7,
-          "label": "7"
+          "label": "7",
+          "value": 7,
+          "wvsCode": 7,
+          "displayOrder": 7
         },
         {
-          "displayOrder": 8,
-          "label": "8"
+          "label": "8",
+          "value": 8,
+          "wvsCode": 8,
+          "displayOrder": 8
         },
         {
-          "displayOrder": 9,
-          "label": "9"
+          "label": "9",
+          "value": 9,
+          "wvsCode": 9,
+          "displayOrder": 9
         },
         {
-          "displayOrder": 10,
-          "label": "Always justifiable"
+          "label": "Always justifiable",
+          "value": 10,
+          "wvsCode": 10,
+          "displayOrder": 10
         }
       ],
       "validRange": {
@@ -700,44 +798,64 @@
       "missingCountInFullProcessedData": 1194,
       "levels": [
         {
-          "displayOrder": 1,
-          "label": "Never justifiable"
+          "label": "Never justifiable",
+          "value": 1,
+          "wvsCode": 1,
+          "displayOrder": 1
         },
         {
-          "displayOrder": 2,
-          "label": "2"
+          "label": "2",
+          "value": 2,
+          "wvsCode": 2,
+          "displayOrder": 2
         },
         {
-          "displayOrder": 3,
-          "label": "3"
+          "label": "3",
+          "value": 3,
+          "wvsCode": 3,
+          "displayOrder": 3
         },
         {
-          "displayOrder": 4,
-          "label": "4"
+          "label": "4",
+          "value": 4,
+          "wvsCode": 4,
+          "displayOrder": 4
         },
         {
-          "displayOrder": 5,
-          "label": "5"
+          "label": "5",
+          "value": 5,
+          "wvsCode": 5,
+          "displayOrder": 5
         },
         {
-          "displayOrder": 6,
-          "label": "6"
+          "label": "6",
+          "value": 6,
+          "wvsCode": 6,
+          "displayOrder": 6
         },
         {
-          "displayOrder": 7,
-          "label": "7"
+          "label": "7",
+          "value": 7,
+          "wvsCode": 7,
+          "displayOrder": 7
         },
         {
-          "displayOrder": 8,
-          "label": "8"
+          "label": "8",
+          "value": 8,
+          "wvsCode": 8,
+          "displayOrder": 8
         },
         {
-          "displayOrder": 9,
-          "label": "9"
+          "label": "9",
+          "value": 9,
+          "wvsCode": 9,
+          "displayOrder": 9
         },
         {
-          "displayOrder": 10,
-          "label": "Always justifiable"
+          "label": "Always justifiable",
+          "value": 10,
+          "wvsCode": 10,
+          "displayOrder": 10
         }
       ],
       "validRange": {
@@ -762,44 +880,64 @@
       "missingCountInFullProcessedData": 7515,
       "levels": [
         {
-          "displayOrder": 1,
-          "label": "Never justifiable"
+          "label": "Never justifiable",
+          "value": 1,
+          "wvsCode": 1,
+          "displayOrder": 1
         },
         {
-          "displayOrder": 2,
-          "label": "2"
+          "label": "2",
+          "value": 2,
+          "wvsCode": 2,
+          "displayOrder": 2
         },
         {
-          "displayOrder": 3,
-          "label": "3"
+          "label": "3",
+          "value": 3,
+          "wvsCode": 3,
+          "displayOrder": 3
         },
         {
-          "displayOrder": 4,
-          "label": "4"
+          "label": "4",
+          "value": 4,
+          "wvsCode": 4,
+          "displayOrder": 4
         },
         {
-          "displayOrder": 5,
-          "label": "5"
+          "label": "5",
+          "value": 5,
+          "wvsCode": 5,
+          "displayOrder": 5
         },
         {
-          "displayOrder": 6,
-          "label": "6"
+          "label": "6",
+          "value": 6,
+          "wvsCode": 6,
+          "displayOrder": 6
         },
         {
-          "displayOrder": 7,
-          "label": "7"
+          "label": "7",
+          "value": 7,
+          "wvsCode": 7,
+          "displayOrder": 7
         },
         {
-          "displayOrder": 8,
-          "label": "8"
+          "label": "8",
+          "value": 8,
+          "wvsCode": 8,
+          "displayOrder": 8
         },
         {
-          "displayOrder": 9,
-          "label": "9"
+          "label": "9",
+          "value": 9,
+          "wvsCode": 9,
+          "displayOrder": 9
         },
         {
-          "displayOrder": 10,
-          "label": "Always justifiable"
+          "label": "Always justifiable",
+          "value": 10,
+          "wvsCode": 10,
+          "displayOrder": 10
         }
       ],
       "validRange": {
@@ -824,44 +962,64 @@
       "missingCountInFullProcessedData": 8751,
       "levels": [
         {
-          "displayOrder": 1,
-          "label": "Never justifiable"
+          "label": "Never justifiable",
+          "value": 1,
+          "wvsCode": 1,
+          "displayOrder": 1
         },
         {
-          "displayOrder": 2,
-          "label": "2"
+          "label": "2",
+          "value": 2,
+          "wvsCode": 2,
+          "displayOrder": 2
         },
         {
-          "displayOrder": 3,
-          "label": "3"
+          "label": "3",
+          "value": 3,
+          "wvsCode": 3,
+          "displayOrder": 3
         },
         {
-          "displayOrder": 4,
-          "label": "4"
+          "label": "4",
+          "value": 4,
+          "wvsCode": 4,
+          "displayOrder": 4
         },
         {
-          "displayOrder": 5,
-          "label": "5"
+          "label": "5",
+          "value": 5,
+          "wvsCode": 5,
+          "displayOrder": 5
         },
         {
-          "displayOrder": 6,
-          "label": "6"
+          "label": "6",
+          "value": 6,
+          "wvsCode": 6,
+          "displayOrder": 6
         },
         {
-          "displayOrder": 7,
-          "label": "7"
+          "label": "7",
+          "value": 7,
+          "wvsCode": 7,
+          "displayOrder": 7
         },
         {
-          "displayOrder": 8,
-          "label": "8"
+          "label": "8",
+          "value": 8,
+          "wvsCode": 8,
+          "displayOrder": 8
         },
         {
-          "displayOrder": 9,
-          "label": "9"
+          "label": "9",
+          "value": 9,
+          "wvsCode": 9,
+          "displayOrder": 9
         },
         {
-          "displayOrder": 10,
-          "label": "Always justifiable"
+          "label": "Always justifiable",
+          "value": 10,
+          "wvsCode": 10,
+          "displayOrder": 10
         }
       ],
       "validRange": {
@@ -886,44 +1044,64 @@
       "missingCountInFullProcessedData": 2275,
       "levels": [
         {
-          "displayOrder": 1,
-          "label": "Never justifiable"
+          "label": "Never justifiable",
+          "value": 1,
+          "wvsCode": 1,
+          "displayOrder": 1
         },
         {
-          "displayOrder": 2,
-          "label": "2"
+          "label": "2",
+          "value": 2,
+          "wvsCode": 2,
+          "displayOrder": 2
         },
         {
-          "displayOrder": 3,
-          "label": "3"
+          "label": "3",
+          "value": 3,
+          "wvsCode": 3,
+          "displayOrder": 3
         },
         {
-          "displayOrder": 4,
-          "label": "4"
+          "label": "4",
+          "value": 4,
+          "wvsCode": 4,
+          "displayOrder": 4
         },
         {
-          "displayOrder": 5,
-          "label": "5"
+          "label": "5",
+          "value": 5,
+          "wvsCode": 5,
+          "displayOrder": 5
         },
         {
-          "displayOrder": 6,
-          "label": "6"
+          "label": "6",
+          "value": 6,
+          "wvsCode": 6,
+          "displayOrder": 6
         },
         {
-          "displayOrder": 7,
-          "label": "7"
+          "label": "7",
+          "value": 7,
+          "wvsCode": 7,
+          "displayOrder": 7
         },
         {
-          "displayOrder": 8,
-          "label": "8"
+          "label": "8",
+          "value": 8,
+          "wvsCode": 8,
+          "displayOrder": 8
         },
         {
-          "displayOrder": 9,
-          "label": "9"
+          "label": "9",
+          "value": 9,
+          "wvsCode": 9,
+          "displayOrder": 9
         },
         {
-          "displayOrder": 10,
-          "label": "Always justifiable"
+          "label": "Always justifiable",
+          "value": 10,
+          "wvsCode": 10,
+          "displayOrder": 10
         }
       ],
       "validRange": {
@@ -948,44 +1126,64 @@
       "missingCountInFullProcessedData": 1929,
       "levels": [
         {
-          "displayOrder": 1,
-          "label": "Never justifiable"
+          "label": "Never justifiable",
+          "value": 1,
+          "wvsCode": 1,
+          "displayOrder": 1
         },
         {
-          "displayOrder": 2,
-          "label": "2"
+          "label": "2",
+          "value": 2,
+          "wvsCode": 2,
+          "displayOrder": 2
         },
         {
-          "displayOrder": 3,
-          "label": "3"
+          "label": "3",
+          "value": 3,
+          "wvsCode": 3,
+          "displayOrder": 3
         },
         {
-          "displayOrder": 4,
-          "label": "4"
+          "label": "4",
+          "value": 4,
+          "wvsCode": 4,
+          "displayOrder": 4
         },
         {
-          "displayOrder": 5,
-          "label": "5"
+          "label": "5",
+          "value": 5,
+          "wvsCode": 5,
+          "displayOrder": 5
         },
         {
-          "displayOrder": 6,
-          "label": "6"
+          "label": "6",
+          "value": 6,
+          "wvsCode": 6,
+          "displayOrder": 6
         },
         {
-          "displayOrder": 7,
-          "label": "7"
+          "label": "7",
+          "value": 7,
+          "wvsCode": 7,
+          "displayOrder": 7
         },
         {
-          "displayOrder": 8,
-          "label": "8"
+          "label": "8",
+          "value": 8,
+          "wvsCode": 8,
+          "displayOrder": 8
         },
         {
-          "displayOrder": 9,
-          "label": "9"
+          "label": "9",
+          "value": 9,
+          "wvsCode": 9,
+          "displayOrder": 9
         },
         {
-          "displayOrder": 10,
-          "label": "Always justifiable"
+          "label": "Always justifiable",
+          "value": 10,
+          "wvsCode": 10,
+          "displayOrder": 10
         }
       ],
       "validRange": {
@@ -1010,44 +1208,64 @@
       "missingCountInFullProcessedData": 4814,
       "levels": [
         {
-          "displayOrder": 1,
-          "label": "Never justifiable"
+          "label": "Never justifiable",
+          "value": 1,
+          "wvsCode": 1,
+          "displayOrder": 1
         },
         {
-          "displayOrder": 2,
-          "label": "2"
+          "label": "2",
+          "value": 2,
+          "wvsCode": 2,
+          "displayOrder": 2
         },
         {
-          "displayOrder": 3,
-          "label": "3"
+          "label": "3",
+          "value": 3,
+          "wvsCode": 3,
+          "displayOrder": 3
         },
         {
-          "displayOrder": 4,
-          "label": "4"
+          "label": "4",
+          "value": 4,
+          "wvsCode": 4,
+          "displayOrder": 4
         },
         {
-          "displayOrder": 5,
-          "label": "5"
+          "label": "5",
+          "value": 5,
+          "wvsCode": 5,
+          "displayOrder": 5
         },
         {
-          "displayOrder": 6,
-          "label": "6"
+          "label": "6",
+          "value": 6,
+          "wvsCode": 6,
+          "displayOrder": 6
         },
         {
-          "displayOrder": 7,
-          "label": "7"
+          "label": "7",
+          "value": 7,
+          "wvsCode": 7,
+          "displayOrder": 7
         },
         {
-          "displayOrder": 8,
-          "label": "8"
+          "label": "8",
+          "value": 8,
+          "wvsCode": 8,
+          "displayOrder": 8
         },
         {
-          "displayOrder": 9,
-          "label": "9"
+          "label": "9",
+          "value": 9,
+          "wvsCode": 9,
+          "displayOrder": 9
         },
         {
-          "displayOrder": 10,
-          "label": "Always justifiable"
+          "label": "Always justifiable",
+          "value": 10,
+          "wvsCode": 10,
+          "displayOrder": 10
         }
       ],
       "validRange": {
@@ -1072,44 +1290,64 @@
       "missingCountInFullProcessedData": 2366,
       "levels": [
         {
-          "displayOrder": 1,
-          "label": "Never justifiable"
+          "label": "Never justifiable",
+          "value": 1,
+          "wvsCode": 1,
+          "displayOrder": 1
         },
         {
-          "displayOrder": 2,
-          "label": "2"
+          "label": "2",
+          "value": 2,
+          "wvsCode": 2,
+          "displayOrder": 2
         },
         {
-          "displayOrder": 3,
-          "label": "3"
+          "label": "3",
+          "value": 3,
+          "wvsCode": 3,
+          "displayOrder": 3
         },
         {
-          "displayOrder": 4,
-          "label": "4"
+          "label": "4",
+          "value": 4,
+          "wvsCode": 4,
+          "displayOrder": 4
         },
         {
-          "displayOrder": 5,
-          "label": "5"
+          "label": "5",
+          "value": 5,
+          "wvsCode": 5,
+          "displayOrder": 5
         },
         {
-          "displayOrder": 6,
-          "label": "6"
+          "label": "6",
+          "value": 6,
+          "wvsCode": 6,
+          "displayOrder": 6
         },
         {
-          "displayOrder": 7,
-          "label": "7"
+          "label": "7",
+          "value": 7,
+          "wvsCode": 7,
+          "displayOrder": 7
         },
         {
-          "displayOrder": 8,
-          "label": "8"
+          "label": "8",
+          "value": 8,
+          "wvsCode": 8,
+          "displayOrder": 8
         },
         {
-          "displayOrder": 9,
-          "label": "9"
+          "label": "9",
+          "value": 9,
+          "wvsCode": 9,
+          "displayOrder": 9
         },
         {
-          "displayOrder": 10,
-          "label": "Always justifiable"
+          "label": "Always justifiable",
+          "value": 10,
+          "wvsCode": 10,
+          "displayOrder": 10
         }
       ],
       "validRange": {
@@ -1134,44 +1372,64 @@
       "missingCountInFullProcessedData": 3974,
       "levels": [
         {
-          "displayOrder": 1,
-          "label": "Never justifiable"
+          "label": "Never justifiable",
+          "value": 1,
+          "wvsCode": 1,
+          "displayOrder": 1
         },
         {
-          "displayOrder": 2,
-          "label": "2"
+          "label": "2",
+          "value": 2,
+          "wvsCode": 2,
+          "displayOrder": 2
         },
         {
-          "displayOrder": 3,
-          "label": "3"
+          "label": "3",
+          "value": 3,
+          "wvsCode": 3,
+          "displayOrder": 3
         },
         {
-          "displayOrder": 4,
-          "label": "4"
+          "label": "4",
+          "value": 4,
+          "wvsCode": 4,
+          "displayOrder": 4
         },
         {
-          "displayOrder": 5,
-          "label": "5"
+          "label": "5",
+          "value": 5,
+          "wvsCode": 5,
+          "displayOrder": 5
         },
         {
-          "displayOrder": 6,
-          "label": "6"
+          "label": "6",
+          "value": 6,
+          "wvsCode": 6,
+          "displayOrder": 6
         },
         {
-          "displayOrder": 7,
-          "label": "7"
+          "label": "7",
+          "value": 7,
+          "wvsCode": 7,
+          "displayOrder": 7
         },
         {
-          "displayOrder": 8,
-          "label": "8"
+          "label": "8",
+          "value": 8,
+          "wvsCode": 8,
+          "displayOrder": 8
         },
         {
-          "displayOrder": 9,
-          "label": "9"
+          "label": "9",
+          "value": 9,
+          "wvsCode": 9,
+          "displayOrder": 9
         },
         {
-          "displayOrder": 10,
-          "label": "Always justifiable"
+          "label": "Always justifiable",
+          "value": 10,
+          "wvsCode": 10,
+          "displayOrder": 10
         }
       ],
       "validRange": {
@@ -1196,44 +1454,64 @@
       "missingCountInFullProcessedData": 4076,
       "levels": [
         {
-          "displayOrder": 1,
-          "label": "Never justifiable"
+          "label": "Never justifiable",
+          "value": 1,
+          "wvsCode": 1,
+          "displayOrder": 1
         },
         {
-          "displayOrder": 2,
-          "label": "2"
+          "label": "2",
+          "value": 2,
+          "wvsCode": 2,
+          "displayOrder": 2
         },
         {
-          "displayOrder": 3,
-          "label": "3"
+          "label": "3",
+          "value": 3,
+          "wvsCode": 3,
+          "displayOrder": 3
         },
         {
-          "displayOrder": 4,
-          "label": "4"
+          "label": "4",
+          "value": 4,
+          "wvsCode": 4,
+          "displayOrder": 4
         },
         {
-          "displayOrder": 5,
-          "label": "5"
+          "label": "5",
+          "value": 5,
+          "wvsCode": 5,
+          "displayOrder": 5
         },
         {
-          "displayOrder": 6,
-          "label": "6"
+          "label": "6",
+          "value": 6,
+          "wvsCode": 6,
+          "displayOrder": 6
         },
         {
-          "displayOrder": 7,
-          "label": "7"
+          "label": "7",
+          "value": 7,
+          "wvsCode": 7,
+          "displayOrder": 7
         },
         {
-          "displayOrder": 8,
-          "label": "8"
+          "label": "8",
+          "value": 8,
+          "wvsCode": 8,
+          "displayOrder": 8
         },
         {
-          "displayOrder": 9,
-          "label": "9"
+          "label": "9",
+          "value": 9,
+          "wvsCode": 9,
+          "displayOrder": 9
         },
         {
-          "displayOrder": 10,
-          "label": "Always justifiable"
+          "label": "Always justifiable",
+          "value": 10,
+          "wvsCode": 10,
+          "displayOrder": 10
         }
       ],
       "validRange": {
@@ -1258,44 +1536,64 @@
       "missingCountInFullProcessedData": 1034,
       "levels": [
         {
-          "displayOrder": 1,
-          "label": "Never justifiable"
+          "label": "Never justifiable",
+          "value": 1,
+          "wvsCode": 1,
+          "displayOrder": 1
         },
         {
-          "displayOrder": 2,
-          "label": "2"
+          "label": "2",
+          "value": 2,
+          "wvsCode": 2,
+          "displayOrder": 2
         },
         {
-          "displayOrder": 3,
-          "label": "3"
+          "label": "3",
+          "value": 3,
+          "wvsCode": 3,
+          "displayOrder": 3
         },
         {
-          "displayOrder": 4,
-          "label": "4"
+          "label": "4",
+          "value": 4,
+          "wvsCode": 4,
+          "displayOrder": 4
         },
         {
-          "displayOrder": 5,
-          "label": "5"
+          "label": "5",
+          "value": 5,
+          "wvsCode": 5,
+          "displayOrder": 5
         },
         {
-          "displayOrder": 6,
-          "label": "6"
+          "label": "6",
+          "value": 6,
+          "wvsCode": 6,
+          "displayOrder": 6
         },
         {
-          "displayOrder": 7,
-          "label": "7"
+          "label": "7",
+          "value": 7,
+          "wvsCode": 7,
+          "displayOrder": 7
         },
         {
-          "displayOrder": 8,
-          "label": "8"
+          "label": "8",
+          "value": 8,
+          "wvsCode": 8,
+          "displayOrder": 8
         },
         {
-          "displayOrder": 9,
-          "label": "9"
+          "label": "9",
+          "value": 9,
+          "wvsCode": 9,
+          "displayOrder": 9
         },
         {
-          "displayOrder": 10,
-          "label": "Always justifiable"
+          "label": "Always justifiable",
+          "value": 10,
+          "wvsCode": 10,
+          "displayOrder": 10
         }
       ],
       "validRange": {
@@ -1320,44 +1618,64 @@
       "missingCountInFullProcessedData": 1022,
       "levels": [
         {
-          "displayOrder": 1,
-          "label": "Never justifiable"
+          "label": "Never justifiable",
+          "value": 1,
+          "wvsCode": 1,
+          "displayOrder": 1
         },
         {
-          "displayOrder": 2,
-          "label": "2"
+          "label": "2",
+          "value": 2,
+          "wvsCode": 2,
+          "displayOrder": 2
         },
         {
-          "displayOrder": 3,
-          "label": "3"
+          "label": "3",
+          "value": 3,
+          "wvsCode": 3,
+          "displayOrder": 3
         },
         {
-          "displayOrder": 4,
-          "label": "4"
+          "label": "4",
+          "value": 4,
+          "wvsCode": 4,
+          "displayOrder": 4
         },
         {
-          "displayOrder": 5,
-          "label": "5"
+          "label": "5",
+          "value": 5,
+          "wvsCode": 5,
+          "displayOrder": 5
         },
         {
-          "displayOrder": 6,
-          "label": "6"
+          "label": "6",
+          "value": 6,
+          "wvsCode": 6,
+          "displayOrder": 6
         },
         {
-          "displayOrder": 7,
-          "label": "7"
+          "label": "7",
+          "value": 7,
+          "wvsCode": 7,
+          "displayOrder": 7
         },
         {
-          "displayOrder": 8,
-          "label": "8"
+          "label": "8",
+          "value": 8,
+          "wvsCode": 8,
+          "displayOrder": 8
         },
         {
-          "displayOrder": 9,
-          "label": "9"
+          "label": "9",
+          "value": 9,
+          "wvsCode": 9,
+          "displayOrder": 9
         },
         {
-          "displayOrder": 10,
-          "label": "Always justifiable"
+          "label": "Always justifiable",
+          "value": 10,
+          "wvsCode": 10,
+          "displayOrder": 10
         }
       ],
       "validRange": {
@@ -1382,44 +1700,64 @@
       "missingCountInFullProcessedData": 4523,
       "levels": [
         {
-          "displayOrder": 1,
-          "label": "Never justifiable"
+          "label": "Never justifiable",
+          "value": 1,
+          "wvsCode": 1,
+          "displayOrder": 1
         },
         {
-          "displayOrder": 2,
-          "label": "2"
+          "label": "2",
+          "value": 2,
+          "wvsCode": 2,
+          "displayOrder": 2
         },
         {
-          "displayOrder": 3,
-          "label": "3"
+          "label": "3",
+          "value": 3,
+          "wvsCode": 3,
+          "displayOrder": 3
         },
         {
-          "displayOrder": 4,
-          "label": "4"
+          "label": "4",
+          "value": 4,
+          "wvsCode": 4,
+          "displayOrder": 4
         },
         {
-          "displayOrder": 5,
-          "label": "5"
+          "label": "5",
+          "value": 5,
+          "wvsCode": 5,
+          "displayOrder": 5
         },
         {
-          "displayOrder": 6,
-          "label": "6"
+          "label": "6",
+          "value": 6,
+          "wvsCode": 6,
+          "displayOrder": 6
         },
         {
-          "displayOrder": 7,
-          "label": "7"
+          "label": "7",
+          "value": 7,
+          "wvsCode": 7,
+          "displayOrder": 7
         },
         {
-          "displayOrder": 8,
-          "label": "8"
+          "label": "8",
+          "value": 8,
+          "wvsCode": 8,
+          "displayOrder": 8
         },
         {
-          "displayOrder": 9,
-          "label": "9"
+          "label": "9",
+          "value": 9,
+          "wvsCode": 9,
+          "displayOrder": 9
         },
         {
-          "displayOrder": 10,
-          "label": "Always justifiable"
+          "label": "Always justifiable",
+          "value": 10,
+          "wvsCode": 10,
+          "displayOrder": 10
         }
       ],
       "validRange": {
@@ -1444,44 +1782,64 @@
       "missingCountInFullProcessedData": 7750,
       "levels": [
         {
-          "displayOrder": 1,
-          "label": "Never justifiable"
+          "label": "Never justifiable",
+          "value": 1,
+          "wvsCode": 1,
+          "displayOrder": 1
         },
         {
-          "displayOrder": 2,
-          "label": "2"
+          "label": "2",
+          "value": 2,
+          "wvsCode": 2,
+          "displayOrder": 2
         },
         {
-          "displayOrder": 3,
-          "label": "3"
+          "label": "3",
+          "value": 3,
+          "wvsCode": 3,
+          "displayOrder": 3
         },
         {
-          "displayOrder": 4,
-          "label": "4"
+          "label": "4",
+          "value": 4,
+          "wvsCode": 4,
+          "displayOrder": 4
         },
         {
-          "displayOrder": 5,
-          "label": "5"
+          "label": "5",
+          "value": 5,
+          "wvsCode": 5,
+          "displayOrder": 5
         },
         {
-          "displayOrder": 6,
-          "label": "6"
+          "label": "6",
+          "value": 6,
+          "wvsCode": 6,
+          "displayOrder": 6
         },
         {
-          "displayOrder": 7,
-          "label": "7"
+          "label": "7",
+          "value": 7,
+          "wvsCode": 7,
+          "displayOrder": 7
         },
         {
-          "displayOrder": 8,
-          "label": "8"
+          "label": "8",
+          "value": 8,
+          "wvsCode": 8,
+          "displayOrder": 8
         },
         {
-          "displayOrder": 9,
-          "label": "9"
+          "label": "9",
+          "value": 9,
+          "wvsCode": 9,
+          "displayOrder": 9
         },
         {
-          "displayOrder": 10,
-          "label": "Always justifiable"
+          "label": "Always justifiable",
+          "value": 10,
+          "wvsCode": 10,
+          "displayOrder": 10
         }
       ],
       "validRange": {
@@ -1506,44 +1864,64 @@
       "missingCountInFullProcessedData": 4793,
       "levels": [
         {
-          "displayOrder": 1,
-          "label": "Never justifiable"
+          "label": "Never justifiable",
+          "value": 1,
+          "wvsCode": 1,
+          "displayOrder": 1
         },
         {
-          "displayOrder": 2,
-          "label": "2"
+          "label": "2",
+          "value": 2,
+          "wvsCode": 2,
+          "displayOrder": 2
         },
         {
-          "displayOrder": 3,
-          "label": "3"
+          "label": "3",
+          "value": 3,
+          "wvsCode": 3,
+          "displayOrder": 3
         },
         {
-          "displayOrder": 4,
-          "label": "4"
+          "label": "4",
+          "value": 4,
+          "wvsCode": 4,
+          "displayOrder": 4
         },
         {
-          "displayOrder": 5,
-          "label": "5"
+          "label": "5",
+          "value": 5,
+          "wvsCode": 5,
+          "displayOrder": 5
         },
         {
-          "displayOrder": 6,
-          "label": "6"
+          "label": "6",
+          "value": 6,
+          "wvsCode": 6,
+          "displayOrder": 6
         },
         {
-          "displayOrder": 7,
-          "label": "7"
+          "label": "7",
+          "value": 7,
+          "wvsCode": 7,
+          "displayOrder": 7
         },
         {
-          "displayOrder": 8,
-          "label": "8"
+          "label": "8",
+          "value": 8,
+          "wvsCode": 8,
+          "displayOrder": 8
         },
         {
-          "displayOrder": 9,
-          "label": "9"
+          "label": "9",
+          "value": 9,
+          "wvsCode": 9,
+          "displayOrder": 9
         },
         {
-          "displayOrder": 10,
-          "label": "Always justifiable"
+          "label": "Always justifiable",
+          "value": 10,
+          "wvsCode": 10,
+          "displayOrder": 10
         }
       ],
       "validRange": {
@@ -1568,44 +1946,64 @@
       "missingCountInFullProcessedData": 2469,
       "levels": [
         {
-          "displayOrder": 1,
-          "label": "Never justifiable"
+          "label": "Never justifiable",
+          "value": 1,
+          "wvsCode": 1,
+          "displayOrder": 1
         },
         {
-          "displayOrder": 2,
-          "label": "2"
+          "label": "2",
+          "value": 2,
+          "wvsCode": 2,
+          "displayOrder": 2
         },
         {
-          "displayOrder": 3,
-          "label": "3"
+          "label": "3",
+          "value": 3,
+          "wvsCode": 3,
+          "displayOrder": 3
         },
         {
-          "displayOrder": 4,
-          "label": "4"
+          "label": "4",
+          "value": 4,
+          "wvsCode": 4,
+          "displayOrder": 4
         },
         {
-          "displayOrder": 5,
-          "label": "5"
+          "label": "5",
+          "value": 5,
+          "wvsCode": 5,
+          "displayOrder": 5
         },
         {
-          "displayOrder": 6,
-          "label": "6"
+          "label": "6",
+          "value": 6,
+          "wvsCode": 6,
+          "displayOrder": 6
         },
         {
-          "displayOrder": 7,
-          "label": "7"
+          "label": "7",
+          "value": 7,
+          "wvsCode": 7,
+          "displayOrder": 7
         },
         {
-          "displayOrder": 8,
-          "label": "8"
+          "label": "8",
+          "value": 8,
+          "wvsCode": 8,
+          "displayOrder": 8
         },
         {
-          "displayOrder": 9,
-          "label": "9"
+          "label": "9",
+          "value": 9,
+          "wvsCode": 9,
+          "displayOrder": 9
         },
         {
-          "displayOrder": 10,
-          "label": "Always justifiable"
+          "label": "Always justifiable",
+          "value": 10,
+          "wvsCode": 10,
+          "displayOrder": 10
         }
       ],
       "validRange": {
@@ -1630,23 +2028,27 @@
       "missingCountInFullProcessedData": 5807,
       "levels": [
         {
-          "value": 1,
           "label": "Very good",
+          "value": 1,
+          "wvsCode": 1,
           "displayOrder": 1
         },
         {
-          "value": 2,
           "label": "Fairly good",
+          "value": 2,
+          "wvsCode": 2,
           "displayOrder": 2
         },
         {
-          "value": 3,
           "label": "Fairly Bad",
+          "value": 3,
+          "wvsCode": 3,
           "displayOrder": 3
         },
         {
-          "value": 4,
           "label": "Very bad",
+          "value": 4,
+          "wvsCode": 4,
           "displayOrder": 4
         }
       ],
@@ -1761,40 +2163,58 @@
       "missingCountInFullProcessedData": 1071,
       "levels": [
         {
-          "displayOrder": 1,
-          "label": "Early childhood education (ISCED 0) / no education"
+          "label": "Early childhood education (ISCED 0) / no education",
+          "value": 1,
+          "wvsCode": 0,
+          "displayOrder": 1
         },
         {
-          "displayOrder": 2,
-          "label": "Primary education (ISCED 1)"
+          "label": "Primary education (ISCED 1)",
+          "value": 2,
+          "wvsCode": 1,
+          "displayOrder": 2
         },
         {
-          "displayOrder": 3,
-          "label": "Lower secondary education (ISCED 2)"
+          "label": "Lower secondary education (ISCED 2)",
+          "value": 3,
+          "wvsCode": 2,
+          "displayOrder": 3
         },
         {
-          "displayOrder": 4,
-          "label": "Upper secondary education (ISCED 3)"
+          "label": "Upper secondary education (ISCED 3)",
+          "value": 4,
+          "wvsCode": 3,
+          "displayOrder": 4
         },
         {
-          "displayOrder": 5,
-          "label": "Post-secondary non-tertiary education (ISCED 4)"
+          "label": "Post-secondary non-tertiary education (ISCED 4)",
+          "value": 5,
+          "wvsCode": 4,
+          "displayOrder": 5
         },
         {
-          "displayOrder": 6,
-          "label": "Short-cycle tertiary education (ISCED 5)"
+          "label": "Short-cycle tertiary education (ISCED 5)",
+          "value": 6,
+          "wvsCode": 5,
+          "displayOrder": 6
         },
         {
-          "displayOrder": 7,
-          "label": "Bachelor or equivalent (ISCED 6)"
+          "label": "Bachelor or equivalent (ISCED 6)",
+          "value": 7,
+          "wvsCode": 6,
+          "displayOrder": 7
         },
         {
-          "displayOrder": 8,
-          "label": "Master or equivalent (ISCED 7)"
+          "label": "Master or equivalent (ISCED 7)",
+          "value": 8,
+          "wvsCode": 7,
+          "displayOrder": 8
         },
         {
-          "displayOrder": 9,
-          "label": "Doctoral or equivalent (ISCED 8)"
+          "label": "Doctoral or equivalent (ISCED 8)",
+          "value": 9,
+          "wvsCode": 8,
+          "displayOrder": 9
         }
       ],
       "validRange": {
@@ -1819,44 +2239,64 @@
       "missingCountInFullProcessedData": 2961,
       "levels": [
         {
-          "displayOrder": 1,
-          "label": "Lower step"
+          "label": "Lower step",
+          "value": 1,
+          "wvsCode": 1,
+          "displayOrder": 1
         },
         {
-          "displayOrder": 2,
-          "label": "Second step"
+          "label": "Second step",
+          "value": 2,
+          "wvsCode": 2,
+          "displayOrder": 2
         },
         {
-          "displayOrder": 3,
-          "label": "Third step"
+          "label": "Third step",
+          "value": 3,
+          "wvsCode": 3,
+          "displayOrder": 3
         },
         {
-          "displayOrder": 4,
-          "label": "Fourth step"
+          "label": "Fourth step",
+          "value": 4,
+          "wvsCode": 4,
+          "displayOrder": 4
         },
         {
-          "displayOrder": 5,
-          "label": "Fifth step"
+          "label": "Fifth step",
+          "value": 5,
+          "wvsCode": 5,
+          "displayOrder": 5
         },
         {
-          "displayOrder": 6,
-          "label": "Sixth step"
+          "label": "Sixth step",
+          "value": 6,
+          "wvsCode": 6,
+          "displayOrder": 6
         },
         {
-          "displayOrder": 7,
-          "label": "Seventh step"
+          "label": "Seventh step",
+          "value": 7,
+          "wvsCode": 7,
+          "displayOrder": 7
         },
         {
-          "displayOrder": 8,
-          "label": "Eight  step"
+          "label": "Eight  step",
+          "value": 8,
+          "wvsCode": 8,
+          "displayOrder": 8
         },
         {
-          "displayOrder": 9,
-          "label": "Nineth step"
+          "label": "Nineth step",
+          "value": 9,
+          "wvsCode": 9,
+          "displayOrder": 9
         },
         {
-          "displayOrder": 10,
-          "label": "Tenth step"
+          "label": "Tenth step",
+          "value": 10,
+          "wvsCode": 10,
+          "displayOrder": 10
         }
       ],
       "validRange": {
@@ -1881,44 +2321,64 @@
       "missingCountInFullProcessedData": 1363,
       "levels": [
         {
-          "displayOrder": 1,
-          "label": "Do not belong to a denomination"
+          "label": "Do not belong to a denomination",
+          "value": "Do not belong to a denomination",
+          "wvsCode": 0,
+          "displayOrder": 1
         },
         {
-          "displayOrder": 2,
-          "label": "Catholic (Roman/Greek/etc)"
+          "label": "Catholic (Roman/Greek/etc)",
+          "value": "Catholic (Roman/Greek/etc)",
+          "wvsCode": 1,
+          "displayOrder": 2
         },
         {
-          "displayOrder": 3,
-          "label": "Protestant"
+          "label": "Protestant",
+          "value": "Protestant",
+          "wvsCode": 2,
+          "displayOrder": 3
         },
         {
-          "displayOrder": 4,
-          "label": "Orthodox (Russian/Greek/etc.)"
+          "label": "Orthodox (Russian/Greek/etc.)",
+          "value": "Orthodox (Russian/Greek/etc.)",
+          "wvsCode": 3,
+          "displayOrder": 4
         },
         {
-          "displayOrder": 5,
-          "label": "Jew"
+          "label": "Jew",
+          "value": "Jew",
+          "wvsCode": 4,
+          "displayOrder": 5
         },
         {
-          "displayOrder": 6,
-          "label": "Muslim"
+          "label": "Muslim",
+          "value": "Muslim",
+          "wvsCode": 5,
+          "displayOrder": 6
         },
         {
-          "displayOrder": 7,
-          "label": "Hindu"
+          "label": "Hindu",
+          "value": "Hindu",
+          "wvsCode": 6,
+          "displayOrder": 7
         },
         {
-          "displayOrder": 8,
-          "label": "Buddhist"
+          "label": "Buddhist",
+          "value": "Buddhist",
+          "wvsCode": 7,
+          "displayOrder": 8
         },
         {
-          "displayOrder": 9,
-          "label": "Other Christian (Jehova withness...)"
+          "label": "Other Christian (Jehova withness...)",
+          "value": "Other Christian (Jehova withness...)",
+          "wvsCode": 8,
+          "displayOrder": 9
         },
         {
-          "displayOrder": 10,
-          "label": "Other"
+          "label": "Other",
+          "value": "Other",
+          "wvsCode": 9,
+          "displayOrder": 10
         }
       ],
       "validRange": null

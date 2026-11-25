@@ -73,39 +73,50 @@ function responseLabel(variable, value) {
     return matches.map(level => level.label).join(" / ") || String(value);
   }
   if (variable.analysisType === "ordinal") {
-    const match = variable.levels?.find(level => String(level.displayOrder) === String(value));
+    const match = variable.levels?.find(level => String(Object.hasOwn(level, "value") ? level.value : level.displayOrder) === String(value));
     if (match) return match.label;
   }
   return String(value);
 }
 
-function responseCodingTable(variable) {
-  const rows = variable.levels.map(level => `
-    <tr><th scope="row">${escapeHtml(level.label)}</th>
-      <td>${escapeHtml(level.value ?? "Missing")}</td><td>${escapeHtml(level.wvsCode)}</td></tr>`);
-  return `<h3>Response coding</h3>
-    <div class="table-wrap"><table class="results-table" aria-label="Response coding for ${escapeHtml(variable.id)}">
-      <thead><tr><th scope="col">Response</th><th scope="col">Value used in WorldView</th>
-        <th scope="col">Original WVS code</th></tr></thead>
-      <tbody>${rows.join("")}</tbody>
-    </table></div>`;
-}
-
-function renderLevels(variable) {
-  if (!Array.isArray(variable.levels) || variable.levels.length === 0) {
-    if (variable.validRange) {
-      return `<p>${escapeHtml(variable.validRange.minimum)} to ${escapeHtml(variable.validRange.maximum)}</p>`;
-    }
-    return "<p>Not specified</p>";
+function renderWorldViewValues(variable) {
+  if (variable.analysisType === "integer") {
+    const age = variable.id === "Q262";
+    const description = age ? "WorldView uses the respondent’s age in years." : "WorldView stores a whole number for each valid response.";
+    const range = variable.validRange;
+    if (!range) return `<p>${description} There are no valid responses before sampling.</p>`;
+    const subject = age ? "Ages" : "Values";
+    return `<p>${description} ${subject} in the full dataset range from ${escapeHtml(range.minimum)} to ${escapeHtml(range.maximum)}.</p>`;
   }
 
-  return `<ol class="level-list">${variable.levels.map(level =>
-    `<li value="${escapeHtml(level.displayOrder)}">${escapeHtml(level.label)}</li>`
-  ).join("")}</ol>`;
+  const nominal = variable.analysisType === "nominal";
+  const headings = nominal
+    ? ["Category stored in WorldView", "Original WVS code"]
+    : ["Response", "Value used in WorldView", "Original WVS code"];
+  const rows = variable.levels.map(level => `
+    <tr><th scope="row">${escapeHtml(nominal ? level.value : level.label)}</th>
+      ${nominal ? "" : `<td>${escapeHtml(level.value ?? "Missing")}</td>`}
+      <td>${escapeHtml(level.wvsCode)}</td></tr>`);
+  return `<div class="table-wrap"><table class="results-table" aria-label="Values used in WorldView for ${escapeHtml(variable.id)}">
+    <thead><tr>${headings.map(heading => `<th scope="col">${heading}</th>`).join("")}</tr></thead>
+    <tbody>${rows.join("")}</tbody>
+  </table></div>`;
+}
+
+function analysisNote(variable) {
+  const eligibility = variable.correlationEligible
+    ? "Available for correlation." : "Excluded from correlation.";
+  if (variable.analysisType === "binary") return `${eligibility} ${variable.interpretationNote}`;
+  if (variable.analysisType === "ordinal") {
+    return `${eligibility} The WorldView scores give the order of the responses. Calculating a mean treats adjacent scores as equally spaced.`;
+  }
+  if (variable.analysisType === "nominal") {
+    return `${eligibility} Use counts or percentages to compare these unordered categories.`;
+  }
+  return eligibility;
 }
 
 function variableCard(variable) {
-  const eligible = variable.correlationEligible ? "Correlation eligible" : "Not correlation eligible";
   return `
     <details class="variable-card" id="${escapeHtml(variable.id)}">
       <summary>
@@ -117,16 +128,15 @@ function variableCard(variable) {
         <dl class="detail-grid">
           <div><dt>Topic</dt><dd>${escapeHtml(variable.group)}</dd></div>
           <div><dt>Display type</dt><dd>${escapeHtml(variable.displayType)}</dd></div>
-          <div><dt>Correlation use</dt><dd>${eligible}</dd></div>
-          ${variable.analysisType === "binary" ? "" : `<div><dt>Correlation coding</dt><dd>${escapeHtml(variable.correlationRepresentation)}</dd></div>`}
-          <div><dt>Valid in full processed data</dt><dd>${formatNumber(variable.validCountInFullProcessedData)}</dd></div>
-          <div><dt>Missing in full processed data</dt><dd>${formatNumber(variable.missingCountInFullProcessedData)}</dd></div>
+          <div><dt>Valid responses before sampling</dt><dd>${formatNumber(variable.validCountInFullProcessedData)}</dd></div>
+          <div><dt>Missing responses before sampling</dt><dd>${formatNumber(variable.missingCountInFullProcessedData)}</dd></div>
         </dl>
-        ${variable.analysisType === "binary" ? responseCodingTable(variable) : `<h3>Processed values</h3>${renderLevels(variable)}`}
+        <h3>Values used in WorldView</h3>
+        ${renderWorldViewValues(variable)}
         <h3>Missing-data treatment</h3>
         <p>${escapeHtml(variable.missingRule)}</p>
-        <h3>Interpretation</h3>
-        <p>${escapeHtml(variable.interpretationNote)}</p>
+        <h3>Use in analysis</h3>
+        <p>${escapeHtml(analysisNote(variable))}</p>
       </div>
     </details>`;
 }

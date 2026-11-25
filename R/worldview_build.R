@@ -244,39 +244,25 @@ wv_default_interpretation <- function(analysis_type) {
   )
 }
 
-wv_level_records <- function(base_value, recoded_value, display_type, analysis_type, recode_expression, var_id) {
-  if (!is.factor(base_value)) return(list())
-  labels <- levels(base_value)
-  if (!length(labels)) return(list())
-
-  if (identical(analysis_type, "nominal")) {
-    return(lapply(seq_along(labels), function(i) {
-      list(value = labels[[i]], label = labels[[i]], displayOrder = i)
-    }))
-  }
-
-  if (identical(wv_clean(display_type)[1], "factor_ordered")) {
-    return(lapply(seq_along(labels), function(i) {
-      list(value = i, label = labels[[i]], displayOrder = i)
-    }))
-  }
-
-  lapply(seq_along(labels), function(i) {
-    test <- factor(labels[[i]], levels = labels, ordered = is.ordered(base_value))
-    code <- suppressWarnings(wv_apply_recode(test, recode_expression, var_id))
-    code <- if (length(code) && !is.na(code[[1]])) as.numeric(code[[1]]) else i
-    list(value = code, label = labels[[i]], displayOrder = code)
-  })
-}
-
-wv_binary_levels <- function(raw_value, base_value, row, var_id) {
+wv_response_levels <- function(raw_value, base_value, row, var_id, analysis_type) {
+  if (identical(analysis_type, "integer")) return(list())
   source_codes <- attr(raw_value, "labels", exact = TRUE)
-  source_codes <- source_codes[!is.na(source_codes) & source_codes >= 0]
-  if (!length(source_codes)) stop("Missing WVS response labels for ", var_id, call. = FALSE)
-  responses <- factor(names(source_codes), levels = levels(base_value), ordered = is.ordered(base_value))
+  if (is.null(source_codes)) {
+    # Unlabelled factors retain their original response text as factor levels.
+    categories <- if (is.factor(base_value)) levels(base_value) else sort(unique(na.omit(base_value)))
+    source_codes <- setNames(categories, categories)
+  } else {
+    source_codes <- source_codes[!is.na(source_codes) & source_codes >= 0]
+  }
+  if (!length(source_codes)) return(list())
+  responses <- if (is.factor(base_value)) {
+    factor(names(source_codes), levels = levels(base_value), ordered = is.ordered(base_value))
+  } else {
+    as.integer(source_codes)
+  }
   recoded <- wv_apply_recode(responses, row$R_recode[[1]], var_id)
   values <- wv_browser_value(responses, recoded, row$Variable_Display_Type[[1]], var_id)
-  if (!all(is.na(values) | values %in% c(0, 1))) {
+  if (identical(analysis_type, "binary") && !all(is.na(values) | values %in% c(0, 1))) {
     stop("Binary response codes must be 0 or 1 for ", var_id, call. = FALSE)
   }
   lapply(seq_along(source_codes), function(i) {
@@ -299,7 +285,7 @@ wv_template_map <- function(path) {
   list(template = template, records = records)
 }
 
-wv_make_record <- function(var_id, row, raw_value, base_value, recoded_value, browser_value, template_record = NULL) {
+wv_make_record <- function(var_id, row, raw_value, base_value, browser_value, template_record = NULL) {
   template_record <- template_record %||% list()
   display_type <- wv_clean(row[["Variable_Display_Type"]])[1]
   inferred_type <- wv_infer_analysis_type(display_type, browser_value)
@@ -314,21 +300,12 @@ wv_make_record <- function(var_id, row, raw_value, base_value, recoded_value, br
   )
   representation <- template_record$correlationRepresentation %||% wv_default_representation(analysis_type)
   interpretation <- template_record$interpretationNote %||% wv_default_interpretation(analysis_type)
+  levels <- wv_response_levels(raw_value, base_value, row, var_id, analysis_type)
   if (identical(analysis_type, "binary")) {
-    levels <- wv_binary_levels(raw_value, base_value, row, var_id)
     representation <- paste(vapply(levels, function(level) {
       paste(level$label, "=", if (is.na(level$value)) "Missing" else level$value)
     }, character(1)), collapse = "; ")
     interpretation <- "The mean is the proportion of valid responses with WorldView value 1."
-  } else {
-    levels <- template_record$levels %||% wv_level_records(
-      base_value,
-      recoded_value,
-      display_type,
-      analysis_type,
-      row[["R_recode"]],
-      var_id
-    )
   }
 
   list(
@@ -347,7 +324,7 @@ wv_make_record <- function(var_id, row, raw_value, base_value, recoded_value, br
     validCountInFullProcessedData = sum(!is.na(browser_value) & browser_value != ""),
     missingCountInFullProcessedData = sum(is.na(browser_value) | browser_value == ""),
     levels = levels,
-    validRange = template_record$validRange %||% wv_valid_range(browser_value)
+    validRange = wv_valid_range(browser_value)
   )
 }
 
@@ -483,7 +460,6 @@ build_worldview <- function(
   }
 
   base_values <- list()
-  recoded_values <- list()
   browser_values <- list()
 
   country_row <- row_for("B_COUNTRY")
@@ -496,7 +472,6 @@ build_worldview <- function(
     recoded <- wv_apply_recode(base, row$R_recode[[1]], id)
     browser <- wv_browser_value(base, recoded, row$Variable_Display_Type[[1]], id)
     base_values[[id]] <- base
-    recoded_values[[id]] <- recoded
     browser_values[[id]] <- browser
   }
 
@@ -512,7 +487,6 @@ build_worldview <- function(
   full_browser <- full_browser[valid_country, , drop = FALSE]
   for (id in selected_vars) {
     base_values[[id]] <- base_values[[id]][valid_country]
-    recoded_values[[id]] <- recoded_values[[id]][valid_country]
     browser_values[[id]] <- browser_values[[id]][valid_country]
   }
 
@@ -538,9 +512,8 @@ build_worldview <- function(
     wv_make_record(
       id,
       row,
-      raw[[id]][valid_country],
+      raw[[id]],
       base_values[[id]],
-      recoded_values[[id]],
       browser_values[[id]],
       template$records[[id]]
     )

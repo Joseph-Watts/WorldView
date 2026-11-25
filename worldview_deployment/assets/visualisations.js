@@ -89,7 +89,8 @@ function categoryOrder(variable, values) {
   }
 
   if (Array.isArray(variable.levels) && variable.levels.length) {
-    return variable.levels.map(level => String(level.displayOrder));
+    return [...new Set(variable.levels.map(level => Object.hasOwn(level, "value") ? level.value : level.displayOrder)
+      .filter(value => value != null).map(String))];
   }
 
   return [...new Set(values.map(String))].sort((a, b) => Number(a) - Number(b));

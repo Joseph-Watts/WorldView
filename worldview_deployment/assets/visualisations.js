@@ -84,13 +84,13 @@ function categoryOrder(variable, values) {
     });
   }
 
-  if (variable.id === "Q289") {
+  if (variable.analysisType === "nominal") {
     return [...new Set(values.map(String))].sort((a, b) => a.localeCompare(b));
   }
 
   if (Array.isArray(variable.levels) && variable.levels.length) {
     return [...new Set(variable.levels.map(level => Object.hasOwn(level, "value") ? level.value : level.displayOrder)
-      .filter(value => value != null).map(String))];
+      .filter(value => value != null).map(String))].sort((a, b) => compareCategories(variable, a, b));
   }
 
   return [...new Set(values.map(String))].sort((a, b) => Number(a) - Number(b));

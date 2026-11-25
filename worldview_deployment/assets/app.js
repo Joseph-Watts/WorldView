@@ -79,6 +79,45 @@ function responseLabel(variable, value) {
   return String(value);
 }
 
+function compareCategories(variable, a, b, labelA = a, labelB = b) {
+  if (variable.analysisType === "nominal") return String(labelA).localeCompare(String(labelB));
+  return Number(a) - Number(b);
+}
+
+function contingencyTable(data, rowVar, columnVar, countries) {
+  const { columns } = data;
+  const rowValues = columns[rowVar.id === "COUNTRY" ? "B_COUNTRY_ALPHA" : rowVar.id];
+  const columnValues = columns[columnVar.id === "COUNTRY" ? "B_COUNTRY_ALPHA" : columnVar.id];
+  const rows = new Map(), cols = new Map(), counts = new Map();
+  let n = 0;
+
+  function record(axis, variable, key, countryName) {
+    if (!axis.has(key)) {
+      const label = variable.id === "COUNTRY" ? countryName : responseLabel(variable, key);
+      axis.set(key, { key, label, total: 0 });
+    }
+    axis.get(key).total++;
+  }
+
+  for (let i = 0; i < data.length; i++) {
+    if (countries.size && !countries.has(columns.B_COUNTRY_ALPHA[i])) continue;
+    const row = rowValues[i], col = columnValues[i];
+    if (row == null || col == null || row === "" || col === "") continue;
+    record(rows, rowVar, row, columns.B_COUNTRY[i]);
+    record(cols, columnVar, col, columns.B_COUNTRY[i]);
+    if (!counts.has(row)) counts.set(row, new Map());
+    const rowCounts = counts.get(row);
+    rowCounts.set(col, (rowCounts.get(col) || 0) + 1);
+    n++;
+  }
+
+  function ordered(axis, variable) {
+    return [...axis.values()].sort((a, b) => compareCategories(variable, a.key, b.key, a.label, b.label));
+  }
+  return { rows: ordered(rows, rowVar), cols: ordered(cols, columnVar), n,
+    count: (row, col) => counts.get(row.key).get(col.key) || 0 };
+}
+
 function renderWorldViewValues(variable) {
   if (variable.analysisType === "integer") {
     const age = variable.id === "Q262";

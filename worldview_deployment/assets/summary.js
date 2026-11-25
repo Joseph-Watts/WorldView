@@ -99,9 +99,7 @@ function frequencyStatistics(variable, values, totalN) {
     counts.set(key, (counts.get(key) || 0) + 1);
   });
   const validN = values.length;
-  let keys = [...counts.keys()];
-  if (variable.id !== "Q289") keys.sort((a, b) => Number(a) - Number(b));
-  else keys.sort((a, b) => responseLabel(variable, a).localeCompare(responseLabel(variable, b)));
+  const keys = [...counts.keys()].sort((a, b) => compareCategories(variable, a, b));
   return {
     totalN,
     validN,
